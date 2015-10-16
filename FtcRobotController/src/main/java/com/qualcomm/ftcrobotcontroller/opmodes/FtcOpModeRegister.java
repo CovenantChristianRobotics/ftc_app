@@ -72,28 +72,29 @@ public class FtcOpModeRegister implements OpModeRegister {
     //manager.register("IrSeekerOp", IrSeekerOp.class);
     //manager.register("CompassCalibration", CompassCalibration.class);
     //manager.register("I2cAddressChangeExample", LinearI2cAddressChange.class);
-
+    manager.register("K9IrSeeker", K9IrSeeker.class);
+    manager.register("K9Line", K9Line.class);
+    manager.register("CCHS5256TeleOp", CCHS5256TeleOp.class);
+    manager.register("EncValueTeleOp", EncValueTeleOp.class);
+    manager.register("CCHS5256Autonomous", CCHS5256Autonomous.class);
+    manager.register("LeftRightDriveTestTeleOp", LeftRightDriveTestTeleOp.class);
 
     //manager.register("NxtTeleOp", NxtTeleOp.class);
-    
+
     //manager.register("LinearK9TeleOp", LinearK9TeleOp.class);
     //manager.register("LinearIrExample", LinearIrExample.class);
 
-    
     //manager.register ("PushBotManual1", PushBotManual1.class);
     //manager.register ("PushBotAutoSensors", PushBotAutoSensors.class);
     //manager.register ("PushBotIrEvent", PushBotIrEvent.class);
-    
+
     //manager.register ("PushBotManualSensors", PushBotManualSensors.class);
     //manager.register ("PushBotOdsDetectEvent", PushBotOdsDetectEvent.class);
     //manager.register ("PushBotOdsFollowEvent", PushBotOdsFollowEvent.class);
-    //manager.register ("PushBotTouchEvent", PushBotTouchEvent.class);    
-    
+    //manager.register ("PushBotTouchEvent", PushBotTouchEvent.class);
+
     //manager.register("PushBotDriveTouch", PushBotDriveTouch.java);
     //manager.register("PushBotIrSeek", PushBotIrSeek.java);
     //manager.register("PushBotSquare", PushBotSquare.java);
-
-    
-    
   }
 }
