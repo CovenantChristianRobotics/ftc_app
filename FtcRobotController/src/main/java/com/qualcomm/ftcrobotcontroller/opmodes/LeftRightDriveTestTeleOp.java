@@ -2,18 +2,21 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Robotics on 10/15/2015.
  */
 public class LeftRightDriveTestTeleOp extends OpMode {
-    enum MoveState {START1, MOVE1, START2, MOVE2};
+    enum MoveState {START1, DELAY1, MOVE1, DELAY2, START2, DELAY3, MOVE2};
 
     DcMotorController driveTrainController;
     DcMotor motorRight;
     DcMotor motorLeft;
     MoveState currentMove;
+    long delayUntil;
+    Date now;
 
     public LeftRightDriveTestTeleOp() {
     }
@@ -45,11 +48,29 @@ public class LeftRightDriveTestTeleOp extends OpMode {
                     //motorRight.setDirection(DcMotor.Direction.FORWARD);
                     motorLeft.setPower(.5);
                     motorRight.setPower(.5);
-                    currentMove = MoveState.MOVE1;
+                    currentMove = MoveState.DELAY1;
+                    now = new Date();
+                    delayUntil = now.getTime() + 1000;
+                    break;
+
+                case DELAY1:
+                    now = new Date();
+                    if (now.getTime() >= delayUntil) {
+                        currentMove = MoveState.MOVE1;
+                    }
                     break;
 
                 case MOVE1:
-                    currentMove = MoveState.START2;
+                    currentMove = MoveState.DELAY2;
+                    now = new Date();
+                    delayUntil = now.getTime() + 1000;
+                    break;
+
+                case DELAY2:
+                    now = new Date();
+                    if (now.getTime() >= delayUntil) {
+                        currentMove = MoveState.START2;
+                    }
                     break;
 
                 case START2:
@@ -59,10 +80,21 @@ public class LeftRightDriveTestTeleOp extends OpMode {
                     //motorRight.setDirection(DcMotor.Direction.REVERSE);
                     motorLeft.setPower(.5);
                     motorRight.setPower(.5);
-                    currentMove = MoveState.MOVE2;
+                    currentMove = MoveState.DELAY3;
+                    now = new Date();
+                    delayUntil = now.getTime() + 1000;
+                    break;
+
+                case DELAY3:
+                    now = new Date();
+                    if (now.getTime() >= delayUntil) {
+                        currentMove = MoveState.MOVE2;
+                    }
                     break;
 
                 case  MOVE2:
+                    motorLeft.setPowerFloat();
+                    motorRight.setPowerFloat();
                     break;
             }
         }
@@ -72,7 +104,7 @@ public class LeftRightDriveTestTeleOp extends OpMode {
         }
 
         telemetry.addData("Text", "*** Robot Data***");
-        telemetry.addData("ENCLeft", (float)motorLeft.getCurrentPosition());
+        telemetry.addData("ENCLeft", (float) motorLeft.getCurrentPosition());
         telemetry.addData("ENCRight", (float)motorRight.getCurrentPosition());
     }
     @Override
