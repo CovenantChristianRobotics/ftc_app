@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
  * Created by Robotics on 10/15/2015.
  */
 public class LeftRightDriveTestTeleOp extends OpMode {
-    enum MoveState {START1, DELAY1, MOVE1, DELAY2, START2, DELAY3, MOVE2};
+    enum MoveState {START1, DELAY1, MOVE1, DELAY2, START2, DELAY3, MOVE2, DONE};
 
     DcMotorController driveTrainController;
     DcMotor motorRight;
@@ -17,6 +17,8 @@ public class LeftRightDriveTestTeleOp extends OpMode {
     MoveState currentMove;
     long delayUntil;
     Date now;
+    int leftTargetPos;
+    int rightTargetPos;
 
     public LeftRightDriveTestTeleOp() {
     }
@@ -31,74 +33,80 @@ public class LeftRightDriveTestTeleOp extends OpMode {
         motorRight = hardwareMap.dcMotor.get("motor_right");
         motorRight.setDirection(DcMotor.Direction.REVERSE);
         motorLeft = hardwareMap.dcMotor.get("motor_left");
-        motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
+        motorRight.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        motorLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         currentMove = MoveState.START1;
     }
 
     @Override
     public void loop() {
 
-        if (!motorLeft.isBusy() && !motorRight.isBusy()) {
-            switch (currentMove) {
-                case START1:
-                    motorLeft.setTargetPosition(centimetersToCounts(243.84));
-                    motorRight.setTargetPosition(centimetersToCounts(243.84));
-                    //motorLeft.setDirection(DcMotor.Direction.FORWARD);
-                    //motorRight.setDirection(DcMotor.Direction.FORWARD);
-                    motorLeft.setPower(.5);
-                    motorRight.setPower(.5);
-                    currentMove = MoveState.DELAY1;
-                    now = new Date();
-                    delayUntil = now.getTime() + 1000;
-                    break;
+        switch (currentMove) {
+            case START1:
+                leftTargetPos = motorLeft.getCurrentPosition() + centimetersToCounts(243.84);
+                rightTargetPos = motorRight.getCurrentPosition() + centimetersToCounts(243.84);
+                //motorLeft.setDirection(DcMotor.Direction.FORWARD);
+                //motorRight.setDirection(DcMotor.Direction.FORWARD);
+                motorLeft.setPower(0.5);
+                motorRight.setPower(0.5);
+                currentMove = MoveState.MOVE1;
+                break;
 
-                case DELAY1:
-                    now = new Date();
-                    if (now.getTime() >= delayUntil) {
-                        currentMove = MoveState.MOVE1;
-                    }
-                    break;
-
-                case MOVE1:
+            case MOVE1:
+                if (motorLeft.getCurrentPosition() >= leftTargetPos) {
+                    motorLeft.setPower(0.0);
+                }
+                if (motorRight.getCurrentPosition() >= rightTargetPos) {
+                    motorRight.setPower(0.0);
+                }
+                if (motorLeft.getCurrentPosition() >= leftTargetPos && motorRight.getCurrentPosition() >= rightTargetPos) {
                     currentMove = MoveState.DELAY2;
                     now = new Date();
                     delayUntil = now.getTime() + 1000;
-                    break;
+                }
+                break;
 
-                case DELAY2:
-                    now = new Date();
-                    if (now.getTime() >= delayUntil) {
-                        currentMove = MoveState.START2;
-                    }
-                    break;
+            case DELAY2:
+                now = new Date();
+                if (now.getTime() >= delayUntil) {
+                    currentMove = MoveState.START2;
+                }
+                break;
 
-                case START2:
-                    motorLeft.setTargetPosition(motorLeft.getCurrentPosition() + centimetersToCounts(-243.84));
-                    motorRight.setTargetPosition(motorRight.getCurrentPosition() + centimetersToCounts(-243.84));
-                    //motorLeft.setDirection(DcMotor.Direction.REVERSE);
-                    //motorRight.setDirection(DcMotor.Direction.REVERSE);
-                    motorLeft.setPower(.5);
-                    motorRight.setPower(.5);
-                    currentMove = MoveState.DELAY3;
-                    now = new Date();
-                    delayUntil = now.getTime() + 1000;
-                    break;
+            case START2:
+                leftTargetPos = motorLeft.getCurrentPosition() + centimetersToCounts(-243.84);
+                rightTargetPos = motorRight.getCurrentPosition() + centimetersToCounts(-243.84);
+                //motorLeft.setDirection(DcMotor.Direction.REVERSE);
+                //motorRight.setDirection(DcMotor.Direction.REVERSE);
+                motorLeft.setPower(-0.5);
+                motorRight.setPower(-0.5);
+                currentMove = MoveState.DELAY3;
+                now = new Date();
+                delayUntil = now.getTime() + 1000;
+                break;
 
-                case DELAY3:
-                    now = new Date();
-                    if (now.getTime() >= delayUntil) {
-                        currentMove = MoveState.MOVE2;
-                    }
-                    break;
+            case DELAY3:
+                now = new Date();
+                if (now.getTime() >= delayUntil) {
+                    currentMove = MoveState.MOVE2;
+                }
+                break;
 
-                case  MOVE2:
-                    motorLeft.setPowerFloat();
-                    motorRight.setPowerFloat();
-                    break;
-            }
+            case MOVE2:
+                if (motorLeft.getCurrentPosition() <= leftTargetPos) {
+                    motorLeft.setPower(0.0);
+                }
+                if (motorRight.getCurrentPosition() <= rightTargetPos) {
+                    motorRight.setPower(0.0);
+                }
+                if (motorLeft.getCurrentPosition() <= leftTargetPos && motorRight.getCurrentPosition() <= rightTargetPos) {
+                    currentMove = MoveState.DONE;
+                }
+                break;
+
+            case DONE:
+                break;
         }
-
         if (gamepad1.start) {
             currentMove = MoveState.START1;
         }
@@ -107,6 +115,7 @@ public class LeftRightDriveTestTeleOp extends OpMode {
         telemetry.addData("ENCLeft", (float) motorLeft.getCurrentPosition());
         telemetry.addData("ENCRight", (float)motorRight.getCurrentPosition());
     }
+        
     @Override
     public void stop() {
 
