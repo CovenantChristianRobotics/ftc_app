@@ -80,16 +80,7 @@ public class LeftRightDriveTestTeleOp extends OpMode {
                 //motorRight.setDirection(DcMotor.Direction.REVERSE);
                 motorLeft.setPower(-0.5);
                 motorRight.setPower(-0.5);
-                currentMove = MoveState.DELAY3;
-                now = new Date();
-                delayUntil = now.getTime() + 1000;
-                break;
-
-            case DELAY3:
-                now = new Date();
-                if (now.getTime() >= delayUntil) {
-                    currentMove = MoveState.MOVE2;
-                }
+                currentMove = MoveState.MOVE2;
                 break;
 
             case MOVE2:
