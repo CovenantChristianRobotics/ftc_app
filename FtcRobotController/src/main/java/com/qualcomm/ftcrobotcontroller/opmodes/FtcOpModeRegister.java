@@ -78,6 +78,7 @@ public class FtcOpModeRegister implements OpModeRegister {
     manager.register("EncValueTeleOp", EncValueTeleOp.class);
     manager.register("CCHS5256Autonomous", CCHS5256Autonomous.class);
     manager.register("LeftRightDriveTestTeleOp", LeftRightDriveTestTeleOp.class);
+    manager.register("TurnTeleOp", TurnTeleOp.class);
 
     //manager.register("NxtTeleOp", NxtTeleOp.class);
 
