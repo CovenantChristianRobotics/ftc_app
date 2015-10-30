@@ -36,7 +36,7 @@ public class TurnTeleOp extends OpMode {
         driveTrainController = hardwareMap.dcMotorController.get("dtController");
         motorRight = hardwareMap.dcMotor.get("motor_right");
         motorLeft = hardwareMap.dcMotor.get("motor_left");
-        motorLeft.setDirection(DcMotor.Direction.REVERSE);
+        motorRight.setDirection(DcMotor.Direction.REVERSE);
         motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         currentMove = MoveState.START1;
@@ -52,7 +52,7 @@ public class TurnTeleOp extends OpMode {
                     motorRight.setTargetPosition(motorRight.getCurrentPosition() + centimetersToCounts(80));
                     motorLeft.setPower(0.5);
                     motorRight.setPower(0.5);
-                    currentMove = MoveState.DONE;
+                    currentMove = MoveState.DELAY1;
                     now = new Date();
                     delayUntil = now.getTime() + 1000;
                     break;
@@ -60,7 +60,7 @@ public class TurnTeleOp extends OpMode {
                 case DELAY1:
                     now = new Date();
                     if (now.getTime() >= delayUntil) {
-                        currentMove = MoveState.MOVE1;
+                        currentMove = MoveState.DONE;
                     }
                     break;
 
