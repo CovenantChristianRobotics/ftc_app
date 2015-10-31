@@ -30,11 +30,11 @@ public class TurnTeleOp extends OpMode {
     }
 
     int centimetersToCounts(double centimeters) {
-        return (int) ((centimeters / (10.0 * Math.PI)) * 1440.0);
+        return (int) ((centimeters / (10.1 * Math.PI)) * 1120.0);
     }
 
     int degreesToCounts(double degrees) {
-        return centimetersToCounts((20.3 / 90) * degrees);
+        return centimetersToCounts((31.0 / 90.0) * degrees);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class TurnTeleOp extends OpMode {
         driveTrainController = hardwareMap.dcMotorController.get("dtController");
         motorRight = hardwareMap.dcMotor.get("motor_right");
         motorLeft = hardwareMap.dcMotor.get("motor_left");
-        motorRight.setDirection(DcMotor.Direction.REVERSE);
+        motorLeft     .setDirection(DcMotor.Direction.REVERSE);
         motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         currentMove = MoveState.START1;
