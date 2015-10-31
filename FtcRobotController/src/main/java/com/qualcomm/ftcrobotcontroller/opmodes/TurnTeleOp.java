@@ -33,6 +33,10 @@ public class TurnTeleOp extends OpMode {
         return (int) ((centimeters / (10.0 * Math.PI)) * 1440.0);
     }
 
+    int degreesToCounts(double degrees) {
+        return centimetersToCounts((20.3 / 90) * degrees);
+    }
+
     @Override
     public void init() {
         driveTrainController = hardwareMap.dcMotorController.get("dtController");
@@ -47,94 +51,106 @@ public class TurnTeleOp extends OpMode {
     @Override
     public void loop() {
 
-        if (!motorLeft.isBusy() && !motorRight.isBusy()) {
-            switch (currentMove) {
-                case START1:
-                    leftTarget = motorLeft.getCurrentPosition() + centimetersToCounts(80);
-                    motorLeft.setTargetPosition(leftTarget);
-                    rightTarget = motorRight.getCurrentPosition() + centimetersToCounts(80);
-                    motorRight.setTargetPosition(rightTarget);
-                    motorLeft.setPower(0.5);
-                    motorRight.setPower(0.5);
-                    currentMove = MoveState.DELAY1;
-                    now = new Date();
-                    delayUntil = now.getTime() + 1000;
-                    break;
+        switch (currentMove) {
+            case START1:
+                leftTarget = motorLeft.getCurrentPosition() + centimetersToCounts(80);
+                motorLeft.setTargetPosition(leftTarget);
+                rightTarget = motorRight.getCurrentPosition() + centimetersToCounts(80);
+                motorRight.setTargetPosition(rightTarget);
+                motorLeft.setPower(0.5);
+                motorRight.setPower(0.5);
+                currentMove = MoveState.DELAY1;
+                now = new Date();
+                delayUntil = now.getTime() + 1000;
+                break;
 
-                case DELAY1:
-                    now = new Date();
-                    if (now.getTime() >= delayUntil) {
-                        currentMove = MoveState.DONE;
-                    }
-                    break;
+            case DELAY1:
+                now = new Date();
+                if (now.getTime() >= delayUntil) {
+                    currentMove = MoveState.MOVE1;
+                }
+                break;
 
-                case MOVE1:
+            case MOVE1:
+                if (!motorLeft.isBusy() || !motorRight.isBusy()) {
+                    motorLeft.setPower(0.0);
+                    motorRight.setPower(0.0);
                     currentMove = MoveState.DELAY2;
                     now = new Date();
                     delayUntil = now.getTime() + 1000;
-                    break;
+                }
+                break;
 
-                case DELAY2:
-                    now = new Date();
-                    if (now.getTime() >= delayUntil) {
-                        currentMove = MoveState.START2;
-                    }
-                    break;
+            case DELAY2:
+                now = new Date();
+                if (now.getTime() >= delayUntil) {
+                    currentMove = MoveState.START2;
+                }
+                break;
 
-                case START2:
-                    motorLeft.setTargetPosition(motorLeft.getCurrentPosition() + centimetersToCounts(33.9));
-                    motorRight.setTargetPosition(motorRight.getCurrentPosition() + centimetersToCounts(-33.9));
-                    motorLeft.setPower(0.5);
-                    motorRight.setPower(0.5);
-                    currentMove = MoveState.DELAY3;
-                    now = new Date();
-                    delayUntil = now.getTime() + 1000;
-                    break;
+            case START2:
+                motorLeft.setTargetPosition(motorLeft.getCurrentPosition() + degreesToCounts(90));
+                motorRight.setTargetPosition(motorRight.getCurrentPosition() - degreesToCounts(90));
+                motorLeft.setPower(0.5);
+                motorRight.setPower(0.5);
+                currentMove = MoveState.DELAY3;
+                now = new Date();
+                delayUntil = now.getTime() + 1000;
+                break;
 
-                case DELAY3:
-                    now = new Date();
-                    if (now.getTime() >= delayUntil) {
-                        currentMove = MoveState.MOVE2;
-                    }
-                    break;
+            case DELAY3:
+                now = new Date();
+                if (now.getTime() >= delayUntil) {
+                    currentMove = MoveState.MOVE2;
+                }
+                break;
 
-                case MOVE2:
+            case MOVE2:
+                if (!motorLeft.isBusy() || !motorRight.isBusy()) {
+                    motorLeft.setPower(0.0);
+                    motorRight.setPower(0.0);
                     currentMove = MoveState.DELAY4;
                     now = new Date();
                     delayUntil = now.getTime() + 1000;
-                    break;
+                }
+                break;
 
-                case DELAY4:
-                    now = new Date();
-                    if (now.getTime() >= delayUntil) {
-                        currentMove = MoveState.START3;
-                    }
-                    break;
+            case DELAY4:
+                now = new Date();
+                if (now.getTime() >= delayUntil) {
+                    currentMove = MoveState.START3;
+                }
+                break;
 
-                case START3:
-                    motorLeft.setTargetPosition(motorLeft.getCurrentPosition() + centimetersToCounts(80));
-                    motorRight.setTargetPosition(motorRight.getCurrentPosition() + centimetersToCounts(80));
-                    motorLeft.setPower(0.5);
-                    motorRight.setPower(0.5);
-                    currentMove = MoveState.DELAY5;
-                    now = new Date();
-                    delayUntil = now.getTime() + 1000;
-                    break;
+            case START3:
+                motorLeft.setTargetPosition(motorLeft.getCurrentPosition() + centimetersToCounts(80));
+                motorRight.setTargetPosition(motorRight.getCurrentPosition() + centimetersToCounts(80));
+                motorLeft.setPower(0.5);
+                motorRight.setPower(0.5);
+                currentMove = MoveState.DELAY5;
+                now = new Date();
+                delayUntil = now.getTime() + 1000;
+                break;
 
-                case DELAY5:
-                    now = new Date();
-                    if (now.getTime() >= delayUntil) {
-                        currentMove = MoveState.MOVE3;
-                    }
-                    break;
+            case DELAY5:
+                now = new Date();
+                if (now.getTime() >= delayUntil) {
+                    currentMove = MoveState.MOVE3;
+                }
+                break;
 
-                case MOVE3:
+            case MOVE3:
+                if (!motorLeft.isBusy() || !motorRight.isBusy()) {
+                    motorLeft.setPower(0.0);
+                    motorRight.setPower(0.0);
                     currentMove = MoveState.DONE;
-                    break;
+                }
+                break;
 
-                case DONE:
-                    break;
-            }
+            case DONE:
+                motorLeft.setPower(0.0);
+                motorRight.setPower(0.0);
+                break;
         }
         if (gamepad1.start) {
             currentMove = MoveState.START1;
