@@ -21,6 +21,8 @@ public class TurnTeleOp extends OpMode {
     DcMotor motorRight;
     DcMotor motorLeft;
     MoveState currentMove;
+    int rightTarget;
+    int leftTarget;
     long delayUntil;
     Date now;
 
@@ -48,8 +50,10 @@ public class TurnTeleOp extends OpMode {
         if (!motorLeft.isBusy() && !motorRight.isBusy()) {
             switch (currentMove) {
                 case START1:
-                    motorLeft.setTargetPosition(motorLeft.getCurrentPosition() + centimetersToCounts(80));
-                    motorRight.setTargetPosition(motorRight.getCurrentPosition() + centimetersToCounts(80));
+                    leftTarget = motorLeft.getCurrentPosition() + centimetersToCounts(80);
+                    motorLeft.setTargetPosition(leftTarget);
+                    rightTarget = motorRight.getCurrentPosition() + centimetersToCounts(80);
+                    motorRight.setTargetPosition(rightTarget);
                     motorLeft.setPower(0.5);
                     motorRight.setPower(0.5);
                     currentMove = MoveState.DELAY1;
@@ -138,7 +142,9 @@ public class TurnTeleOp extends OpMode {
 
         telemetry.addData("Text", "*** Robot Data***");
         telemetry.addData("ENCLeft", (float) motorLeft.getCurrentPosition());
+        telemetry.addData("TGTleft", (float) leftTarget);
         telemetry.addData("ENCRight", (float) motorRight.getCurrentPosition());
+        telemetry.addData("TGTright", (float) rightTarget);
     }
 
     @Override
