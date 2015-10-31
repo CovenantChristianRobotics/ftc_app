@@ -3,17 +3,21 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
-
 import java.util.Date;
+
+import org.robochargers.StateMachine;
 
 /**
  * Created by Robotics on 10/27/2015.
  */
 public class TurnTeleOp extends OpMode {
+    public TurnTeleOp() {
+    }
+
     /**
      * Created by Robotics on 10/27/2015.
      */
-    enum MoveState {
+    public enum MoveState {
         START1, DELAY1, MOVE1, DELAY2, START2, DELAY3, MOVE2, DELAY4, START3, DELAY5, MOVE3, DONE
     }
 
@@ -26,8 +30,16 @@ public class TurnTeleOp extends OpMode {
     long delayUntil;
     Date now;
 
-    public TurnTeleOp() {
-    }
+    /*
+        public StateMachine(int thisState, int nextState,
+                    StateConditional condition, StateAction action,
+                    int intParam, double realParam)
+     */
+    private StateMachine[] stateMachine = new StateMachine[] {
+            new StateMachine(0, 1, StateMachine.StateConditional.TRUE, StateMachine.StateAction.DELAY_START, 100, 0.0),
+            new StateMachine(1, 2, StateMachine.StateConditional.DELAY, StateMachine.StateAction.PASS, 0, 0.0),
+            new StateMachine(3, 3, StateMachine.StateConditional.FALSE, StateMachine.StateAction.PASS, 0, 0.0),
+    };
 
     int centimetersToCounts(double centimeters) {
         return (int) ((centimeters / (10.1 * Math.PI)) * 1120.0);
