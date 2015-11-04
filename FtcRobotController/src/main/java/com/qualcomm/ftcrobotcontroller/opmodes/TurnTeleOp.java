@@ -14,13 +14,14 @@ public class TurnTeleOp extends OpMode {
      * Created by Robotics on 10/27/2015.
      */
     enum MoveState {
-        START1, DELAY1, MOVE1, DELAY2, START2, DELAY3, MOVE2, DELAY4, START3, DELAY5, MOVE3, DONE
+        START1, DELAY, DELAY1, DELAY2, STARTMOVE, MOVING, START2, START3, DONE
     }
 
     DcMotorController driveTrainController;
     DcMotor motorRight;
     DcMotor motorLeft;
     MoveState currentMove;
+    MoveState nextMove;
     int rightTarget;
     int leftTarget;
     long delayUntil;
@@ -34,7 +35,7 @@ public class TurnTeleOp extends OpMode {
     }
 
     int degreesToCounts(double degrees) {
-        return centimetersToCounts((31.0 / 90.0) * degrees);
+        return centimetersToCounts((31.5 / 90.0) * degrees);
     }
 
     @Override
@@ -59,32 +60,33 @@ public class TurnTeleOp extends OpMode {
                 motorRight.setTargetPosition(rightTarget);
                 motorLeft.setPower(0.5);
                 motorRight.setPower(0.5);
-                currentMove = MoveState.DELAY1;
-                now = new Date();
-                delayUntil = now.getTime() + 1000;
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DELAY1;
                 break;
 
             case DELAY1:
                 now = new Date();
-                if (now.getTime() >= delayUntil) {
-                    currentMove = MoveState.MOVE1;
-                }
+                delayUntil = now.getTime() + 100;
+                currentMove = MoveState.DELAY;
+                nextMove = MoveState.START2;
                 break;
 
-            case MOVE1:
-                if (!motorLeft.isBusy() || !motorRight.isBusy()) {
-                    motorLeft.setPower(0.0);
-                    motorRight.setPower(0.0);
-                    currentMove = MoveState.DELAY2;
-                    now = new Date();
-                    delayUntil = now.getTime() + 1000;
-                }
-                break;
-
-            case DELAY2:
+            case DELAY:
                 now = new Date();
                 if (now.getTime() >= delayUntil) {
-                    currentMove = MoveState.START2;
+                    currentMove = nextMove;
+                }
+                break;
+
+            case STARTMOVE:
+                if (motorLeft.isBusy() && motorRight.isBusy()) {
+                    currentMove = MoveState.MOVING;
+                }
+                break;
+
+            case MOVING:
+                if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+                    currentMove = nextMove;
                 }
                 break;
 
@@ -93,33 +95,15 @@ public class TurnTeleOp extends OpMode {
                 motorRight.setTargetPosition(motorRight.getCurrentPosition() - degreesToCounts(90));
                 motorLeft.setPower(0.5);
                 motorRight.setPower(0.5);
-                currentMove = MoveState.DELAY3;
-                now = new Date();
-                delayUntil = now.getTime() + 1000;
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DELAY2;
                 break;
 
-            case DELAY3:
+            case DELAY2:
                 now = new Date();
-                if (now.getTime() >= delayUntil) {
-                    currentMove = MoveState.MOVE2;
-                }
-                break;
-
-            case MOVE2:
-                if (!motorLeft.isBusy() || !motorRight.isBusy()) {
-                    motorLeft.setPower(0.0);
-                    motorRight.setPower(0.0);
-                    currentMove = MoveState.DELAY4;
-                    now = new Date();
-                    delayUntil = now.getTime() + 1000;
-                }
-                break;
-
-            case DELAY4:
-                now = new Date();
-                if (now.getTime() >= delayUntil) {
-                    currentMove = MoveState.START3;
-                }
+                delayUntil = now.getTime() + 100;
+                currentMove = MoveState.DELAY;
+                nextMove = MoveState.START3;
                 break;
 
             case START3:
@@ -127,24 +111,8 @@ public class TurnTeleOp extends OpMode {
                 motorRight.setTargetPosition(motorRight.getCurrentPosition() + centimetersToCounts(80));
                 motorLeft.setPower(0.5);
                 motorRight.setPower(0.5);
-                currentMove = MoveState.DELAY5;
-                now = new Date();
-                delayUntil = now.getTime() + 1000;
-                break;
-
-            case DELAY5:
-                now = new Date();
-                if (now.getTime() >= delayUntil) {
-                    currentMove = MoveState.MOVE3;
-                }
-                break;
-
-            case MOVE3:
-                if (!motorLeft.isBusy() || !motorRight.isBusy()) {
-                    motorLeft.setPower(0.0);
-                    motorRight.setPower(0.0);
-                    currentMove = MoveState.DONE;
-                }
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DONE;
                 break;
 
             case DONE:
