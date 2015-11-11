@@ -20,6 +20,9 @@ public class TurnTeleOp extends OpMode {
     enum MoveState {
         START1, DELAY, DELAY1, DELAY2, STARTMOVE, MOVING, START2, START3, DONE
     }
+    enum BeaconState {
+        NOT_LOOKING, LOOKING_START, LOOKING_END, DONE
+    }
 
     DcMotorController driveTrainController;
     DcMotor motorRight;
@@ -28,6 +31,16 @@ public class TurnTeleOp extends OpMode {
     IrSeekerSensor IrSense;
     MoveState currentMove;
     MoveState nextMove;
+    BeaconState redState;
+    double redStartRight;
+    double redStartLeft;
+    double redEndRight;
+    double redEndLeft;
+    BeaconState blueState;
+    double blueStartRight;
+    double blueStartLeft;
+    double blueEndRight;
+    double blueEndLeft;
     int rightTarget;
     int leftTarget;
     long delayUntil;
@@ -55,8 +68,9 @@ public class TurnTeleOp extends OpMode {
         motorLeft     .setDirection(DcMotor.Direction.REVERSE);
         motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        //currentMove = MoveState.START1;
-        currentMove = MoveState.DONE;
+        currentMove = MoveState.START1;
+        redState = BeaconState.NOT_LOOKING;
+        blueState = BeaconState.NOT_LOOKING;
     }
 
     @Override
@@ -123,6 +137,8 @@ public class TurnTeleOp extends OpMode {
                 motorRight.setPower(0.5);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
+                redState = BeaconState.LOOKING_START;
+                blueState = BeaconState.LOOKING_START;
                 break;
 
             case DONE:
@@ -130,15 +146,55 @@ public class TurnTeleOp extends OpMode {
                 motorRight.setPower(0.0);
                 break;
         }
+        switch (redState) {
+            case NOT_LOOKING:
+                break;
+            case LOOKING_START:
+                if (ColorSense.red() >= 1) {
+                    redStartLeft = motorLeft.getCurrentPosition();
+                    redStartRight = motorRight.getCurrentPosition();
+                    redState = BeaconState.LOOKING_END;
+                }
+                break;
+            case LOOKING_END:
+                if(ColorSense.red() == 0) {
+                    redEndLeft = motorLeft.getCurrentPosition();
+                    redEndRight = motorRight.getCurrentPosition();
+                    redState = BeaconState.DONE;
+                }
+                break;
+            case DONE:
+                break;
+        }
+        switch (blueState) {
+            case NOT_LOOKING:
+                break;
+            case LOOKING_START:
+                if (ColorSense.blue() >= 1) {
+                    blueStartLeft = motorLeft.getCurrentPosition();
+                    blueStartRight = motorRight.getCurrentPosition();
+                    blueState = BeaconState.LOOKING_END;
+                }
+                break;
+            case LOOKING_END:
+                if(ColorSense.blue() == 0) {
+                    blueEndLeft = motorLeft.getCurrentPosition();
+                    blueEndRight = motorRight.getCurrentPosition();
+                    blueState = BeaconState.DONE;
+                }
+                break;
+            case DONE:
+                break;
+        }
         if (gamepad1.start) {
             currentMove = MoveState.START1;
         }
 
         telemetry.addData("Text", "*** Robot Data***");
-        telemetry.addData("ColorSensor(R):" , (float) ColorSense.red());
-        telemetry.addData("ColorSensor(B):" , (float) ColorSense.blue());
-        telemetry.addData("ColorSensor(A):" , (float) ColorSense.alpha());
-        telemetry.addData("IRSensor(S):" , (float) IrSense.getStrength());
+        telemetry.addData("redStart", redStartLeft);
+        telemetry.addData("redEnd", redEndLeft);
+        telemetry.addData("blueStart", blueStartLeft);
+        telemetry.addData("blueEnd", blueEndLeft);
         telemetry.addData("ENCLeft", (float) motorLeft.getCurrentPosition());
         telemetry.addData("TGTleft", (float) leftTarget);
         telemetry.addData("ENCRight", (float) motorRight.getCurrentPosition());
