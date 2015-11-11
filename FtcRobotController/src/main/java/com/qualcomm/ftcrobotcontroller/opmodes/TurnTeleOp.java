@@ -3,6 +3,10 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
+import com.qualcomm.robotcore.hardware.DigitalChannelController;
+import com.qualcomm.robotcore.hardware.IrSeekerSensor;
 
 import java.util.Date;
 
@@ -20,6 +24,8 @@ public class TurnTeleOp extends OpMode {
     DcMotorController driveTrainController;
     DcMotor motorRight;
     DcMotor motorLeft;
+    ColorSensor ColorSense;
+    IrSeekerSensor IrSense;
     MoveState currentMove;
     MoveState nextMove;
     int rightTarget;
@@ -43,10 +49,14 @@ public class TurnTeleOp extends OpMode {
         driveTrainController = hardwareMap.dcMotorController.get("dtController");
         motorRight = hardwareMap.dcMotor.get("motor_right");
         motorLeft = hardwareMap.dcMotor.get("motor_left");
+        ColorSense = hardwareMap.colorSensor.get("ColorSense");
+        ColorSense.enableLed(true);
+        IrSense = hardwareMap.irSeekerSensor.get("IRSense");
         motorLeft     .setDirection(DcMotor.Direction.REVERSE);
         motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        currentMove = MoveState.START1;
+        //currentMove = MoveState.START1;
+        currentMove = MoveState.DONE;
     }
 
     @Override
@@ -125,6 +135,10 @@ public class TurnTeleOp extends OpMode {
         }
 
         telemetry.addData("Text", "*** Robot Data***");
+        telemetry.addData("ColorSensor(R):" , (float) ColorSense.red());
+        telemetry.addData("ColorSensor(B):" , (float) ColorSense.blue());
+        telemetry.addData("ColorSensor(A):" , (float) ColorSense.alpha());
+        telemetry.addData("IRSensor(S):" , (float) IrSense.getStrength());
         telemetry.addData("ENCLeft", (float) motorLeft.getCurrentPosition());
         telemetry.addData("TGTleft", (float) leftTarget);
         telemetry.addData("ENCRight", (float) motorRight.getCurrentPosition());
