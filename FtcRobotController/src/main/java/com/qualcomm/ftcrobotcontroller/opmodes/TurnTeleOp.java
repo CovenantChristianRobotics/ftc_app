@@ -29,7 +29,7 @@ public class TurnTeleOp extends OpMode {
     DcMotor motorLeft;
     ColorSensor ColorSense;
     GyroSensor Gyro;
-    IrSeekerSensor IrSense;
+    //IrSeekerSensor IrSense;
     MoveState currentMove;
     MoveState nextMove;
     BeaconState redState;
@@ -66,7 +66,7 @@ public class TurnTeleOp extends OpMode {
         ColorSense = hardwareMap.colorSensor.get("ColorSense");
         ColorSense.enableLed(true);
         Gyro = hardwareMap.gyroSensor.get("GyroSense");
-        IrSense = hardwareMap.irSeekerSensor.get("IRSense");
+        //IrSense = hardwareMap.irSeekerSensor.get("IRSense");
         motorLeft     .setDirection(DcMotor.Direction.REVERSE);
         motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
