@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 import com.qualcomm.robotcore.hardware.DigitalChannelController;
 import com.qualcomm.robotcore.hardware.IrSeekerSensor;
+import com.qualcomm.robotcore.hardware.GyroSensor;
 import java.util.Date;
 
 /**
@@ -27,6 +28,7 @@ public class TurnTeleOp extends OpMode {
     DcMotor motorRight;
     DcMotor motorLeft;
     ColorSensor ColorSense;
+    GyroSensor Gyro;
     IrSeekerSensor IrSense;
     MoveState currentMove;
     MoveState nextMove;
@@ -63,6 +65,7 @@ public class TurnTeleOp extends OpMode {
         motorLeft = hardwareMap.dcMotor.get("motor_left");
         ColorSense = hardwareMap.colorSensor.get("ColorSense");
         ColorSense.enableLed(true);
+        Gyro = hardwareMap.gyroSensor.get("GyroSense");
         IrSense = hardwareMap.irSeekerSensor.get("IRSense");
         motorLeft     .setDirection(DcMotor.Direction.REVERSE);
         motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
@@ -190,10 +193,11 @@ public class TurnTeleOp extends OpMode {
         }
 
         telemetry.addData("Text", "*** Robot Data***");
-        telemetry.addData("redStart", redStartLeft);
-        telemetry.addData("redEnd", redEndLeft);
-        telemetry.addData("blueStart", blueStartLeft);
-        telemetry.addData("blueEnd", blueEndLeft);
+        telemetry.addData("RedStart", redStartLeft);
+        telemetry.addData("RedEnd", redEndLeft);
+        telemetry.addData("BlueStart", blueStartLeft);
+        telemetry.addData("BlueEnd", blueEndLeft);
+        telemetry.addData("GyroSense", (float)Gyro.getRotation());
         telemetry.addData("ENCLeft", (float) motorLeft.getCurrentPosition());
         telemetry.addData("TGTleft", (float) leftTarget);
         telemetry.addData("ENCRight", (float) motorRight.getCurrentPosition());
