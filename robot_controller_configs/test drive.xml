@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<Robot>
+    <DeviceInterfaceModule name="Device Interface Module 3" serialNumber="AL00VFP2">
+        <OpticalDistanceSensor name="opDistance" port="0" />
+    </DeviceInterfaceModule>
+</Robot>

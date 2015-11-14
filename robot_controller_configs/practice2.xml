@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<Robot>
+    <DeviceInterfaceModule name="Core Interface Module" serialNumber="AL00VFP2">
+        <ColorSensor name="color" port="0" />
+        <Gyro name="gyro" port="1" />
+        <OpticalDistanceSensor name="opDistance" port="0" />
+    </DeviceInterfaceModule>
+</Robot>
