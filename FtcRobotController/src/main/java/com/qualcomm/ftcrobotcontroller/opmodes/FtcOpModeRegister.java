@@ -59,16 +59,14 @@ public class FtcOpModeRegister implements OpModeRegister {
 
     //manager.register("MatrixK9TeleOp", MatrixK9TeleOp.class);
     manager.register("K9TeleOp", K9TeleOp.class);
-    manager.register("K9Line", K9Line.class);
-    manager.register ("PushBotAuto", PushBotAuto.class);
-    manager.register ("PushBotManual", PushBotManual.class);
-
-
+//    manager.register("K9Line", K9Line.class);
+//    manager.register ("PushBotAuto", PushBotAuto.class);
+//    manager.register ("PushBotManual", PushBotManual.class);
 
     /*
      * Uncomment any of the following lines if you want to register an op mode.
      */
-    manager.register("MR Gyro Test", MRGyroTest.class);
+    //manager.register("MR Gyro Test", MRGyroTest.class);
 
     //manager.register("AdafruitRGBExample", AdafruitRGBExample.class);
     //manager.register("ColorSensorDriver", ColorSensorDriver.class);
@@ -76,13 +74,14 @@ public class FtcOpModeRegister implements OpModeRegister {
     //manager.register("IrSeekerOp", IrSeekerOp.class);
     //manager.register("CompassCalibration", CompassCalibration.class);
     //manager.register("I2cAddressChangeExample", LinearI2cAddressChange.class);
-    manager.register("K9IrSeeker", K9IrSeeker.class);
-    manager.register("K9Line", K9Line.class);
+//    manager.register("K9IrSeeker", K9IrSeeker.class);
+//    manager.register("K9Line", K9Line.class);
     manager.register("CCHS5256TeleOp", CCHS5256TeleOp.class);
-    manager.register("EncValueTeleOp", EncValueTeleOp.class);
-    manager.register("CCHS5256Autonomous", CCHS5256Autonomous.class);
-    manager.register("LeftRightDriveTestTeleOp", LeftRightDriveTestTeleOp.class);
+//    manager.register("EncValueTeleOp", EncValueTeleOp.class);
+//    manager.register("CCHS5256Autonomous", CCHS5256Autonomous.class);
+//    manager.register("LeftRightDriveTestTeleOp", LeftRightDriveTestTeleOp.class);
     manager.register("TurnTeleOp", TurnTeleOp.class);
+    manager.register("TestAutonomous", TestAutonomous.class);
 
     //manager.register("NxtTeleOp", NxtTeleOp.class);
 
