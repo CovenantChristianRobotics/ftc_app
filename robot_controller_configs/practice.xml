@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<Robot>
+    <ServoController name="servoCtlr" serialNumber="AL00YAL7">
+        <!--
+        <Servo name="servo_1" port="1" />
+        <Servo name="servo_2" port="2" />
+        -->
+    </ServoController>
+    <MotorController name="dtCtrl" serialNumber="AL00XTFA">
+        <Motor name="motorL" port="1" />
+        <Motor name="motorR" port="2" />
+    </MotorController>
+    <MotorController name="Motor Controller 1" serialNumber="AL00XTFL">
+    </MotorController>
+    <LegacyModuleController name="legacyModule" serialNumber="AL00XU3L">
+    </LegacyModuleController>
+    <DeviceInterfaceModule name="Core Interface Module" serialNumber="AL00VFP2">
+        <ColorSensor name="color" port="0" />
+        <Gyro name="gyro" port="1" />
+        <OpticalDistanceSensor name="opDistance" port="0" />
+    </DeviceInterfaceModule>
+</Robot>
