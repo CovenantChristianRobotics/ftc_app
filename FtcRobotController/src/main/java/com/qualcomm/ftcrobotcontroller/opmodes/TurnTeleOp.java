@@ -3,7 +3,10 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
-
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
+import com.qualcomm.robotcore.hardware.DigitalChannelController;
+import com.qualcomm.robotcore.hardware.IrSeekerSensor;
 import java.util.Date;
 
 /**
@@ -14,13 +17,29 @@ public class TurnTeleOp extends OpMode {
      * Created by Robotics on 10/27/2015.
      */
     enum MoveState {
-        START1, DELAY1, MOVE1, DELAY2, START2, DELAY3, MOVE2, DELAY4, START3, DELAY5, MOVE3, DONE
+        START1, DELAY, DELAY1, DELAY2, STARTMOVE, MOVING, START2, START3, DONE
+    }
+    enum BeaconState {
+        NOT_LOOKING, LOOKING_START, LOOKING_END, DONE
     }
 
     DcMotorController driveTrainController;
     DcMotor motorRight;
     DcMotor motorLeft;
+    ColorSensor ColorSense;
+    IrSeekerSensor IrSense;
     MoveState currentMove;
+    MoveState nextMove;
+    BeaconState redState;
+    double redStartRight;
+    double redStartLeft;
+    double redEndRight;
+    double redEndLeft;
+    BeaconState blueState;
+    double blueStartRight;
+    double blueStartLeft;
+    double blueEndRight;
+    double blueEndLeft;
     int rightTarget;
     int leftTarget;
     long delayUntil;
@@ -34,7 +53,7 @@ public class TurnTeleOp extends OpMode {
     }
 
     int degreesToCounts(double degrees) {
-        return centimetersToCounts((31.0 / 90.0) * degrees);
+        return centimetersToCounts((31.5 / 90.0) * degrees);
     }
 
     @Override
@@ -42,10 +61,15 @@ public class TurnTeleOp extends OpMode {
         driveTrainController = hardwareMap.dcMotorController.get("dtController");
         motorRight = hardwareMap.dcMotor.get("motor_right");
         motorLeft = hardwareMap.dcMotor.get("motor_left");
+        ColorSense = hardwareMap.colorSensor.get("ColorSense");
+        ColorSense.enableLed(true);
+        IrSense = hardwareMap.irSeekerSensor.get("IRSense");
         motorLeft     .setDirection(DcMotor.Direction.REVERSE);
         motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         currentMove = MoveState.START1;
+        redState = BeaconState.NOT_LOOKING;
+        blueState = BeaconState.NOT_LOOKING;
     }
 
     @Override
@@ -59,32 +83,33 @@ public class TurnTeleOp extends OpMode {
                 motorRight.setTargetPosition(rightTarget);
                 motorLeft.setPower(0.5);
                 motorRight.setPower(0.5);
-                currentMove = MoveState.DELAY1;
-                now = new Date();
-                delayUntil = now.getTime() + 1000;
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DELAY1;
                 break;
 
             case DELAY1:
                 now = new Date();
-                if (now.getTime() >= delayUntil) {
-                    currentMove = MoveState.MOVE1;
-                }
+                delayUntil = now.getTime() + 100;
+                currentMove = MoveState.DELAY;
+                nextMove = MoveState.START2;
                 break;
 
-            case MOVE1:
-                if (!motorLeft.isBusy() || !motorRight.isBusy()) {
-                    motorLeft.setPower(0.0);
-                    motorRight.setPower(0.0);
-                    currentMove = MoveState.DELAY2;
-                    now = new Date();
-                    delayUntil = now.getTime() + 1000;
-                }
-                break;
-
-            case DELAY2:
+            case DELAY:
                 now = new Date();
                 if (now.getTime() >= delayUntil) {
-                    currentMove = MoveState.START2;
+                    currentMove = nextMove;
+                }
+                break;
+
+            case STARTMOVE:
+                if (motorLeft.isBusy() && motorRight.isBusy()) {
+                    currentMove = MoveState.MOVING;
+                }
+                break;
+
+            case MOVING:
+                if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+                    currentMove = nextMove;
                 }
                 break;
 
@@ -93,33 +118,15 @@ public class TurnTeleOp extends OpMode {
                 motorRight.setTargetPosition(motorRight.getCurrentPosition() - degreesToCounts(90));
                 motorLeft.setPower(0.5);
                 motorRight.setPower(0.5);
-                currentMove = MoveState.DELAY3;
-                now = new Date();
-                delayUntil = now.getTime() + 1000;
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DELAY2;
                 break;
 
-            case DELAY3:
+            case DELAY2:
                 now = new Date();
-                if (now.getTime() >= delayUntil) {
-                    currentMove = MoveState.MOVE2;
-                }
-                break;
-
-            case MOVE2:
-                if (!motorLeft.isBusy() || !motorRight.isBusy()) {
-                    motorLeft.setPower(0.0);
-                    motorRight.setPower(0.0);
-                    currentMove = MoveState.DELAY4;
-                    now = new Date();
-                    delayUntil = now.getTime() + 1000;
-                }
-                break;
-
-            case DELAY4:
-                now = new Date();
-                if (now.getTime() >= delayUntil) {
-                    currentMove = MoveState.START3;
-                }
+                delayUntil = now.getTime() + 100;
+                currentMove = MoveState.DELAY;
+                nextMove = MoveState.START3;
                 break;
 
             case START3:
@@ -127,24 +134,10 @@ public class TurnTeleOp extends OpMode {
                 motorRight.setTargetPosition(motorRight.getCurrentPosition() + centimetersToCounts(80));
                 motorLeft.setPower(0.5);
                 motorRight.setPower(0.5);
-                currentMove = MoveState.DELAY5;
-                now = new Date();
-                delayUntil = now.getTime() + 1000;
-                break;
-
-            case DELAY5:
-                now = new Date();
-                if (now.getTime() >= delayUntil) {
-                    currentMove = MoveState.MOVE3;
-                }
-                break;
-
-            case MOVE3:
-                if (!motorLeft.isBusy() || !motorRight.isBusy()) {
-                    motorLeft.setPower(0.0);
-                    motorRight.setPower(0.0);
-                    currentMove = MoveState.DONE;
-                }
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DONE;
+                redState = BeaconState.LOOKING_START;
+                blueState = BeaconState.LOOKING_START;
                 break;
 
             case DONE:
@@ -152,11 +145,55 @@ public class TurnTeleOp extends OpMode {
                 motorRight.setPower(0.0);
                 break;
         }
+        switch (redState) {
+            case NOT_LOOKING:
+                break;
+            case LOOKING_START:
+                if (ColorSense.red() >= 1) {
+                    redStartLeft = motorLeft.getCurrentPosition();
+                    redStartRight = motorRight.getCurrentPosition();
+                    redState = BeaconState.LOOKING_END;
+                }
+                break;
+            case LOOKING_END:
+                if(ColorSense.red() == 0) {
+                    redEndLeft = motorLeft.getCurrentPosition();
+                    redEndRight = motorRight.getCurrentPosition();
+                    redState = BeaconState.DONE;
+                }
+                break;
+            case DONE:
+                break;
+        }
+        switch (blueState) {
+            case NOT_LOOKING:
+                break;
+            case LOOKING_START:
+                if (ColorSense.blue() >= 1) {
+                    blueStartLeft = motorLeft.getCurrentPosition();
+                    blueStartRight = motorRight.getCurrentPosition();
+                    blueState = BeaconState.LOOKING_END;
+                }
+                break;
+            case LOOKING_END:
+                if(ColorSense.blue() == 0) {
+                    blueEndLeft = motorLeft.getCurrentPosition();
+                    blueEndRight = motorRight.getCurrentPosition();
+                    blueState = BeaconState.DONE;
+                }
+                break;
+            case DONE:
+                break;
+        }
         if (gamepad1.start) {
             currentMove = MoveState.START1;
         }
 
         telemetry.addData("Text", "*** Robot Data***");
+        telemetry.addData("redStart", redStartLeft);
+        telemetry.addData("redEnd", redEndLeft);
+        telemetry.addData("blueStart", blueStartLeft);
+        telemetry.addData("blueEnd", blueEndLeft);
         telemetry.addData("ENCLeft", (float) motorLeft.getCurrentPosition());
         telemetry.addData("TGTleft", (float) leftTarget);
         telemetry.addData("ENCRight", (float) motorRight.getCurrentPosition());
