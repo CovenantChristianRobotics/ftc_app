@@ -11,7 +11,7 @@ import java.util.Date;
  */
 public class TestAutonomous extends OpMode {
     enum MoveState {
-        START1, DELAY, DELAY1, DELAY2, STARTMOVE, MOVING, START2, START3, FINDRED, DONE
+        DELAY, STARTMOVE, MOVING, START1, START2, START3, START4, START5, DELAY1, DELAY2, DELAY3, DELAY4, DONE
     }
 
     enum BeaconState {
@@ -70,7 +70,7 @@ public class TestAutonomous extends OpMode {
         return centimetersToCounts(oneDegree * degrees);
     }
 
-    void moveStraight(int distanceCM, double speed) {
+    void moveStraight(double distanceCM, double speed) {
         int rightTarget;
         int leftTarget;
 
@@ -92,9 +92,9 @@ public class TestAutonomous extends OpMode {
         int rightTarget;
         int leftTarget;
 
-        leftTarget = motorLeft.getCurrentPosition() + degreesToCounts(degrees);
+        leftTarget = motorLeft.getCurrentPosition() - degreesToCounts(degrees);
         motorLeft.setTargetPosition(leftTarget);
-        rightTarget = motorRight.getCurrentPosition() - degreesToCounts(degrees);
+        rightTarget = motorRight.getCurrentPosition() + degreesToCounts(degrees);
         motorRight.setTargetPosition(rightTarget);
         motorLeft.setPower(speed);
         motorRight.setPower(speed);
@@ -110,7 +110,7 @@ public class TestAutonomous extends OpMode {
         //Gyro = hardwareMap.gyroSensor.get("GyroSense");
         OpticalDistance = hardwareMap.opticalDistanceSensor.get("opDistance");
         //IrSense = hardwareMap.irSeekerSensor.get("IRSense");
-        motorLeft.setDirection(DcMotor.Direction.REVERSE);
+        motorRight.setDirection(DcMotor.Direction.REVERSE);
         motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         currentMove = MoveState.START1;
@@ -123,19 +123,6 @@ public class TestAutonomous extends OpMode {
     public void loop() {
 
         switch (currentMove) {
-            case START1:
-                moveStraight(80, 0.5);
-                currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DELAY1;
-                break;
-
-            case DELAY1:
-                now = new Date();
-                delayUntil = now.getTime() + 100;
-                currentMove = MoveState.DELAY;
-                nextMove = MoveState.START2;
-                break;
-
             case DELAY:
                 now = new Date();
                 if (now.getTime() >= delayUntil) {
@@ -150,13 +137,31 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case MOVING:
+                if (ColorSense.red() >= 1) {
+                    motorRight.setPower(0.0);
+                    motorLeft.setPower(0.0);
+                    currentMove = nextMove;
+                }
                 if (!motorLeft.isBusy() && !motorRight.isBusy()) {
                     currentMove = nextMove;
                 }
                 break;
 
+            case START1:
+                moveStraight(85.0, 0.5);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DELAY1;
+                break;
+
+            case DELAY1:
+                now = new Date();
+                delayUntil = now.getTime() + 100;
+                currentMove = MoveState.DELAY;
+                nextMove = MoveState.START2;
+                break;
+
             case START2:
-                moveTurn(90.0, 0.5);
+                moveTurn(45.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DELAY2;
                 break;
@@ -169,15 +174,33 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case START3:
-                moveStraight(160, 0.5);
+                moveStraight(266.7, 0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.FINDRED;
-                redState = BeaconState.LOOKING_START;
-                blueState = BeaconState.LOOKING_START;
+                nextMove = MoveState.DELAY3;
                 break;
 
-            case FINDRED:
-                moveStraight((int)countsToCentimeters(-(motorLeft.getCurrentPosition() - ((redStartLeft + redEndLeft) / 2))), 0.5);
+            case DELAY3:
+                now = new Date();
+                delayUntil = now.getTime() + 100;
+                currentMove = MoveState.DELAY;
+                nextMove = MoveState.START4;
+                break;
+
+            case START4:
+                moveTurn(-45.0, 0.5);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DELAY4;
+                break;
+
+            case DELAY4:
+                now = new Date();
+                delayUntil = now.getTime() + 100;
+                currentMove = MoveState.DELAY;
+                nextMove = MoveState.START5;
+                break;
+
+            case START5:
+                moveStraight(-91.4, 0.5);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
                 break;
