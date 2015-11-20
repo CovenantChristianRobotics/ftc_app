@@ -11,7 +11,8 @@ import java.util.Date;
  */
 public class TestAutonomous extends OpMode {
     enum MoveState {
-        DELAY, STARTMOVE, MOVING, START1, START2, START3, START4, START5, DELAY1, DELAY2, DELAY3, DELAY4, DONE
+        DELAY, STARTMOVE, MOVING, START1, START2, START3, START4, START5,START6,
+        START7, START8, DELAY1, DELAY2, DELAY3, DELAY4, DELAY5, DELAY6, DELAY7, DONE
     }
 
     enum BeaconState {
@@ -32,10 +33,11 @@ public class TestAutonomous extends OpMode {
     ColorSensor ColorSense;
     //GyroSensor Gyro;
     //IrSeekerSensor IrSense;
-    OpticalDistanceSensor OpticalDistance;
+    //OpticalDistanceSensor OpticalDistance;
     MoveState currentMove;
     MoveState nextMove;
     BeaconState redState;
+    boolean lookingForRedFlag;
     //double[][][] beaconLocation;
     int redStartRight;
     int redStartLeft;
@@ -61,7 +63,7 @@ public class TestAutonomous extends OpMode {
     double countsToCentimeters(int counts) {
         double wheelDiameter = 10.1;
         double encoderCounts = 1120.0;
-        return (((double)counts / encoderCounts) * (wheelDiameter * Math.PI));
+        return (((double) counts / encoderCounts) * (wheelDiameter * Math.PI));
     }
 
     int degreesToCounts(double degrees) {
@@ -108,7 +110,7 @@ public class TestAutonomous extends OpMode {
         ColorSense = hardwareMap.colorSensor.get("color");
         ColorSense.enableLed(true);
         //Gyro = hardwareMap.gyroSensor.get("GyroSense");
-        OpticalDistance = hardwareMap.opticalDistanceSensor.get("opDistance");
+        //OpticalDistance = hardwareMap.opticalDistanceSensor.get("opDistance");
         //IrSense = hardwareMap.irSeekerSensor.get("IRSense");
         motorRight.setDirection(DcMotor.Direction.REVERSE);
         motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
@@ -116,6 +118,7 @@ public class TestAutonomous extends OpMode {
         currentMove = MoveState.START1;
         redState = BeaconState.NOT_LOOKING;
         blueState = BeaconState.NOT_LOOKING;
+        lookingForRedFlag = false;
         //beaconLocation = new double[2][2][2];
     }
 
@@ -137,7 +140,7 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case MOVING:
-                if (ColorSense.red() >= 1) {
+                if ((ColorSense.red() >= 1) && lookingForRedFlag) {
                     motorRight.setPower(0.0);
                     motorLeft.setPower(0.0);
                     currentMove = nextMove;
@@ -148,7 +151,7 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case START1:
-                moveStraight(85.0, 0.5);
+                moveStraight(80.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DELAY1;
                 break;
@@ -174,7 +177,7 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case START3:
-                moveStraight(266.7, 0.5);
+                moveStraight(259.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DELAY3;
                 break;
@@ -200,7 +203,48 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case START5:
-                moveStraight(-91.4, 0.5);
+                moveStraight(-122.0, 0.5);
+                lookingForRedFlag = true;
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DELAY5;
+                break;
+
+            case DELAY5:
+                lookingForRedFlag = false;
+                now = new Date();
+                delayUntil = now.getTime() + 1000;
+                currentMove = MoveState.DELAY;
+                nextMove = MoveState.START6;
+                break;
+
+            case START6:
+                moveTurn(50.0, 0.5);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DELAY6;
+                break;
+
+            case DELAY6:
+                now = new Date();
+                delayUntil = now.getTime() + 100;
+                currentMove = MoveState.DELAY;
+                nextMove = MoveState.START7;
+                break;
+
+            case START7:
+                moveStraight(-103.0, 0.5);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DELAY7;
+                break;
+
+            case DELAY7:
+                now = new Date();
+                delayUntil = now.getTime() + 100;
+                currentMove = MoveState.DELAY;
+                nextMove = MoveState.START8;
+                break;
+
+            case START8:
+                moveTurn(-101.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
                 break;
@@ -256,12 +300,8 @@ public class TestAutonomous extends OpMode {
 
         telemetry.addData("Text", "*** Robot Data***");
         telemetry.addData("Text", "Look for Red");
-        telemetry.addData("RedStart", redStartLeft);
-        telemetry.addData("RedEnd", redEndLeft);
-        telemetry.addData("BlueStart", blueStartLeft);
-        telemetry.addData("BlueEnd", blueEndLeft);
+        telemetry.addData("Color", (float) ColorSense.red());
         //telemetry.addData("GyroSense", (float) Gyro.getRotation());
-        telemetry.addData("OpticalSense", (float) OpticalDistance.getLightDetectedRaw());
         telemetry.addData("ENCLeft", (float) motorLeft.getCurrentPosition());
         telemetry.addData("ENCRight", (float) motorRight.getCurrentPosition());
     }
@@ -270,3 +310,4 @@ public class TestAutonomous extends OpMode {
     public void stop() {
     }
 }
+

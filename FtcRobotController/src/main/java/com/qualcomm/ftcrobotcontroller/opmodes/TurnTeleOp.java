@@ -58,13 +58,13 @@ public class TurnTeleOp extends OpMode {
 
     @Override
     public void init() {
-        driveTrainController = hardwareMap.dcMotorController.get("dtController");
-        motorRight = hardwareMap.dcMotor.get("motor_right");
-        motorLeft = hardwareMap.dcMotor.get("motor_left");
-        ColorSense = hardwareMap.colorSensor.get("ColorSense");
-        ColorSense.enableLed(true);
+        driveTrainController = hardwareMap.dcMotorController.get("dtCtlr");
+        motorRight = hardwareMap.dcMotor.get("motorRight");
+        motorLeft = hardwareMap.dcMotor.get("motorLeft");
+        ColorSense = hardwareMap.colorSensor.get("color");
+        ColorSense.enableLed(false);
         IrSense = hardwareMap.irSeekerSensor.get("IRSense");
-        motorLeft     .setDirection(DcMotor.Direction.REVERSE);
+        motorLeft.setDirection(DcMotor.Direction.REVERSE);
         motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         currentMove = MoveState.START1;
