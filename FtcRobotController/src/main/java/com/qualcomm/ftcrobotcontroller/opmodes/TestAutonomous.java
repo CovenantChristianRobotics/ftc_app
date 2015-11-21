@@ -15,39 +15,13 @@ public class TestAutonomous extends OpMode {
         START7, START8, DELAY1, DELAY2, DELAY3, DELAY4, DELAY5, DELAY6, DELAY7, DONE
     }
 
-    enum BeaconState {
-        NOT_LOOKING, LOOKING_START, LOOKING_END, DONE
-    }
-
-//    enum BeaconColor {
-//        RED, BLUE
-//    }
-//
-//    enum RobotSide {
-//        LEFT, RIGHT
-//    }
-
     DcMotorController driveTrainController;
     DcMotor motorRight;
     DcMotor motorLeft;
     ColorSensor ColorSense;
-    //GyroSensor Gyro;
-    //IrSeekerSensor IrSense;
-    //OpticalDistanceSensor OpticalDistance;
     MoveState currentMove;
     MoveState nextMove;
-    BeaconState redState;
     boolean lookingForRedFlag;
-    //double[][][] beaconLocation;
-    int redStartRight;
-    int redStartLeft;
-    int redEndRight;
-    int redEndLeft;
-    BeaconState blueState;
-    int blueStartRight;
-    int blueStartLeft;
-    int blueEndRight;
-    int blueEndLeft;
     long delayUntil;
     Date now;
 
@@ -109,17 +83,11 @@ public class TestAutonomous extends OpMode {
         motorLeft = hardwareMap.dcMotor.get("motorL");
         ColorSense = hardwareMap.colorSensor.get("color");
         ColorSense.enableLed(true);
-        //Gyro = hardwareMap.gyroSensor.get("GyroSense");
-        //OpticalDistance = hardwareMap.opticalDistanceSensor.get("opDistance");
-        //IrSense = hardwareMap.irSeekerSensor.get("IRSense");
         motorRight.setDirection(DcMotor.Direction.REVERSE);
         motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         currentMove = MoveState.START1;
-        redState = BeaconState.NOT_LOOKING;
-        blueState = BeaconState.NOT_LOOKING;
         lookingForRedFlag = false;
-        //beaconLocation = new double[2][2][2];
     }
 
     @Override
@@ -254,46 +222,7 @@ public class TestAutonomous extends OpMode {
                 motorRight.setPower(0.0);
                 break;
         }
-        switch (redState) {
-            case NOT_LOOKING:
-                break;
-            case LOOKING_START:
-                if (ColorSense.red() >= 1) {
-                    redStartLeft = motorLeft.getCurrentPosition();
-                    redStartRight = motorRight.getCurrentPosition();
-                    redState = BeaconState.LOOKING_END;
-                }
-                break;
-            case LOOKING_END:
-                if (ColorSense.red() == 0) {
-                    redEndLeft = motorLeft.getCurrentPosition();
-                    redEndRight = motorRight.getCurrentPosition();
-                    redState = BeaconState.DONE;
-                }
-                break;
-            case DONE:
-                break;
-        }
-        switch (blueState) {
-            case NOT_LOOKING:
-                break;
-            case LOOKING_START:
-                if (ColorSense.blue() >= 1) {
-                    blueStartLeft = motorLeft.getCurrentPosition();
-                    blueStartRight = motorRight.getCurrentPosition();
-                    blueState = BeaconState.LOOKING_END;
-                }
-                break;
-            case LOOKING_END:
-                if (ColorSense.blue() == 0) {
-                    blueEndLeft = motorLeft.getCurrentPosition();
-                    blueEndRight = motorRight.getCurrentPosition();
-                    blueState = BeaconState.DONE;
-                }
-                break;
-            case DONE:
-                break;
-        }
+
         if (gamepad1.start) {
             currentMove = MoveState.START1;
         }
@@ -301,7 +230,6 @@ public class TestAutonomous extends OpMode {
         telemetry.addData("Text", "*** Robot Data***");
         telemetry.addData("Text", "Look for Red");
         telemetry.addData("Color", (float) ColorSense.red());
-        //telemetry.addData("GyroSense", (float) Gyro.getRotation());
         telemetry.addData("ENCLeft", (float) motorLeft.getCurrentPosition());
         telemetry.addData("ENCRight", (float) motorRight.getCurrentPosition());
     }
