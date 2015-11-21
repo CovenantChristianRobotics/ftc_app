@@ -3,16 +3,16 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
-import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
+import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import java.util.Date;
-
 /**
  * Created by cchsrobochargers on 11/14/15.
  */
 public class TestAutonomous extends OpMode {
     enum MoveState {
-        DELAY, STARTMOVE, MOVING, MOVEDELAY, START1, START2, START3, START4, START5,START6,
-        START7, START8, DONE
+        DELAY, STARTMOVE, MOVING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
+        FINDBEACON, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, DONE
     }
 
     DcMotorController driveTrainController;
@@ -23,8 +23,11 @@ public class TestAutonomous extends OpMode {
     MoveState nextMove;
     long moveDelayTime;
     boolean lookingForRedFlag;
+    boolean lookingForWallFlag;
     long delayUntil;
     Date now;
+    GyroSensor gyroSense;
+    UltrasonicSensor ultraSense;
 
     public TestAutonomous() {
     }
@@ -87,15 +90,22 @@ public class TestAutonomous extends OpMode {
         motorRight.setDirection(DcMotor.Direction.REVERSE);
         motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        currentMove = MoveState.START1;
+        currentMove = MoveState.FIRSTMOVE;
         lookingForRedFlag = false;
+        lookingForWallFlag = false;
+        gyroSense = hardwareMap.gyroSensor.get("gyro");
+        gyroSense.calibrate();
+        while (gyroSense.isCalibrating()) {
+        }
+        ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
     }
 
     @Override
     public void loop() {
-
+        if (gyroSense.isCalibrating()) {
+            return;
+        }
         switch (currentMove) {
-
 
             case STARTMOVE:
                 if (motorLeft.isBusy() && motorRight.isBusy()) {
@@ -104,7 +114,13 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case MOVING:
-                if ((ColorSense.red() >= 1) && lookingForRedFlag) {
+                if (lookingForRedFlag && (ColorSense.red() >= 1))  {
+                    motorRight.setPower(0.0);
+                    motorLeft.setPower(0.0);
+                    currentMove = MoveState.MOVEDELAY;
+                }
+                if (lookingForWallFlag &&
+                        (ultraSense.getUltrasonicLevel() > 15) && (ultraSense.getUltrasonicLevel() <= 20)) {
                     motorRight.setPower(0.0);
                     motorLeft.setPower(0.0);
                     currentMove = MoveState.MOVEDELAY;
@@ -127,58 +143,68 @@ public class TestAutonomous extends OpMode {
                 }
                 break;
 
-            case START1:
+            case FIRSTMOVE:
                 moveStraight(80.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.START2;
+                nextMove = MoveState.TURNDIAG;
                 moveDelayTime = 100;
                 break;
 
-            case START2:
+            case TURNDIAG:
                 moveTurn(45.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.START3;
+                nextMove = MoveState.MOVEDIAG;
                 moveDelayTime = 100;
                 break;
 
-            case START3:
+            case MOVEDIAG:
                 moveStraight(259.0, 0.5);
+                lookingForWallFlag = true;
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.START4;
+                nextMove = MoveState.TURNALONGWALL;
                 moveDelayTime = 100;
                 break;
 
-            case START4:
-                moveTurn(-45.0, 0.5);
+            case FINDWALL:
+                moveStraight(40.0, 0.5);
+                lookingForWallFlag = true;
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.START5;
-                moveDelayTime = 100;
-                break;
-
-            case START5:
-                moveStraight(-122.0, 0.5);
-                lookingForRedFlag = true;
-                currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.START6;
+                nextMove = MoveState.TURNALONGWALL;
                 moveDelayTime = 1000;
                 break;
 
-            case START6:
+            case TURNALONGWALL:
+                moveTurn(-45.0, 0.5);
+                lookingForWallFlag = false;
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.FINDBEACON;
+                moveDelayTime = 100;
+                break;
+
+            case FINDBEACON:
+                moveStraight(-122.0, 0.5);
+                lookingForRedFlag = true;
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.ROTATEFROMBEACON;
+                moveDelayTime = 2000;
+                break;
+
+            case ROTATEFROMBEACON:
                 moveTurn(50.0, 0.5);
                 lookingForRedFlag = false;
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.START7;
+                nextMove = MoveState.MOVETORAMP;
                 moveDelayTime = 100;
                 break;
 
-            case START7:
+            case MOVETORAMP:
                 moveStraight(-103.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.START8;
+                nextMove = MoveState.TURNTORAMP;
                 moveDelayTime = 100;
                 break;
 
-            case START8:
+            case TURNTORAMP:
                 moveTurn(-101.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
@@ -191,14 +217,14 @@ public class TestAutonomous extends OpMode {
         }
 
         if (gamepad1.start) {
-            currentMove = MoveState.START1;
+            currentMove = MoveState.FIRSTMOVE;
         }
 
         telemetry.addData("Text", "*** Robot Data***");
         telemetry.addData("Text", "Look for Red");
         telemetry.addData("Color", (float) ColorSense.red());
-        telemetry.addData("ENCLeft", (float) motorLeft.getCurrentPosition());
-        telemetry.addData("ENCRight", (float) motorRight.getCurrentPosition());
+        telemetry.addData("gyro", (float) gyroSense.getHeading());
+        telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
     }
 
     @Override
