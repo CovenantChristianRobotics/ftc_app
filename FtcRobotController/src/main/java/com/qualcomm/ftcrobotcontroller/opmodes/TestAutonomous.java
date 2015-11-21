@@ -11,8 +11,8 @@ import java.util.Date;
  */
 public class TestAutonomous extends OpMode {
     enum MoveState {
-        DELAY, STARTMOVE, MOVING, START1, START2, START3, START4, START5,START6,
-        START7, START8, DELAY1, DELAY2, DELAY3, DELAY4, DELAY5, DELAY6, DELAY7, DONE
+        DELAY, STARTMOVE, MOVING, MOVEDELAY, START1, START2, START3, START4, START5,START6,
+        START7, START8, DONE
     }
 
     DcMotorController driveTrainController;
@@ -21,6 +21,7 @@ public class TestAutonomous extends OpMode {
     ColorSensor ColorSense;
     MoveState currentMove;
     MoveState nextMove;
+    long moveDelayTime;
     boolean lookingForRedFlag;
     long delayUntil;
     Date now;
@@ -94,12 +95,7 @@ public class TestAutonomous extends OpMode {
     public void loop() {
 
         switch (currentMove) {
-            case DELAY:
-                now = new Date();
-                if (now.getTime() >= delayUntil) {
-                    currentMove = nextMove;
-                }
-                break;
+
 
             case STARTMOVE:
                 if (motorLeft.isBusy() && motorRight.isBusy()) {
@@ -111,9 +107,22 @@ public class TestAutonomous extends OpMode {
                 if ((ColorSense.red() >= 1) && lookingForRedFlag) {
                     motorRight.setPower(0.0);
                     motorLeft.setPower(0.0);
-                    currentMove = nextMove;
+                    currentMove = MoveState.MOVEDELAY;
                 }
                 if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+                    currentMove = MoveState.MOVEDELAY;
+                }
+                break;
+
+            case MOVEDELAY:
+                now = new Date();
+                delayUntil = now.getTime() + moveDelayTime;
+                currentMove = MoveState.DELAY;
+                break;
+
+            case DELAY:
+                now = new Date();
+                if (now.getTime() >= delayUntil) {
                     currentMove = nextMove;
                 }
                 break;
@@ -121,94 +130,52 @@ public class TestAutonomous extends OpMode {
             case START1:
                 moveStraight(80.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DELAY1;
-                break;
-
-            case DELAY1:
-                now = new Date();
-                delayUntil = now.getTime() + 100;
-                currentMove = MoveState.DELAY;
                 nextMove = MoveState.START2;
+                moveDelayTime = 100;
                 break;
 
             case START2:
                 moveTurn(45.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DELAY2;
-                break;
-
-            case DELAY2:
-                now = new Date();
-                delayUntil = now.getTime() + 100;
-                currentMove = MoveState.DELAY;
                 nextMove = MoveState.START3;
+                moveDelayTime = 100;
                 break;
 
             case START3:
                 moveStraight(259.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DELAY3;
-                break;
-
-            case DELAY3:
-                now = new Date();
-                delayUntil = now.getTime() + 100;
-                currentMove = MoveState.DELAY;
                 nextMove = MoveState.START4;
+                moveDelayTime = 100;
                 break;
 
             case START4:
                 moveTurn(-45.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DELAY4;
-                break;
-
-            case DELAY4:
-                now = new Date();
-                delayUntil = now.getTime() + 100;
-                currentMove = MoveState.DELAY;
                 nextMove = MoveState.START5;
+                moveDelayTime = 100;
                 break;
 
             case START5:
                 moveStraight(-122.0, 0.5);
                 lookingForRedFlag = true;
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DELAY5;
-                break;
-
-            case DELAY5:
-                lookingForRedFlag = false;
-                now = new Date();
-                delayUntil = now.getTime() + 1000;
-                currentMove = MoveState.DELAY;
                 nextMove = MoveState.START6;
+                moveDelayTime = 1000;
                 break;
 
             case START6:
                 moveTurn(50.0, 0.5);
+                lookingForRedFlag = false;
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DELAY6;
-                break;
-
-            case DELAY6:
-                now = new Date();
-                delayUntil = now.getTime() + 100;
-                currentMove = MoveState.DELAY;
                 nextMove = MoveState.START7;
+                moveDelayTime = 100;
                 break;
 
             case START7:
                 moveStraight(-103.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DELAY7;
-                break;
-
-            case DELAY7:
-                now = new Date();
-                delayUntil = now.getTime() + 100;
-                currentMove = MoveState.DELAY;
                 nextMove = MoveState.START8;
+                moveDelayTime = 100;
                 break;
 
             case START8:
