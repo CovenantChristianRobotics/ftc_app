@@ -16,7 +16,14 @@ public class CCHS5256Autonomous extends OpMode {
         SERVO_CLIMBER_RELEASER_pMOVEMENT, SERVO_BEACON_PUSHER_nMOVEMENT, SERVO_BEACON_PINION_nMOVEMENT, SERVO_CLIMBER_DUMPER_nMOVEMENT,
         SERVO_CLIMBER_RELEASER_nMOVEMENT,START1, START2, START3, START4, START5, START6, START7, START8, DELAY1, DELAY2, DELAY3,
         DELAY4, DELAY5, DELAY6, DELAY7, DELAY8, DELAY9, DELAY10, DELAY11, DELAY12, ALIGN_PRESSER, PRESS_BUTTON, TIP_CLIMBERS, RELEASE_CLIMBERS, ALIGN_DUMPER, DRIVE_TO_POSITION,DONE
+
     }
+
+    enum MoveState {
+        DELAY, STARTMOVE, MOVING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
+        FINDBEACON, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, DONE
+    }
+
 
 //    enum BeaconState {
 //        NOT_LOOKING, LOOKING_START, LOOKING_END, DONE
@@ -201,6 +208,118 @@ public class CCHS5256Autonomous extends OpMode {
         servoBeaconPusher.setPosition(beaconPusherPosition);
         servoClimberReleaser.setPosition(climberReleaserPosition);
         servoClimberDumper.setPosition(climberDumperPosition);
+
+        @Override
+        public void loop() {
+            double distanceToWall;
+
+            if (gyroSense.isCalibrating()) {
+                return;
+            }
+            switch (currentMove) {
+
+                case STARTMOVE:
+                    if (motorLeft.isBusy() && motorRight.isBusy()) {
+                        currentMove = MoveState.MOVING;
+                    }
+                    break;
+
+                case MOVING:
+                    if (lookingForRedFlag && (ColorSense.red() >= 1))  {
+                        motorRight.setPower(0.0);
+                        motorLeft.setPower(0.0);
+                        currentMove = MoveState.MOVEDELAY;
+                    }
+                    if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+                        currentMove = MoveState.MOVEDELAY;
+                    }
+                    break;
+
+                case MOVEDELAY:
+                    now = new Date();
+                    delayUntil = now.getTime() + moveDelayTime;
+                    currentMove = MoveState.DELAY;
+                    break;
+
+                case DELAY:
+                    now = new Date();
+                    if (now.getTime() >= delayUntil) {
+                        currentMove = nextMove;
+                    }
+                    break;
+
+                case FIRSTMOVE:
+                    moveStraight(80.0, 0.5);
+                    currentMove = MoveState.STARTMOVE;
+                    nextMove = MoveState.TURNDIAG;
+                    moveDelayTime = 100;
+                    break;
+
+                case TURNDIAG:
+                    moveTurn(45.0, 0.5);
+                    currentMove = MoveState.STARTMOVE;
+                    nextMove = MoveState.MOVEDIAG;
+                    moveDelayTime = 100;
+                    break;
+
+                case MOVEDIAG:
+                    moveStraight(219.0, 0.5);
+                    currentMove = MoveState.STARTMOVE;
+                    nextMove = MoveState.FINDWALL;
+                    moveDelayTime = 1000;
+                    break;
+
+                case FINDWALL:
+                    distanceToWall = ultraSense.getUltrasonicLevel();
+                    if ((distanceToWall > 30.0) && (distanceToWall <= 70.0)) {
+                        moveStraight((distanceToWall - 15.0) * 1.414, 0.5);
+                        currentMove = MoveState.STARTMOVE;
+                        nextMove = MoveState.TURNALONGWALL;
+                        moveDelayTime = 1000;
+                    }
+                    break;
+
+                case TURNALONGWALL:
+                    moveTurn(-45.0, 0.5);
+                    currentMove = MoveState.STARTMOVE;
+                    nextMove = MoveState.FINDBEACON;
+                    moveDelayTime = 100;
+                    break;
+
+                case FINDBEACON:
+                    moveStraight(-122.0, 0.5);
+                    lookingForRedFlag = true;
+                    currentMove = MoveState.STARTMOVE;
+                    nextMove = MoveState.ROTATEFROMBEACON;
+                    moveDelayTime = 2000;
+                    break;
+
+                case ROTATEFROMBEACON:
+                    moveTurn(50.0, 0.5);
+                    lookingForRedFlag = false;
+                    currentMove = MoveState.STARTMOVE;
+                    nextMove = MoveState.MOVETORAMP;
+                    moveDelayTime = 100;
+                    break;
+
+                case MOVETORAMP:
+                    moveStraight(-103.0, 0.5);
+                    currentMove = MoveState.STARTMOVE;
+                    nextMove = MoveState.TURNTORAMP;
+                    moveDelayTime = 100;
+                    break;
+
+                case TURNTORAMP:
+                    moveTurn(-101.0, 0.5);
+                    currentMove = MoveState.STARTMOVE;
+                    nextMove = MoveState.DONE;
+                    break;
+
+                case DONE:
+                    motorLeft.setPower(0.0);
+                    motorRight.setPower(0.0);
+                    break;
+            }
 
         switch (currentMove) {
             case DELAY:
