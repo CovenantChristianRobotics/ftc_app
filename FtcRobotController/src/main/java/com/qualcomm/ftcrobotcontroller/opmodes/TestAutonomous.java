@@ -23,6 +23,7 @@ public class TestAutonomous extends OpMode {
     MoveState nextMove;
     long moveDelayTime;
     boolean lookingForRedFlag;
+    boolean sawBlueFlag;
     long delayUntil;
     Date now;
     GyroSensor gyroSense;
@@ -91,6 +92,7 @@ public class TestAutonomous extends OpMode {
         motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         currentMove = MoveState.FIRSTMOVE;
         lookingForRedFlag = false;
+        sawBlueFlag = false;
         gyroSense = hardwareMap.gyroSensor.get("gyro");
         gyroSense.calibrate();
         while (gyroSense.isCalibrating()) {
@@ -114,6 +116,9 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case MOVING:
+                if (ColorSense.blue() >= 1) {
+                    sawBlueFlag = true;
+                }
                 if (lookingForRedFlag && (ColorSense.red() >= 1))  {
                     motorRight.setPower(0.0);
                     motorLeft.setPower(0.0);
@@ -192,7 +197,11 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case MOVETORAMP:
-                moveStraight(-103.0, 0.5);
+                if (sawBlueFlag) {
+                    moveStraight(-103.0, 0.5);
+                } else {
+                    moveStraight(-113.0,0.5);
+                }
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNTORAMP;
                 moveDelayTime = 100;
