@@ -3,53 +3,30 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
-import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
+import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import java.util.Date;
-
 /**
  * Created by cchsrobochargers on 11/14/15.
  */
 public class TestAutonomous extends OpMode {
     enum MoveState {
-        DELAY, STARTMOVE, MOVING, START1, START2, START3, START4, START5,START6,
-        START7, START8, DELAY1, DELAY2, DELAY3, DELAY4, DELAY5, DELAY6, DELAY7, DONE
+        DELAY, STARTMOVE, MOVING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
+        FINDBEACON, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, DONE
     }
-
-    enum BeaconState {
-        NOT_LOOKING, LOOKING_START, LOOKING_END, DONE
-    }
-
-//    enum BeaconColor {
-//        RED, BLUE
-//    }
-//
-//    enum RobotSide {
-//        LEFT, RIGHT
-//    }
 
     DcMotorController driveTrainController;
     DcMotor motorRight;
     DcMotor motorLeft;
     ColorSensor ColorSense;
-    //GyroSensor Gyro;
-    //IrSeekerSensor IrSense;
-    //OpticalDistanceSensor OpticalDistance;
     MoveState currentMove;
     MoveState nextMove;
-    BeaconState redState;
+    long moveDelayTime;
     boolean lookingForRedFlag;
-    //double[][][] beaconLocation;
-    int redStartRight;
-    int redStartLeft;
-    int redEndRight;
-    int redEndLeft;
-    BeaconState blueState;
-    int blueStartRight;
-    int blueStartLeft;
-    int blueEndRight;
-    int blueEndLeft;
     long delayUntil;
     Date now;
+    GyroSensor gyroSense;
+    UltrasonicSensor ultraSense;
 
     public TestAutonomous() {
     }
@@ -109,29 +86,26 @@ public class TestAutonomous extends OpMode {
         motorLeft = hardwareMap.dcMotor.get("motorL");
         ColorSense = hardwareMap.colorSensor.get("color");
         ColorSense.enableLed(true);
-        //Gyro = hardwareMap.gyroSensor.get("GyroSense");
-        //OpticalDistance = hardwareMap.opticalDistanceSensor.get("opDistance");
-        //IrSense = hardwareMap.irSeekerSensor.get("IRSense");
         motorRight.setDirection(DcMotor.Direction.REVERSE);
         motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        currentMove = MoveState.START1;
-        redState = BeaconState.NOT_LOOKING;
-        blueState = BeaconState.NOT_LOOKING;
+        currentMove = MoveState.FIRSTMOVE;
         lookingForRedFlag = false;
-        //beaconLocation = new double[2][2][2];
+        gyroSense = hardwareMap.gyroSensor.get("gyro");
+        gyroSense.calibrate();
+        while (gyroSense.isCalibrating()) {
+        }
+        ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
     }
 
     @Override
     public void loop() {
+        double distanceToWall;
 
+        if (gyroSense.isCalibrating()) {
+            return;
+        }
         switch (currentMove) {
-            case DELAY:
-                now = new Date();
-                if (now.getTime() >= delayUntil) {
-                    currentMove = nextMove;
-                }
-                break;
 
             case STARTMOVE:
                 if (motorLeft.isBusy() && motorRight.isBusy()) {
@@ -140,110 +114,91 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case MOVING:
-                if ((ColorSense.red() >= 1) && lookingForRedFlag) {
+                if (lookingForRedFlag && (ColorSense.red() >= 1))  {
                     motorRight.setPower(0.0);
                     motorLeft.setPower(0.0);
-                    currentMove = nextMove;
+                    currentMove = MoveState.MOVEDELAY;
                 }
                 if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+                    currentMove = MoveState.MOVEDELAY;
+                }
+                break;
+
+            case MOVEDELAY:
+                now = new Date();
+                delayUntil = now.getTime() + moveDelayTime;
+                currentMove = MoveState.DELAY;
+                break;
+
+            case DELAY:
+                now = new Date();
+                if (now.getTime() >= delayUntil) {
                     currentMove = nextMove;
                 }
                 break;
 
-            case START1:
+            case FIRSTMOVE:
                 moveStraight(80.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DELAY1;
+                nextMove = MoveState.TURNDIAG;
+                moveDelayTime = 100;
                 break;
 
-            case DELAY1:
-                now = new Date();
-                delayUntil = now.getTime() + 100;
-                currentMove = MoveState.DELAY;
-                nextMove = MoveState.START2;
-                break;
-
-            case START2:
+            case TURNDIAG:
                 moveTurn(45.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DELAY2;
+                nextMove = MoveState.MOVEDIAG;
+                moveDelayTime = 100;
                 break;
 
-            case DELAY2:
-                now = new Date();
-                delayUntil = now.getTime() + 100;
-                currentMove = MoveState.DELAY;
-                nextMove = MoveState.START3;
-                break;
-
-            case START3:
-                moveStraight(259.0, 0.5);
+            case MOVEDIAG:
+                moveStraight(219.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DELAY3;
+                nextMove = MoveState.FINDWALL;
+                moveDelayTime = 1000;
                 break;
 
-            case DELAY3:
-                now = new Date();
-                delayUntil = now.getTime() + 100;
-                currentMove = MoveState.DELAY;
-                nextMove = MoveState.START4;
+            case FINDWALL:
+                distanceToWall = ultraSense.getUltrasonicLevel();
+                if ((distanceToWall > 30.0) && (distanceToWall <= 70.0)) {
+                    moveStraight((distanceToWall - 15.0) * 1.414, 0.5);
+                    currentMove = MoveState.STARTMOVE;
+                    nextMove = MoveState.TURNALONGWALL;
+                    moveDelayTime = 1000;
+                }
                 break;
 
-            case START4:
+            case TURNALONGWALL:
                 moveTurn(-45.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DELAY4;
+                nextMove = MoveState.FINDBEACON;
+                moveDelayTime = 100;
                 break;
 
-            case DELAY4:
-                now = new Date();
-                delayUntil = now.getTime() + 100;
-                currentMove = MoveState.DELAY;
-                nextMove = MoveState.START5;
-                break;
-
-            case START5:
+            case FINDBEACON:
                 moveStraight(-122.0, 0.5);
                 lookingForRedFlag = true;
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DELAY5;
+                nextMove = MoveState.ROTATEFROMBEACON;
+                moveDelayTime = 2000;
                 break;
 
-            case DELAY5:
-                lookingForRedFlag = false;
-                now = new Date();
-                delayUntil = now.getTime() + 1000;
-                currentMove = MoveState.DELAY;
-                nextMove = MoveState.START6;
-                break;
-
-            case START6:
+            case ROTATEFROMBEACON:
                 moveTurn(50.0, 0.5);
+                lookingForRedFlag = false;
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DELAY6;
+                nextMove = MoveState.MOVETORAMP;
+                moveDelayTime = 100;
                 break;
 
-            case DELAY6:
-                now = new Date();
-                delayUntil = now.getTime() + 100;
-                currentMove = MoveState.DELAY;
-                nextMove = MoveState.START7;
-                break;
-
-            case START7:
+            case MOVETORAMP:
                 moveStraight(-103.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DELAY7;
+                nextMove = MoveState.TURNTORAMP;
+                moveDelayTime = 100;
                 break;
 
-            case DELAY7:
-                now = new Date();
-                delayUntil = now.getTime() + 100;
-                currentMove = MoveState.DELAY;
-                nextMove = MoveState.START8;
-                break;
-
-            case START8:
+            case TURNTORAMP:
                 moveTurn(-101.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
@@ -254,56 +209,16 @@ public class TestAutonomous extends OpMode {
                 motorRight.setPower(0.0);
                 break;
         }
-        switch (redState) {
-            case NOT_LOOKING:
-                break;
-            case LOOKING_START:
-                if (ColorSense.red() >= 1) {
-                    redStartLeft = motorLeft.getCurrentPosition();
-                    redStartRight = motorRight.getCurrentPosition();
-                    redState = BeaconState.LOOKING_END;
-                }
-                break;
-            case LOOKING_END:
-                if (ColorSense.red() == 0) {
-                    redEndLeft = motorLeft.getCurrentPosition();
-                    redEndRight = motorRight.getCurrentPosition();
-                    redState = BeaconState.DONE;
-                }
-                break;
-            case DONE:
-                break;
-        }
-        switch (blueState) {
-            case NOT_LOOKING:
-                break;
-            case LOOKING_START:
-                if (ColorSense.blue() >= 1) {
-                    blueStartLeft = motorLeft.getCurrentPosition();
-                    blueStartRight = motorRight.getCurrentPosition();
-                    blueState = BeaconState.LOOKING_END;
-                }
-                break;
-            case LOOKING_END:
-                if (ColorSense.blue() == 0) {
-                    blueEndLeft = motorLeft.getCurrentPosition();
-                    blueEndRight = motorRight.getCurrentPosition();
-                    blueState = BeaconState.DONE;
-                }
-                break;
-            case DONE:
-                break;
-        }
+
         if (gamepad1.start) {
-            currentMove = MoveState.START1;
+            currentMove = MoveState.FIRSTMOVE;
         }
 
         telemetry.addData("Text", "*** Robot Data***");
         telemetry.addData("Text", "Look for Red");
         telemetry.addData("Color", (float) ColorSense.red());
-        //telemetry.addData("GyroSense", (float) Gyro.getRotation());
-        telemetry.addData("ENCLeft", (float) motorLeft.getCurrentPosition());
-        telemetry.addData("ENCRight", (float) motorRight.getCurrentPosition());
+        telemetry.addData("gyro", (float) gyroSense.getHeading());
+        telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
     }
 
     @Override
