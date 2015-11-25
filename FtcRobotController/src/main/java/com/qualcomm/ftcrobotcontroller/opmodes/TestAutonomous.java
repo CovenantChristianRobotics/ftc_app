@@ -12,7 +12,7 @@ import java.util.Date;
 public class TestAutonomous extends OpMode {
     enum MoveState {
         DELAY, STARTMOVE, MOVING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
-        FINDBEACON, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, DONE
+        FINDBEACON, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, UPRAMP, DONE
     }
 
     DcMotorController driveTrainController;
@@ -209,6 +209,13 @@ public class TestAutonomous extends OpMode {
 
             case TURNTORAMP:
                 moveTurn(-101.0, 0.5);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.UPRAMP;
+                moveDelayTime = 100;
+                break;
+
+            case UPRAMP:
+                moveStraight(-70.0, 0.3);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
                 break;

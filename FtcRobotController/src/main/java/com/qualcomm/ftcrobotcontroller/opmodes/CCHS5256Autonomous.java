@@ -361,7 +361,7 @@ public class CCHS5256Autonomous extends OpMode {
             case ALIGN_DUMPER:
                 ifRedOnBeacon = ColorSense.red();
                 servoBeaconPinion.setDirection(Servo.Direction.FORWARD);
-                servoBeaconPinion.setPosition(1.0);n
+                servoBeaconPinion.setPosition(1.0);
                 nextMove = MoveState.DELAY6;
                 break;
 
