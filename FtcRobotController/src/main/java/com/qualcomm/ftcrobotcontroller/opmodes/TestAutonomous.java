@@ -23,7 +23,6 @@ public class TestAutonomous extends OpMode {
     MoveState nextMove;
     long moveDelayTime;
     boolean lookingForRedFlag;
-    boolean lookingForWallFlag;
     long delayUntil;
     Date now;
     GyroSensor gyroSense;
@@ -92,7 +91,6 @@ public class TestAutonomous extends OpMode {
         motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         currentMove = MoveState.FIRSTMOVE;
         lookingForRedFlag = false;
-        lookingForWallFlag = false;
         gyroSense = hardwareMap.gyroSensor.get("gyro");
         gyroSense.calibrate();
         while (gyroSense.isCalibrating()) {
@@ -102,6 +100,8 @@ public class TestAutonomous extends OpMode {
 
     @Override
     public void loop() {
+        double distanceToWall;
+
         if (gyroSense.isCalibrating()) {
             return;
         }
@@ -115,12 +115,6 @@ public class TestAutonomous extends OpMode {
 
             case MOVING:
                 if (lookingForRedFlag && (ColorSense.red() >= 1))  {
-                    motorRight.setPower(0.0);
-                    motorLeft.setPower(0.0);
-                    currentMove = MoveState.MOVEDELAY;
-                }
-                if (lookingForWallFlag &&
-                        (ultraSense.getUltrasonicLevel() > 15) && (ultraSense.getUltrasonicLevel() <= 20)) {
                     motorRight.setPower(0.0);
                     motorLeft.setPower(0.0);
                     currentMove = MoveState.MOVEDELAY;
@@ -158,24 +152,24 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case MOVEDIAG:
-                moveStraight(259.0, 0.5);
-                lookingForWallFlag = true;
+                moveStraight(219.0, 0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.TURNALONGWALL;
-                moveDelayTime = 100;
+                nextMove = MoveState.FINDWALL;
+                moveDelayTime = 1000;
                 break;
 
             case FINDWALL:
-                moveStraight(40.0, 0.5);
-                lookingForWallFlag = true;
-                currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.TURNALONGWALL;
-                moveDelayTime = 1000;
+                distanceToWall = ultraSense.getUltrasonicLevel();
+                if ((distanceToWall > 30.0) && (distanceToWall <= 70.0)) {
+                    moveStraight((distanceToWall - 15.0) * 1.414, 0.5);
+                    currentMove = MoveState.STARTMOVE;
+                    nextMove = MoveState.TURNALONGWALL;
+                    moveDelayTime = 1000;
+                }
                 break;
 
             case TURNALONGWALL:
                 moveTurn(-45.0, 0.5);
-                lookingForWallFlag = false;
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDBEACON;
                 moveDelayTime = 100;
