@@ -154,7 +154,7 @@ public class SpareParts5256Autonomous extends OpMode {
                 break;
 
             case FIRSTMOVE:
-                moveStraight(80.0, speed);
+                moveStraight(73.0, speed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNDIAG;
                 moveDelayTime = delay;
@@ -168,7 +168,7 @@ public class SpareParts5256Autonomous extends OpMode {
                 break;
 
             case MOVEDIAG:
-                moveStraight(132.0, speed);
+                moveStraight(140.0, speed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNTOWARDSWALL;
                 moveDelayTime = delay;
@@ -207,7 +207,7 @@ public class SpareParts5256Autonomous extends OpMode {
                 break;
 
             case MOVETORAMP:
-                moveStraight(140.0, speed);
+                moveStraight(135.0, speed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
                 moveDelayTime = delay;
