@@ -45,6 +45,7 @@ public class CCHS5256Autonomous extends OpMode {
     Servo servoBeaconPinion;
     Servo servoBeaconPusher;
     Servo servoClimberDumper;
+    Servo servo1;
     //sensors
     ColorSensor ColorSense;
     OpticalDistanceSensor OpticalDistance;
@@ -199,14 +200,15 @@ public class CCHS5256Autonomous extends OpMode {
         motorRight = hardwareMap.dcMotor.get("motorR");
         motorLeft = hardwareMap.dcMotor.get("motorL");
         //servo controllers
-        beaconServos = hardwareMap.servoController.get("beaconCtlr");
+        beaconServos = hardwareMap.servoController.get("servoCtlr");
         //servos
         servoBeaconPinion = hardwareMap.servo.get("beacon_pinion");
         servoBeaconPusher = hardwareMap.servo.get("beacon_pusher");
         servoClimberDumper = hardwareMap.servo.get("climber_dumper");
+        servo1 = hardwareMap.servo.get("servo_1");
         //sensors
         ColorSense = hardwareMap.colorSensor.get("color");
-        ColorSense.enableLed(true);
+        ColorSense.enableLed(false);
         gyroSense = hardwareMap.gyroSensor.get("gyro");
         gyroSense.calibrate();
         while (gyroSense.isCalibrating()) {
@@ -223,8 +225,9 @@ public class CCHS5256Autonomous extends OpMode {
         sawBlueFlag = false;
         //servo positions
         moveBeaconPinion(0.0);
-        moveClimberDump(0.0);
-        moveBeaconPress(0.0);
+        moveClimberDump(1.0);
+        moveBeaconPress(1.0);
+        servo1.setPosition(0.25);
 
     }
 
@@ -324,7 +327,7 @@ public class CCHS5256Autonomous extends OpMode {
                     break;
 
                 case MOVEDIAG:
-                    moveStraight(219.0, 0.6);
+                    moveStraight(171.0, 0.6);
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.FINDWALL;
                     telemetryMove = MoveState.MOVEDIAG;
@@ -379,7 +382,7 @@ public class CCHS5256Autonomous extends OpMode {
 
                 case DUMPCLIMBERS:
                     moveClimberDump(1.0);
-                    currentMove = MoveState.SERVODUMPERMOVE;
+//                  currentMove = MoveState.SERVODUMPERMOVE;
                     nextMove = MoveState.ALIGNPRESSER;
                     telemetryMove = MoveState.DUMPCLIMBERS;
                     moveDelayTime = 75;
@@ -399,7 +402,7 @@ public class CCHS5256Autonomous extends OpMode {
 
                 case PRESSBUTTON:
                     moveBeaconPress(1.0);
-                    currentMove = MoveState.SERVOPUSHERMOVE;
+//                    currentMove = MoveState.SERVOPUSHERMOVE;
                     nextMove = MoveState.PULLAHEADALONGWALL;
                     telemetryMove = MoveState.PRESSBUTTON;
                     moveDelayTime = 75;
