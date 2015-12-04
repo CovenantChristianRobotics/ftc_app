@@ -2,7 +2,9 @@
 <Robot>
     <ServoController name="servoCtlr" serialNumber="AL00YAL7">
         <Servo name="servo_1" port="1" />
-        <Servo name="servo_2" port="2" />
+        <Servo name="beacon_pinion" port="2" />
+        <Servo name="beacon_pusher" port="3" />
+        <Servo name="climber_dumper" port="4" />
     </ServoController>
     <MotorController name="Motor Controller 1" serialNumber="AL00XTFL">
     </MotorController>
