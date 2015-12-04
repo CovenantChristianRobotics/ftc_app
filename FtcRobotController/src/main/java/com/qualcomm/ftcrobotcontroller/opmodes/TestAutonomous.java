@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import java.util.Date;
 /**
@@ -18,6 +19,7 @@ public class TestAutonomous extends OpMode {
     DcMotorController driveTrainController;
     DcMotor motorRight;
     DcMotor motorLeft;
+    ServoController servoCtlr;
     ColorSensor ColorSense;
     MoveState currentMove;
     MoveState nextMove;
@@ -25,9 +27,17 @@ public class TestAutonomous extends OpMode {
     boolean lookingForRedFlag;
     boolean sawBlueFlag;
     long delayUntil;
+    double speed;
+    double slowSpeed;
+    double turnSpeed;
+    long delay;
     Date now;
     GyroSensor gyroSense;
     UltrasonicSensor ultraSense;
+
+    // Switches
+    boolean nearMountainFlag = false;
+
 
     public TestAutonomous() {
     }
@@ -85,6 +95,8 @@ public class TestAutonomous extends OpMode {
         driveTrainController = hardwareMap.dcMotorController.get("dtCtlr");
         motorRight = hardwareMap.dcMotor.get("motorR");
         motorLeft = hardwareMap.dcMotor.get("motorL");
+        servoCtlr = hardwareMap.servoController.get("servoCtlr");
+        servoCtlr.setServoPosition(1, 0.25);
         ColorSense = hardwareMap.colorSensor.get("color");
         ColorSense.enableLed(true);
         motorRight.setDirection(DcMotor.Direction.REVERSE);
@@ -93,6 +105,10 @@ public class TestAutonomous extends OpMode {
         currentMove = MoveState.FIRSTMOVE;
         lookingForRedFlag = false;
         sawBlueFlag = false;
+        speed = 0.5;
+        slowSpeed = 0.3;
+        turnSpeed = 0.5;
+        delay = 100;
         gyroSense = hardwareMap.gyroSensor.get("gyro");
         gyroSense.calibrate();
         while (gyroSense.isCalibrating()) {
@@ -143,21 +159,21 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case FIRSTMOVE:
-                moveStraight(80.0, 0.5);
+                moveStraight(80.0, speed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNDIAG;
-                moveDelayTime = 100;
+                moveDelayTime = delay;
                 break;
 
             case TURNDIAG:
-                moveTurn(45.0, 0.5);
+                moveTurn(45.0, turnSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.MOVEDIAG;
                 moveDelayTime = 100;
                 break;
 
             case MOVEDIAG:
-                moveStraight(219.0, 0.5);
+                moveStraight(219.0, speed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDWALL;
                 moveDelayTime = 1000;
@@ -174,14 +190,14 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case TURNALONGWALL:
-                moveTurn(-45.0, 0.5);
+                moveTurn(-45.0, turnSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDBEACON;
                 moveDelayTime = 100;
                 break;
 
             case FINDBEACON:
-                moveStraight(-122.0, 0.5);
+                moveStraight(-122.0, speed);
                 lookingForRedFlag = true;
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.ROTATEFROMBEACON;
@@ -189,7 +205,7 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case ROTATEFROMBEACON:
-                moveTurn(50.0, 0.5);
+                moveTurn(50.0, turnSpeed);
                 lookingForRedFlag = false;
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.MOVETORAMP;
@@ -197,25 +213,36 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case MOVETORAMP:
-                if (sawBlueFlag) {
-                    moveStraight(-103.0, 0.5);
-                } else {
-                    moveStraight(-113.0,0.5);
+                double distance = -109.0;
+                if (!sawBlueFlag) {
+                    distance -= 10.0;
                 }
+                if (!nearMountainFlag) {
+                    distance -= 61.0;
+                }
+                moveStraight(distance, 0.5);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNTORAMP;
                 moveDelayTime = 100;
                 break;
 
             case TURNTORAMP:
-                moveTurn(-101.0, 0.5);
+                if (nearMountainFlag) {
+                    moveTurn(-101.0, turnSpeed);
+                } else {
+                    moveTurn(87.0, turnSpeed);
+                }
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.UPRAMP;
                 moveDelayTime = 100;
                 break;
 
             case UPRAMP:
-                moveStraight(-70.0, 0.3);
+                if (nearMountainFlag) {
+                    moveStraight(-70.0, slowSpeed);
+                } else {
+                    moveStraight(-210.0, speed);
+                }
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
                 break;
