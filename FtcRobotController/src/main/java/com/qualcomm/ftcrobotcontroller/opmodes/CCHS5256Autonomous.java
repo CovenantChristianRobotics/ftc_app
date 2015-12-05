@@ -247,11 +247,11 @@ public class CCHS5256Autonomous extends OpMode {
                     break;
 
                 case MOVING:
-//                    if (lookingForRedFlag && (ColorSense.red() >= 1))  {
-//                        motorRight.setPower(0.0);
-//                        motorLeft.setPower(0.0);
-//                        currentMove = MoveState.MOVEDELAY;
-//                    }
+                    if (lookingForRedFlag && ((ColorSense.red() >= 1) || (ColorSense.blue() >= 1)))  {
+                        motorRight.setPower(0.0);
+                        motorLeft.setPower(0.0);
+                        currentMove = MoveState.MOVEDELAY;
+                    }
                     if (!motorLeft.isBusy() && !motorRight.isBusy()) {
                         currentMove = MoveState.MOVEDELAY;
                     }
@@ -336,8 +336,8 @@ public class CCHS5256Autonomous extends OpMode {
 
                 case FINDWALL:
                     distanceToWall = ultraSense.getUltrasonicLevel();
-                    if ((distanceToWall > 30.0) && (distanceToWall <= 70.0)) {
-                        moveStraight((distanceToWall - 15.0) * 1.414, 0.5);
+                    if ((distanceToWall > 30.0) && (distanceToWall <= 90.0)) {
+                        moveStraight((distanceToWall - 23.0) * 1.414, 0.5);
                         currentMove = MoveState.STARTMOVE;
                         nextMove = MoveState.TURNALONGWALL;
                         telemetryMove = MoveState.FINDWALL;
@@ -355,7 +355,7 @@ public class CCHS5256Autonomous extends OpMode {
                     break;
 
                 case DRIVEALONGWALL:
-                    moveStraight(-60.0, 0.6);
+                    moveStraight(-50.0, 0.6);
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.FINDBEACON;
                     telemetryMove = MoveState.DRIVEALONGWALL;
@@ -363,8 +363,8 @@ public class CCHS5256Autonomous extends OpMode {
                     break;
 
                 case FINDBEACON:
-                    motorOn(0.25, true);
-//                    lookingForRedFlag = true;
+                    moveStraight(-30, 0.20);
+                    lookingForRedFlag = true;
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.ALIGNDUMPER;
                     telemetryMove = MoveState.FINDBEACON;
@@ -381,8 +381,8 @@ public class CCHS5256Autonomous extends OpMode {
                     break;
 
                 case DUMPCLIMBERS:
-                    moveClimberDump(1.0);
-//                  currentMove = MoveState.SERVODUMPERMOVE;
+                    moveClimberDump(0.0);
+                    currentMove = MoveState.MOVEDELAY;
                     nextMove = MoveState.ALIGNPRESSER;
                     telemetryMove = MoveState.DUMPCLIMBERS;
                     moveDelayTime = 75;
@@ -401,8 +401,8 @@ public class CCHS5256Autonomous extends OpMode {
                     break;
 
                 case PRESSBUTTON:
-                    moveBeaconPress(1.0);
-//                    currentMove = MoveState.SERVOPUSHERMOVE;
+                    moveBeaconPress(0.0);
+                    currentMove = MoveState.MOVEDELAY;
                     nextMove = MoveState.PULLAHEADALONGWALL;
                     telemetryMove = MoveState.PRESSBUTTON;
                     moveDelayTime = 75;
@@ -460,6 +460,7 @@ public class CCHS5256Autonomous extends OpMode {
 
         telemetry.addData("Text", "*** Robot Data***");
         telemetry.addData("Text", "Look for Red");
+        telemetry.addData("Ultrasonic", ultraSense.getUltrasonicLevel());
         telemetry.addData("Current Move", telemetryMove.toString());
         telemetry.addData("ENCLeft", (float) motorLeft.getCurrentPosition());
         telemetry.addData("ENCRight", (float) motorRight.getCurrentPosition());
