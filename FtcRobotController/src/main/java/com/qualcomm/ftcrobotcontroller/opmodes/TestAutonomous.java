@@ -14,7 +14,7 @@ import java.util.Date;
 public class TestAutonomous extends OpMode {
     enum MoveState {
         DELAY, STARTMOVE, MOVING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
-        FINDBEACON, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, UPRAMP, DONE
+        FINDBEACON, DUMPTRUCK, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, UPRAMP, DONE
     }
 
     DcMotorController driveTrainController;
@@ -119,7 +119,7 @@ public class TestAutonomous extends OpMode {
         delay = 100;
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
         servoBeaconPinion.setPosition(0.0);
-        servoClimberDumper.setPosition(1.0);
+        servoClimberDumper.setPosition(0.9);
         servoBeaconPusher.setPosition(1.0);
         servo1.setPosition(0.25);
         gyroSense = hardwareMap.gyroSensor.get("gyro");
@@ -181,7 +181,7 @@ public class TestAutonomous extends OpMode {
                 moveTurn(45.0, turnSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.MOVEDIAG;
-                moveDelayTime = 100;
+                moveDelayTime = delay;
                 break;
 
             case MOVEDIAG:
@@ -197,7 +197,7 @@ public class TestAutonomous extends OpMode {
                     moveStraight((distanceToWall - 23.0) * 1.414, slowSpeed);
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.TURNALONGWALL;
-                    moveDelayTime = 1000;
+                    moveDelayTime = delay;
                 }
                 break;
 
@@ -205,23 +205,31 @@ public class TestAutonomous extends OpMode {
                 moveTurn(-45.0, turnSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDBEACON;
-                moveDelayTime = 100;
+                moveDelayTime = delay;
                 break;
 
             case FINDBEACON:
                 moveStraight(-122.0, speed);
                 lookingForRedFlag = true;
                 currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DUMPTRUCK;
+                moveDelayTime = delay;
+                break;
+
+            case DUMPTRUCK:
+                servoClimberDumper.setPosition(0.25);
+                currentMove = MoveState.MOVEDELAY;
                 nextMove = MoveState.ROTATEFROMBEACON;
-                moveDelayTime = 2000;
+                moveDelayTime = 1000;
                 break;
 
             case ROTATEFROMBEACON:
                 moveTurn(50.0, turnSpeed);
                 lookingForRedFlag = false;
+                servoClimberDumper.setPosition(1.0);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.MOVETORAMP;
-                moveDelayTime = 100;
+                moveDelayTime = delay;
                 break;
 
             case MOVETORAMP:
@@ -235,7 +243,7 @@ public class TestAutonomous extends OpMode {
                 moveStraight(distance, speed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNTORAMP;
-                moveDelayTime = 100;
+                moveDelayTime = delay;
                 break;
 
             case TURNTORAMP:
@@ -246,7 +254,7 @@ public class TestAutonomous extends OpMode {
                 }
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.STOPATRAMP;
-                moveDelayTime = 100;
+                moveDelayTime = delay;
                 break;
 
             case STOPATRAMP:
