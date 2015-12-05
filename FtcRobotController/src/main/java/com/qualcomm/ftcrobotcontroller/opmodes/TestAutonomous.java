@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import java.util.Date;
@@ -13,13 +14,17 @@ import java.util.Date;
 public class TestAutonomous extends OpMode {
     enum MoveState {
         DELAY, STARTMOVE, MOVING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
-        FINDBEACON, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, UPRAMP, DONE
+        FINDBEACON, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, UPRAMP, DONE
     }
 
     DcMotorController driveTrainController;
     DcMotor motorRight;
     DcMotor motorLeft;
-    ServoController servoCtlr;
+    //servos
+    Servo servoBeaconPinion;
+    Servo servoBeaconPusher;
+    Servo servoClimberDumper;
+    Servo servo1;
     ColorSensor ColorSense;
     MoveState currentMove;
     MoveState nextMove;
@@ -95,8 +100,11 @@ public class TestAutonomous extends OpMode {
         driveTrainController = hardwareMap.dcMotorController.get("dtCtlr");
         motorRight = hardwareMap.dcMotor.get("motorR");
         motorLeft = hardwareMap.dcMotor.get("motorL");
-        servoCtlr = hardwareMap.servoController.get("servoCtlr");
-        servoCtlr.setServoPosition(1, 0.25);
+        //servos
+        servoBeaconPinion = hardwareMap.servo.get("beacon_pinion");
+        servoBeaconPusher = hardwareMap.servo.get("beacon_pusher");
+        servoClimberDumper = hardwareMap.servo.get("climber_dumper");
+        servo1 = hardwareMap.servo.get("servo_1");
         ColorSense = hardwareMap.colorSensor.get("color");
         ColorSense.enableLed(true);
         motorRight.setDirection(DcMotor.Direction.REVERSE);
@@ -109,11 +117,15 @@ public class TestAutonomous extends OpMode {
         slowSpeed = 0.3;
         turnSpeed = 0.5;
         delay = 100;
+        ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
+        servoBeaconPinion.setPosition(0.0);
+        servoClimberDumper.setPosition(1.0);
+        servoBeaconPusher.setPosition(1.0);
+        servo1.setPosition(0.25);
         gyroSense = hardwareMap.gyroSensor.get("gyro");
         gyroSense.calibrate();
         while (gyroSense.isCalibrating()) {
         }
-        ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
     }
 
     @Override
@@ -182,7 +194,7 @@ public class TestAutonomous extends OpMode {
             case FINDWALL:
                 distanceToWall = ultraSense.getUltrasonicLevel();
                 if ((distanceToWall > 30.0) && (distanceToWall <= 70.0)) {
-                    moveStraight((distanceToWall - 15.0) * 1.414, 0.5);
+                    moveStraight((distanceToWall - 23.0) * 1.414, slowSpeed);
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.TURNALONGWALL;
                     moveDelayTime = 1000;
@@ -213,14 +225,14 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case MOVETORAMP:
-                double distance = -109.0;
+                double distance = -91.0;
                 if (!sawBlueFlag) {
                     distance -= 10.0;
                 }
                 if (!nearMountainFlag) {
-                    distance -= 61.0;
+                    distance -= 67.0;
                 }
-                moveStraight(distance, 0.5);
+                moveStraight(distance, speed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNTORAMP;
                 moveDelayTime = 100;
@@ -228,23 +240,33 @@ public class TestAutonomous extends OpMode {
 
             case TURNTORAMP:
                 if (nearMountainFlag) {
-                    moveTurn(-101.0, turnSpeed);
+                    moveTurn(91.0, turnSpeed);
                 } else {
-                    moveTurn(87.0, turnSpeed);
+                    moveTurn(-93.0, turnSpeed);
                 }
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.UPRAMP;
+                nextMove = MoveState.STOPATRAMP;
                 moveDelayTime = 100;
                 break;
 
-            case UPRAMP:
+            case STOPATRAMP:
                 if (nearMountainFlag) {
-                    moveStraight(-70.0, slowSpeed);
+                    moveStraight(40.0, speed);
                 } else {
-                    moveStraight(-210.0, speed);
+                    moveStraight(200.0, speed);
                 }
+                servo1.setPosition(0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DONE;
+                nextMove = MoveState.UPRAMP;
+                break;
+
+            case UPRAMP:
+                distanceToWall = ultraSense.getUltrasonicLevel();
+                if ((distanceToWall > 30.0) && (distanceToWall <= 70.0)) {
+                    moveStraight(distanceToWall - 5.0, slowSpeed);
+                    currentMove = MoveState.STARTMOVE;
+                    nextMove = MoveState.DONE;
+                }
                 break;
 
             case DONE:
