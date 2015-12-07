@@ -51,6 +51,7 @@ public class CCHS5256Autonomous extends OpMode {
     OpticalDistanceSensor OpticalDistance;
     GyroSensor gyroSense;
     UltrasonicSensor ultraSense;
+    // TouchSensor touchSense;
     //Movestate options
     MoveState currentMove;
     MoveState nextMove;
@@ -214,6 +215,7 @@ public class CCHS5256Autonomous extends OpMode {
         while (gyroSense.isCalibrating()) {
         }
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
+        // touchSense = hardwareMap.touchSensor.get("touchSense");
         //motor configurations
         motorRight.setDirection(DcMotor.Direction.REVERSE);
         motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
@@ -228,6 +230,10 @@ public class CCHS5256Autonomous extends OpMode {
         moveClimberDump(1.0);
         moveBeaconPress(1.0);
         servo1.setPosition(0.25);
+        // align color sensor
+        // while (touchSense.) {
+        //     servoBeaconPinion.setPosition(0.5)
+        // }
 
     }
 
@@ -257,25 +263,25 @@ public class CCHS5256Autonomous extends OpMode {
                     }
                     break;
 
-                case SERVODUMPERMOVE:
-                    if (servoClimberDumper.getPosition() > climberDumperTarget ) {
-                        currentMove = MoveState.SERVODUMPERMOVE;
-                    } else if (servoClimberDumper.getPosition() < climberDumperTarget) {
-                        currentMove = MoveState.SERVODUMPERMOVE;
-                    } else {
-                        currentMove = MoveState.MOVEDELAY;
-                    }
-                    break;
+                // case SERVODUMPERMOVE:
+                //     if (servoClimberDumper.getPosition() > climberDumperTarget ) {
+                //         currentMove = MoveState.SERVODUMPERMOVE;
+                //     } else if (servoClimberDumper.getPosition() < climberDumperTarget) {
+                //         currentMove = MoveState.SERVODUMPERMOVE;
+                //     } else {
+                //         currentMove = MoveState.MOVEDELAY;
+                //     }
+                //     break;
 
-                case SERVOPUSHERMOVE:
-                    if (servoBeaconPusher.getPosition() > climberDumperTarget) {
-                        currentMove = MoveState.SERVOPUSHERMOVE;
-                    } else if (servoBeaconPusher.getPosition() < climberDumperTarget){
-                        currentMove = MoveState.SERVOPUSHERMOVE;
-                    } else {
-                        currentMove = MoveState.MOVEDELAY;
-                    }
-                    break;
+                // case SERVOPUSHERMOVE:
+                //     if (servoBeaconPusher.getPosition() > climberDumperTarget) {
+                //         currentMove = MoveState.SERVOPUSHERMOVE;
+                //     } else if (servoBeaconPusher.getPosition() < climberDumperTarget){
+                //         currentMove = MoveState.SERVOPUSHERMOVE;
+                //     } else {
+                //         currentMove = MoveState.MOVEDELAY;
+                //     }
+                //     break;
 
                 case SERVOPINIONNULLMOVE:
                     if (ColorSense.red() < 1.0 && ColorSense.blue() < 1.0) {
@@ -368,7 +374,7 @@ public class CCHS5256Autonomous extends OpMode {
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.ALIGNDUMPER;
                     telemetryMove = MoveState.FINDBEACON;
-                    moveDelayTime = 75;
+                    moveDelayTime = 500;
                     break;
 
                 case ALIGNDUMPER:
@@ -377,7 +383,7 @@ public class CCHS5256Autonomous extends OpMode {
                     currentMove = MoveState.SERVOPINIONNULLMOVE;
                     nextMove = MoveState.DUMPCLIMBERS;
                     telemetryMove = MoveState.ALIGNDUMPER;
-                    moveDelayTime = 75;
+                    moveDelayTime = 3000;
                     break;
 
                 case DUMPCLIMBERS:
@@ -385,7 +391,7 @@ public class CCHS5256Autonomous extends OpMode {
                     currentMove = MoveState.MOVEDELAY;
                     nextMove = MoveState.ALIGNPRESSER;
                     telemetryMove = MoveState.DUMPCLIMBERS;
-                    moveDelayTime = 75;
+                    moveDelayTime = 3000;
                     break;
 
                 case ALIGNPRESSER:
@@ -397,7 +403,7 @@ public class CCHS5256Autonomous extends OpMode {
                     currentMove = MoveState.SERVOPINIONREDMOVE;
                     nextMove = MoveState.PRESSBUTTON;
                     telemetryMove = MoveState.ALIGNPRESSER;
-                    moveDelayTime = 75;
+                    moveDelayTime = 3000;
                     break;
 
                 case PRESSBUTTON:
@@ -405,7 +411,7 @@ public class CCHS5256Autonomous extends OpMode {
                     currentMove = MoveState.MOVEDELAY;
                     nextMove = MoveState.PULLAHEADALONGWALL;
                     telemetryMove = MoveState.PRESSBUTTON;
-                    moveDelayTime = 75;
+                    moveDelayTime = 3000;
                     break;
 
                 case PULLAHEADALONGWALL:
@@ -413,7 +419,7 @@ public class CCHS5256Autonomous extends OpMode {
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.ROTATEFROMBEACON;
                     telemetryMove = MoveState.PULLAHEADALONGWALL;
-                    moveDelayTime = 75;
+                    moveDelayTime = 200;
                     break;
 
                 case ROTATEFROMBEACON:
