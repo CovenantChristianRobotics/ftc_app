@@ -3,6 +3,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
@@ -28,10 +29,12 @@ public class TestAutonomous extends OpMode {
     ColorSensor ColorSense;
     MoveState currentMove;
     MoveState nextMove;
-    // MoveState telemetryMove;
+    MoveState telemetryMove;
     long moveDelayTime;
     boolean lookingForRedFlag;
+    boolean lookingForBlueFlag;
     boolean sawBlueFlag;
+    boolean sawRedFlag;
     long delayUntil;
     double speed;
     double slowSpeed;
@@ -42,8 +45,11 @@ public class TestAutonomous extends OpMode {
     UltrasonicSensor ultraSense;
 
     // Switches
-    boolean nearMountainFlag = false;
+    DigitalChannel nearMountainSwitch;
+    DigitalChannel redBlueSwitch;
 
+    boolean nearMountainFlag = false;
+    double redBlueFlag = 1.0;
 
     public TestAutonomous() {
     }
@@ -107,24 +113,37 @@ public class TestAutonomous extends OpMode {
         servoClimberDumper = hardwareMap.servo.get("climber_dumper");
         servo1 = hardwareMap.servo.get("servo_1");
         ColorSense = hardwareMap.colorSensor.get("color");
+        nearMountainSwitch = hardwareMap.digitalChannel.get("nearMtnSw");
+        redBlueSwitch = hardwareMap.digitalChannel.get("rbSw");
+        ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
+        gyroSense = hardwareMap.gyroSensor.get("gyro");
+        nearMountainFlag = nearMountainSwitch.getState();
+        if (redBlueSwitch.getState()) {
+            redBlueFlag = 1.0;
+            lookingForRedFlag = true;
+            lookingForBlueFlag = false;
+            servo1.setPosition(0.25);
+        } else {
+            redBlueFlag = -1.0;
+            lookingForRedFlag = false;
+            lookingForBlueFlag = true;
+            servo1.setPosition(0.75);
+        }
         ColorSense.enableLed(true);
         motorRight.setDirection(DcMotor.Direction.REVERSE);
-        motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
+        motorRight.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+        motorLeft.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         currentMove = MoveState.FIRSTMOVE;
-        // telemetryMove = MoveState.FIRSTMOVE;
-        lookingForRedFlag = false;
+        telemetryMove = MoveState.FIRSTMOVE;
+        sawRedFlag = false;
         sawBlueFlag = false;
         speed = 0.5;
         slowSpeed = 0.3;
         turnSpeed = 0.5;
         delay = 100;
-        ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
         servoBeaconPinion.setPosition(0.0);
         servoClimberDumper.setPosition(0.9);
         servoBeaconPusher.setPosition(1.0);
-        servo1.setPosition(0.25);
-        gyroSense = hardwareMap.gyroSensor.get("gyro");
         gyroSense.calibrate();
         while (gyroSense.isCalibrating()) {
         }
@@ -176,15 +195,15 @@ public class TestAutonomous extends OpMode {
                 moveStraight(80.0, speed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNDIAG;
-                // telemetryMove = MoveState.FIRSTMOVE;
+                telemetryMove = MoveState.FIRSTMOVE;
                 moveDelayTime = delay;
                 break;
 
             case TURNDIAG:
-                moveTurn(45.0, turnSpeed);
+                moveTurn(45.0 * redBlueFlag, turnSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.MOVEDIAG;
-                // telemetryMove = MoveState.TURNDIAG;
+                telemetryMove = MoveState.TURNDIAG;
                 moveDelayTime = delay;
                 break;
 
@@ -192,26 +211,26 @@ public class TestAutonomous extends OpMode {
                 moveStraight(219.0, speed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDWALL;
-                // telemetryMove = MoveState.MOVEDIAG;
+                telemetryMove = MoveState.MOVEDIAG;
                 moveDelayTime = 1000;
                 break;
 
             case FINDWALL:
                 distanceToWall = ultraSense.getUltrasonicLevel();
-                if ((distanceToWall > 30.0) && (distanceToWall <= 70.0)) {
-                    moveStraight((distanceToWall - 23.0) * 1.414, slowSpeed);
+                if ((distanceToWall > 40.0) && (distanceToWall <= 80.0)) {
+                    moveStraight((distanceToWall - 33.0) * 1.414, slowSpeed);
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.TURNALONGWALL;
-                    // telemetryMove = MoveSate.FINDWALL;
+                    telemetryMove = MoveState.FINDWALL;
                     moveDelayTime = delay;
                 }
                 break;
 
             case TURNALONGWALL:
-                moveTurn(-45.0, turnSpeed);
+                moveTurn(-45.0 * redBlueFlag, turnSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDBEACON;
-                // telemetryMove = MoveState.TURNALONGWALL;
+                telemetryMove = MoveState.TURNALONGWALL;
                 moveDelayTime = delay;
                 break;
 
@@ -220,7 +239,7 @@ public class TestAutonomous extends OpMode {
                 lookingForRedFlag = true;
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DUMPTRUCK;
-                // telemetryMove = MoveState.FINDBEACON;
+                telemetryMove = MoveState.FINDBEACON;
                 moveDelayTime = delay;
                 break;
 
@@ -228,22 +247,22 @@ public class TestAutonomous extends OpMode {
                 servoClimberDumper.setPosition(0.25);
                 currentMove = MoveState.MOVEDELAY;
                 nextMove = MoveState.ROTATEFROMBEACON;
-                // telemetryMove = MoveState.DUMPTRUCK;
+                telemetryMove = MoveState.DUMPTRUCK;
                 moveDelayTime = 1000;
                 break;
 
             case ROTATEFROMBEACON:
-                moveTurn(50.0, turnSpeed);
+                moveTurn(50.0 * redBlueFlag, turnSpeed);
                 lookingForRedFlag = false;
                 servoClimberDumper.setPosition(1.0);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.MOVETORAMP;
-                // telemetryMove = MoveState.ROTATEFROMBEACON;
+                telemetryMove = MoveState.ROTATEFROMBEACON;
                 moveDelayTime = delay;
                 break;
 
             case MOVETORAMP:
-                double distance = -91.0;
+                double distance = -71.0;
                 if (!sawBlueFlag) {
                     distance -= 10.0;
                 }
@@ -253,19 +272,19 @@ public class TestAutonomous extends OpMode {
                 moveStraight(distance, speed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNTORAMP;
-                // telemetryMove = MoveState.MOVETORAMP;
+                telemetryMove = MoveState.MOVETORAMP;
                 moveDelayTime = delay;
                 break;
 
             case TURNTORAMP:
                 if (nearMountainFlag) {
-                    moveTurn(91.0, turnSpeed);
+                    moveTurn(91.0 * redBlueFlag, turnSpeed);
                 } else {
-                    moveTurn(-93.0, turnSpeed);
+                    moveTurn(-98.0 * redBlueFlag, turnSpeed);
                 }
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.STOPATRAMP;
-                // telemetryMove = MoveState.TURNTORAMP;
+                telemetryMove = MoveState.TURNTORAMP;
                 moveDelayTime = delay;
                 break;
 
@@ -278,7 +297,7 @@ public class TestAutonomous extends OpMode {
                 servo1.setPosition(0.5);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.UPRAMP;
-                // telemetry = MoveState.STOPATRAMP;
+                telemetryMove = MoveState.STOPATRAMP;
                 break;
 
             case UPRAMP:
@@ -287,14 +306,14 @@ public class TestAutonomous extends OpMode {
                     moveStraight(distanceToWall - 5.0, slowSpeed);
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.DONE;
-                    // telemetryMove = MoveState.UPRAMP;
+                    telemetryMove = MoveState.UPRAMP;
                 }
                 break;
 
             case DONE:
                 motorLeft.setPower(0.0);
                 motorRight.setPower(0.0);
-                // telemetryMove = MoveState.DONE;
+                telemetryMove = MoveState.DONE;
                 break;
         }
 
@@ -304,7 +323,7 @@ public class TestAutonomous extends OpMode {
 
         telemetry.addData("Text", "*** Robot Data***");
         telemetry.addData("Text", "Look for Red");
-        // telemetry.addData("Current Move", telemetryMove.toString());
+        telemetry.addData("Current Move", telemetryMove.toString());
         telemetry.addData("Color", (float) ColorSense.red());
         telemetry.addData("gyro", (float) gyroSense.getHeading());
         telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
