@@ -152,7 +152,9 @@ public class TestAutonomous extends OpMode {
     @Override
     public void loop() {
         double distanceToWall;
-
+        int dumperCounter = 0;
+        int dumperCounterThresh = 30;
+        double dumperPosition = 0.9;
         if (gyroSense.isCalibrating()) {
             return;
         }
@@ -244,11 +246,20 @@ public class TestAutonomous extends OpMode {
                 break;
 
             case DUMPTRUCK:
-                servoClimberDumper.setPosition(0.25);
-                currentMove = MoveState.MOVEDELAY;
-                nextMove = MoveState.ROTATEFROMBEACON;
-                telemetryMove = MoveState.DUMPTRUCK;
-                moveDelayTime = 1000;
+                // If timer hits threshold, reset timer and move servo
+                if (dumperCounter >= dumperCounterThresh) {
+                    dumperPosition -= .02;
+                    servoClimberDumper.setPosition(dumperPosition);
+                    dumperCounter = 0;
+                    // Target position reached; moving to next state
+                    if (dumperPosition <= .25) {
+                        nextMove = MoveState.ROTATEFROMBEACON;
+                        currentMove = MoveState.MOVEDELAY;
+                        telemetryMove = MoveState.DUMPTRUCK;
+                        moveDelayTime = 1000;
+                    }
+                 }
+                dumperCounter ++;
                 break;
 
             case ROTATEFROMBEACON:
