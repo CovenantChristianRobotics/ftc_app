@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<Robot>
+    <ServoController name="Servo Controller 1" serialNumber="AL00YAL7">
+        <Servo name="servoDist" port="1" />
+        <Servo name="beacon_pusher" port="2" />
+        <Servo name="climber_dumper" port="3" />
+    </ServoController>
+    <DeviceInterfaceModule name="Device Interface Module 1" serialNumber="AL00VF0A">
+        <DigitalDevice name="nearMtnSw" port="0" />
+        <DigitalDevice name="rbSw" port="1" />
+        <DigitalDevice name="thirdTile" port="2" />
+        <DigitalDevice name="delaySw" port="3" />
+        <ColorSensor name="color" port="0"/>
+        <Gyro name="gyro" port="1"/>
+    </DeviceInterfaceModule>
+    <MotorController name="Motor Drive" serialNumber="AL00XSY7">
+        <Motor name="motorR" port="1" />
+        <Motor name="motorL" port="2" />
+    </MotorController>
+    <MotorController name="Motor Lift" serialNumber="AL00VXRE">
+        <Motor name="trkLftr" port="1" />
+    </MotorController>
+    <LegacyModuleController name="Legacy Module 1" serialNumber="AL00XPHJ">
+        <UltrasonicSensor name="ultraSense" port="5" />
+    </LegacyModuleController>
+</Robot>
