@@ -223,14 +223,17 @@ public void stop() {
         return dScale;
     }
     
-    // double fast(double dval) {
+    // double fast(double jVal) {
     // // scale input * 1.3333333333 (top speed = 1.0)    
+    // scaleInput((jVal*1.3333333333333333));
     // }
-    // double medium(double dval) {
+    // double medium(double jVal) {
     // // scale input * 1.0 (top speed = 0.75)  
+    // scaleInput(jVal);
     // }
-    // double slow(double dval) {
+    // double slow(double jVal) {
     // // scale input * 0.5 (top speed = .375)    
+    // scaleInput((jVal * 0.5))
     // }
 
 }
