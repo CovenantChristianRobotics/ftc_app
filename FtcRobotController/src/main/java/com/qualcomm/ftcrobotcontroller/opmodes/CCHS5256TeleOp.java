@@ -127,12 +127,10 @@ right = (float)scaleInput(right);
 // }else {
 //     left = (float)medium(left);
 //     right = (float)medium(right)
-// }
+// 
 
-leftDrive1.setPower(left);
-leftDrive2.setPower(left);
-rightDrive1.setPower(right);
-rightDrive2.setPower(right);
+leftDrive.setPower(left);
+rightDrive.setPower(right);
 
     // update the position of the arm.
     if (gamepad2.a) {
