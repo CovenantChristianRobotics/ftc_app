@@ -118,9 +118,6 @@ right = Range.clip(right, -1, 1);
 left = (float)scaleInput(left);
 right = (float)scaleInput(right);
 
-left = (float)medium(left);
-right = (float)medium(right);
-
 // if (gamepad1.righttrigger) {
 //     left = (float)fast(left);
 //     right = (float)fast(right);
