@@ -50,14 +50,12 @@ public class CCHS5256TeleOp extends OpMode {
     double climberReleaserDelta = 0.1;
 
 
-DcMotorController leftDrive;
-DcMotorController rightDrive;
+DcMotorController driveTrainController;
+// DcMotorController rightDrive;
 //DcMotorController armController1;
 //DcMotorController armController2;
-DcMotor leftDrive1;
-DcMotor leftDrive2;
-DcMotor rightDrive1;
-DcMotor rightDrive2;
+DcMotor leftDrive;
+DcMotor rightDrive;
 //DcMotor armController1A;
 //DcMotor armController1B;
 //DcMotor armController2A;
@@ -81,16 +79,12 @@ Servo servoClimberReleaser;
     public void init() {
 
 
-        leftDrive = hardwareMap.dcMotorController.get("left_drive");
-        rightDrive = hardwareMap.dcMotorController.get("right_drive");
+        driveTrainController = hardwareMap.dcMotorController.get("dtCtlr");
 //        armController1 = hardwareMap.dcMotorController.get("arm_controller_1");
 //        armController2 = hardwareMap.dcMotorController.get("arm_controller_2");
-        leftDrive1 = hardwareMap.dcMotor.get("left_drive_1");
-        leftDrive1.setDirection(DcMotor.Direction.REVERSE);
-        leftDrive2 = hardwareMap.dcMotor.get("left_drive_2");
-        leftDrive2.setDirection(DcMotor.Direction.REVERSE);
-        rightDrive1 = hardwareMap.dcMotor.get("right_drive_1");
-        rightDrive2 = hardwareMap.dcMotor.get("right_drive_2");
+        leftDrive = hardwareMap.dcMotor.get("left_drive");
+        leftDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightDrive1 = hardwareMap.dcMotor.get("right_drive");
 //        armController1A = hardwareMap.dcMotor.get("arm_1A");
 //        armController1B = hardwareMap.dcMotor.get("arm_1B");
 //        armController2A = hardwareMap.dcMotor.get("arm_2A");
@@ -123,6 +117,20 @@ right = Range.clip(right, -1, 1);
 
 left = (float)scaleInput(left);
 right = (float)scaleInput(right);
+
+left = (float)medium(left);
+right = (float)medium(right);
+
+// if (gamepad1.righttrigger) {
+//     left = (float)fast(left);
+//     right = (float)fast(right);
+// }else if (gamepad1.lefttrigger) {
+//     left = (float)slow(left);
+//     right = (float)slow(right);
+// }else {
+//     left = (float)medium(left);
+//     right = (float)medium(right)
+// }
 
 leftDrive1.setPower(left);
 leftDrive2.setPower(left);
@@ -176,9 +184,31 @@ public void stop() {
 
         }
 
+    // double scaleInput(double dVal)  {
+    //     double[] scaleArray = { 0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
+    //             0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00 };
+
+    //     // get the corresponding index for the scaleInput array.
+    //     int index = (int) (dVal * 16.0);
+    //     if (index < 0) {
+    //         index = -index;
+    //     } else if (index > 16) {
+    //         index = 16;
+    //     }
+
+    //     double dScale = 0.0;
+    //     if (dVal < 0) {
+    //         dScale = -scaleArray[index];
+    //     } else {
+    //         dScale = scaleArray[index];
+    //     }
+
+    //     return dScale;
+    // }
+    
     double scaleInput(double dVal)  {
-        double[] scaleArray = { 0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
-                0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00 };
+        double[] scaleArray = { 0.0, 0.04, 0.07, 0.10, 0.13, 0.16, 0.19, 0.23,
+                0.28, 0.34, 0.41, 0.49, 0.58, 0.68, 0.72, 0.75, 0.75 };
 
         // get the corresponding index for the scaleInput array.
         int index = (int) (dVal * 16.0);
@@ -197,5 +227,15 @@ public void stop() {
 
         return dScale;
     }
+    
+    // double fast(double dval) {
+    // // scale input * 1.3333333333 (top speed = 1.0)    
+    // }
+    // double medium(double dval) {
+    // // scale input * 1.0 (top speed = 0.75)  
+    // }
+    // double slow(double dval) {
+    // // scale input * 0.5 (top speed = .375)    
+    // }
 
 }
