@@ -50,25 +50,29 @@ public class CCHS4507TeleOp extends OpMode {
         gyroSense = hardwareMap.gyroSensor.get("gyro");
         nearMountainFlag = nearMountainSwitch.getState();
         //set up motors
-        motorRight.setDirection(DcMotor.Direction.REVERSE);
-        motorLeft.setDirection(DcMotor.Direction.FORWARD);
+        motorLeft.setDirection(DcMotor.Direction.REVERSE);
+        motorRight.setDirection(DcMotor.Direction.FORWARD);
         trackLifter.setDirection(DcMotor.Direction.REVERSE);
-        motorRight.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-        motorLeft.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-        trackLifter.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-
+        motorRight.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        motorLeft.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
     }
 
     @Override
     public void loop() {
         //getting the gamepad values on the y axis
-        float right = gamepad1.right_stick_y;
-        float left = gamepad1.left_stick_y;
-        float lifterMotor = gamepad2.right_stick_y;
+        float right = gamepad1.left_stick_y;
+        float left = gamepad1.right_stick_y;
 
         motorRight.setPower(right);
         motorLeft.setPower(left);
-        trackLifter.setPower(lifterMotor);
-
+        trackLifter.setPower(0.25);
+        if (gamepad2.a == true && gamepad2.b == false) {
+            trackLifter.setTargetPosition(249);
+        }
+        if (gamepad2.b == true && gamepad2.a == false) {
+            trackLifter.setTargetPosition(10);
+        }
+        telemetry.addData("trackLifter", (float)trackLifter.getCurrentPosition());
     }
 }
