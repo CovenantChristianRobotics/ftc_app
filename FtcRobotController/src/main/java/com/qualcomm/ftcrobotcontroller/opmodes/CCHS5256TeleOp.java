@@ -14,16 +14,16 @@ import com.qualcomm.robotcore.util.Range;
  */
 public class CCHS5256TeleOp extends OpMode {
 
-    final static double bpinion_MIN_RANGE  = 0.20;
+    final static double bpinion_MIN_RANGE = 0.20;
     //not sure, we are using a continuous
-    final static double bpinnion_MAX_RANGE  = 0.90;
+    final static double bpinnion_MAX_RANGE = 0.90;
     //not sure, we are using a continuous
-    final static double bpusher_MIN_RANGE  = 0.20;
-    final static double bpusher_MAX_RANGE  = 0.80;
-    final static double cdumper_MIN_RANGE  = 0.00;
-    final static double cdumber_MAX_RANGE  = 1.00;
-    final static double creleaser_MIN_RANGE  = 0.00;
-    final static double creleaser_MAX_RANGE  = 1.00;
+    final static double bpusher_MIN_RANGE = 0.20;
+    final static double bpusher_MAX_RANGE = 0.80;
+    final static double cdumper_MIN_RANGE = 0.00;
+    final static double cdumber_MAX_RANGE = 1.00;
+    final static double creleaser_MIN_RANGE = 0.00;
+    final static double creleaser_MAX_RANGE = 1.00;
 
     // position of the arm servo.
     double beaconPinionPosition;
@@ -50,21 +50,21 @@ public class CCHS5256TeleOp extends OpMode {
     double climberReleaserDelta = 0.1;
 
 
-DcMotorController driveTrainController;
-// DcMotorController rightDrive;
+    DcMotorController driveTrainController;
+    // DcMotorController rightDrive;
 //DcMotorController armController1;
 //DcMotorController armController2;
-DcMotor leftDrive;
-DcMotor rightDrive;
-//DcMotor armController1A;
+    DcMotor leftDrive;
+    DcMotor rightDrive;
+    //DcMotor armController1A;
 //DcMotor armController1B;
 //DcMotor armController2A;
 //DcMotor armController2B;
 //ServoController servoController1;
-Servo servoBeaconPinion;
-Servo servoBeaconPusher;
-Servo servoClimberDumper;
-Servo servoClimberReleaser;
+    Servo servoBeaconPinion;
+    Servo servoBeaconPusher;
+//    Servo servoClimberDumper;
+//    Servo servoClimberReleaser;
 //Servo servo1E;
 //Servo servo1F;
 
@@ -82,9 +82,9 @@ Servo servoClimberReleaser;
         driveTrainController = hardwareMap.dcMotorController.get("dtCtlr");
 //        armController1 = hardwareMap.dcMotorController.get("arm_controller_1");
 //        armController2 = hardwareMap.dcMotorController.get("arm_controller_2");
-        leftDrive = hardwareMap.dcMotor.get("left_drive");
+        leftDrive = hardwareMap.dcMotor.get("motorL");
         leftDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightDrive = hardwareMap.dcMotor.get("right_drive");
+        rightDrive = hardwareMap.dcMotor.get("motorR");
 //        armController1A = hardwareMap.dcMotor.get("arm_1A");
 //        armController1B = hardwareMap.dcMotor.get("arm_1B");
 //        armController2A = hardwareMap.dcMotor.get("arm_2A");
@@ -92,8 +92,7 @@ Servo servoClimberReleaser;
 //        servoController1 = hardwareMap.servoController.get("servo_controller_1");
         servoBeaconPinion = hardwareMap.servo.get("beacon_pinion");
         servoBeaconPusher = hardwareMap.servo.get("beacon_pusher");
-        servoClimberDumper = hardwareMap.servo.get("climber_dumper");
-        servoClimberReleaser = hardwareMap.servo.get("climber_releaser");
+//        servoClimberDumper = hardwareMap.servo.get("climber_dumper");
 //        servo1E = hardwareMap.servo.get("servo1E");
 //        servo1F = hardwareMap.servo.get("servo1F");
 //        leftDrive.setMotorChannelMode(1, DcMotorController.RunMode.RUN_USING_ENCODERS);
@@ -101,48 +100,48 @@ Servo servoClimberReleaser;
 //        rightDrive.setMotorChannelMode(1, DcMotorController.RunMode.RUN_USING_ENCODERS);
 //        rightDrive.setMotorChannelMode(2, DcMotorController.RunMode.RUN_USING_ENCODERS);
 
-       beaconPusherPosition = 0.20;
-       climberDumperPosition = 0.00;
-       climberReleaserPosition = 0.00;
+        beaconPusherPosition = 0.5;
 
     }
-@Override
-public void loop() {
 
-float left = gamepad1.left_stick_y;
-float right = gamepad1.right_stick_y;
+    @Override
+    public void loop() {
 
-left = Range.clip(left, -1, 1);
-right = Range.clip(right, -1, 1);
+        float left = gamepad1.left_stick_y;
+        float right = gamepad1.right_stick_y;
 
-left = (float)scaleInput(left);
-right = (float)scaleInput(right);
+        left = Range.clip(left, -1, 1);
+        right = Range.clip(right, -1, 1);
 
-// if (gamepad1.righttrigger) {
-//     left = (float)fast(left);
-//     right = (float)fast(right);
-// }else if (gamepad1.lefttrigger) {
-//     left = (float)slow(left);
-//     right = (float)slow(right);
-// }else {
-//     left = (float)medium(left);
-//     right = (float)medium(right)
-// 
+//left = (float)scaleInput(left);
+//right = (float)scaleInput(right);
 
-leftDrive.setPower(left);
-rightDrive.setPower(right);
-
-    // update the position of the arm.
-    if (gamepad2.a) {
-        // if the A button is pushed on gamepad1, increment the position of
-        // the arm servo.
-        if(servoBeaconPusher.getPosition()< 0.3) {
-            beaconPusherPosition -= beaconPusherDelta;
+        if (gamepad1.right_trigger > 0) {
+            left = (float) fast(left);
+            right = (float) fast(right);
+        } else if (gamepad1.left_trigger > 0) {
+            left = (float) slow(left);
+            right = (float) slow(right);
+        } else {
+            left = (float) medium(left);
+            right = (float) medium(right);
         }
-        if(servoBeaconPusher.getPosition()> 0.7) {
-            beaconPusherPosition += beaconPusherDelta;
-        }
-    }
+
+
+            leftDrive.setPower(left);
+            rightDrive.setPower(right);
+
+            // update the position of the arm.
+//    if (gamepad2.a) {
+//        // if the A button is pushed on gamepad1, increment the position of
+//        // the arm servo.
+//        if(servoBeaconPusher.getPosition()< 0.3) {
+//            beaconPusherPosition -= beaconPusherDelta;
+//        }
+//        if(servoBeaconPusher.getPosition()> 0.7) {
+//            beaconPusherPosition += beaconPusherDelta;
+//        }
+//    }
 
 //    if (gamepad1.y) {
 //        // if the Y button is pushed on gamepad1, decrease the position of
@@ -172,38 +171,17 @@ rightDrive.setPower(right);
 //telemetry.addData("enc_left_2", (float) leftDrive.getMotorCurrentPosition(2));
 //telemetry.addData("enc_right_1", (float) rightDrive.getMotorCurrentPosition(1));
 //telemetry.addData("enc_right_2", (float) rightDrive.getMotorCurrentPosition(2));
+        telemetry.addData("left trigger", gamepad1.left_trigger);
         }
 
-@Override
-public void stop() {
-
+        @Override
+        public void stop () {
         }
 
-    // double scaleInput(double dVal)  {
-    //     double[] scaleArray = { 0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
-    //             0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00 };
 
-    //     // get the corresponding index for the scaleInput array.
-    //     int index = (int) (dVal * 16.0);
-    //     if (index < 0) {
-    //         index = -index;
-    //     } else if (index > 16) {
-    //         index = 16;
-    //     }
-
-    //     double dScale = 0.0;
-    //     if (dVal < 0) {
-    //         dScale = -scaleArray[index];
-    //     } else {
-    //         dScale = scaleArray[index];
-    //     }
-
-    //     return dScale;
-    // }
-    
-    double scaleInput(double dVal)  {
-        double[] scaleArray = { 0.0, 0.04, 0.07, 0.10, 0.13, 0.16, 0.19, 0.23,
-                0.28, 0.34, 0.41, 0.49, 0.58, 0.68, 0.72, 0.75, 0.75 };
+    double scaleInput(double dVal) {
+        double[] scaleArray = {0.0, 0.04, 0.07, 0.10, 0.13, 0.16, 0.19, 0.23,
+                0.28, 0.34, 0.41, 0.49, 0.58, 0.68, 0.72, 0.75, 0.75};
 
         // get the corresponding index for the scaleInput array.
         int index = (int) (dVal * 16.0);
@@ -222,18 +200,21 @@ public void stop() {
 
         return dScale;
     }
-    
-    // double fast(double jVal) {
-    // // scale input * 1.3333333333 (top speed = 1.0)    
-    // scaleInput((jVal*1.3333333333333333));
-    // }
-    // double medium(double jVal) {
-    // // scale input * 1.0 (top speed = 0.75)  
-    // scaleInput(jVal);
-    // }
-    // double slow(double jVal) {
-    // // scale input * 0.5 (top speed = .375)    
-    // scaleInput((jVal * 0.5))
-    // }
+
+    double fast(double jVal) {
+        // scale input * 1.3333333333 (top speed = 1.0)
+        return ((4 / 3) * scaleInput(jVal));
+    }
+
+    double medium(double jVal) {
+        // scale input * 1.0 (top speed = 0.75)
+        return scaleInput(jVal);
+    }
+
+    double slow(double jVal) {
+        // scale input * 0.5 (top speed = .375)
+        return (0.5 * scaleInput(jVal));
+    }
 
 }
+
