@@ -84,7 +84,7 @@ Servo servoClimberReleaser;
 //        armController2 = hardwareMap.dcMotorController.get("arm_controller_2");
         leftDrive = hardwareMap.dcMotor.get("left_drive");
         leftDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightDrive1 = hardwareMap.dcMotor.get("right_drive");
+        rightDrive = hardwareMap.dcMotor.get("right_drive");
 //        armController1A = hardwareMap.dcMotor.get("arm_1A");
 //        armController1B = hardwareMap.dcMotor.get("arm_1B");
 //        armController2A = hardwareMap.dcMotor.get("arm_2A");

@@ -343,7 +343,7 @@ public class CCHS5256Autonomous extends OpMode {
                 case FINDWALL:
                     distanceToWall = ultraSense.getUltrasonicLevel();
                     if ((distanceToWall > 30.0) && (distanceToWall <= 90.0)) {
-                        moveStraight((distanceToWall - 23.0) * 1.414, 0.5);
+                        moveStraight((distanceToWall - 33.0) * 1.414, 0.5);
                         currentMove = MoveState.STARTMOVE;
                         nextMove = MoveState.TURNALONGWALL;
                         telemetryMove = MoveState.FINDWALL;
@@ -388,6 +388,7 @@ public class CCHS5256Autonomous extends OpMode {
 
                 case DUMPCLIMBERS:
                     moveClimberDump(0.0);
+                    moveClimberDump(1.0);
                     currentMove = MoveState.MOVEDELAY;
                     nextMove = MoveState.ALIGNPRESSER;
                     telemetryMove = MoveState.DUMPCLIMBERS;
@@ -408,6 +409,7 @@ public class CCHS5256Autonomous extends OpMode {
 
                 case PRESSBUTTON:
                     moveBeaconPress(0.0);
+                    moveBeaconPress(1.0);
                     currentMove = MoveState.MOVEDELAY;
                     nextMove = MoveState.PULLAHEADALONGWALL;
                     telemetryMove = MoveState.PRESSBUTTON;
