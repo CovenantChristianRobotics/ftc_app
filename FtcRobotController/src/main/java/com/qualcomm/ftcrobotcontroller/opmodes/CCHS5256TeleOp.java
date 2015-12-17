@@ -83,8 +83,8 @@ public class CCHS5256TeleOp extends OpMode {
 //        armController1 = hardwareMap.dcMotorController.get("arm_controller_1");
 //        armController2 = hardwareMap.dcMotorController.get("arm_controller_2");
         leftDrive = hardwareMap.dcMotor.get("motorL");
-        leftDrive.setDirection(DcMotor.Direction.REVERSE);
         rightDrive = hardwareMap.dcMotor.get("motorR");
+        BrighTside.setDirection = REVERSE;
 //        armController1A = hardwareMap.dcMotor.get("arm_1A");
 //        armController1B = hardwareMap.dcMotor.get("arm_1B");
 //        armController2A = hardwareMap.dcMotor.get("arm_2A");
