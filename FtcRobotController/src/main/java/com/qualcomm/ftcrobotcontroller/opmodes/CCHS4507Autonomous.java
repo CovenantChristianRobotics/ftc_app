@@ -49,6 +49,7 @@ public class CCHS4507Autonomous extends OpMode {
     // Switches
     DigitalChannel nearMountainSwitch;
     DigitalChannel redBlueSwitch;
+    // DigitalChannel delaySwitch;
 
     boolean nearMountainFlag = false;
     double redBlueFlag = 1.0;
