@@ -56,6 +56,7 @@ public class CCHS4507TeleOp extends OpMode {
         motorRight.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         motorLeft.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+        // trackLifter.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
     }
 
     @Override
@@ -69,9 +70,11 @@ public class CCHS4507TeleOp extends OpMode {
         trackLifter.setPower(0.1);
         if (gamepad2.a == true && gamepad2.b == false) {
             trackLifter.setTargetPosition(1220 / 4);
-        }
-        if (gamepad2.b == true && gamepad2.a == false) {
+            //trackLifter.setPower(0.0); 
+        } //else if (gamepad2.b == true && gamepad2.a == false) {
             trackLifter.setTargetPosition(30);
+        } //else {
+            //trackLifter.setPower(0.1);
         }
         telemetry.addData("trackLifter", (float)trackLifter.getCurrentPosition());
     }
