@@ -50,9 +50,12 @@ public class CCHS4507Autonomous extends OpMode {
     DigitalChannel nearMountainSwitch;
     DigitalChannel redBlueSwitch;
     // DigitalChannel delaySwitch;
+    // DigitalChannel tileSwitch
 
     boolean nearMountainFlag = false;
     double redBlueFlag = 1.0;
+    // long delayTimeFlag = 10;
+    
 
     public CCHS4507Autonomous() {
     }
@@ -112,6 +115,8 @@ public class CCHS4507Autonomous extends OpMode {
         ColorSense = hardwareMap.colorSensor.get("color");
         nearMountainSwitch = hardwareMap.digitalChannel.get("nearMtnSw");
         redBlueSwitch = hardwareMap.digitalChannel.get("rbSw");
+        // delaySwitch = hardwareMap.digitalChannel.get("dSw")
+        // tileSwitch = hardwareMap.digitalChannel.get("tSw")
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
         gyroSense = hardwareMap.gyroSensor.get("gyro");
         nearMountainFlag = nearMountainSwitch.getState();
