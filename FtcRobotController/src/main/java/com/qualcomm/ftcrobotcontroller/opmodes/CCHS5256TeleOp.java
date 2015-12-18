@@ -1,5 +1,4 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
-
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
@@ -14,12 +13,10 @@ import com.qualcomm.robotcore.util.Range;
  */
 public class CCHS5256TeleOp extends OpMode {
 
-
     final static double bpusher_MIN_RANGE = 0.20;
     final static double bpusher_MAX_RANGE = 0.80;
     final static double cdumper_MIN_RANGE = 0.00;
     final static double cdumper_MAX_RANGE = 1.00;
-
 
     // position of the arm servo.
     double beaconPinionPosition;
@@ -34,14 +31,7 @@ public class CCHS5256TeleOp extends OpMode {
     double climberDumperPosition;
 
     // amount to change the arm servo position.
-    //double climberDumperDelta = 0.1;
-
-    //position of the claw servo
-    double climberReleaserPosition;
-
-    // amount to change the claw servo position by
-    double climberReleaserDelta = 0.1;
-
+    double climberDumperDelta = 0.1;
 
     DcMotorController driveTrainController;
     // DcMotorController rightDrive;
@@ -71,30 +61,17 @@ public class CCHS5256TeleOp extends OpMode {
     @Override
     public void init() {
 
-
         driveTrainController = hardwareMap.dcMotorController.get("dtCtlr");
-//        armController1 = hardwareMap.dcMotorController.get("arm_controller_1");
-//        armController2 = hardwareMap.dcMotorController.get("arm_controller_2");
         leftDrive = hardwareMap.dcMotor.get("motorL");
         rightDrive = hardwareMap.dcMotor.get("motorR");
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
-//        armController1A = hardwareMap.dcMotor.get("arm_1A");
-//        armController1B = hardwareMap.dcMotor.get("arm_1B");
-//        armController2A = hardwareMap.dcMotor.get("arm_2A");
-//        armController2B = hardwareMap.dcMotor.get("arm_2B");
+
 //        servoController1 = hardwareMap.servoController.get("servo_controller_1");
         servoBeaconPinion = hardwareMap.servo.get("beacon_pinion");
         servoBeaconPusher = hardwareMap.servo.get("beacon_pusher");
 //        servoClimberDumper = hardwareMap.servo.get("climber_dumper");
-//        servo1E = hardwareMap.servo.get("servo1E");
-//        servo1F = hardwareMap.servo.get("servo1F");
-//        leftDrive.setMotorChannelMode(1, DcMotorController.RunMode.RUN_USING_ENCODERS);
-//        leftDrive.setMotorChannelMode(2, DcMotorController.RunMode.RUN_USING_ENCODERS);
-//        rightDrive.setMotorChannelMode(1, DcMotorController.RunMode.RUN_USING_ENCODERS);
-//        rightDrive.setMotorChannelMode(2, DcMotorController.RunMode.RUN_USING_ENCODERS);
 
         beaconPusherPosition = 0.5;
-
     }
 
     @Override
@@ -135,37 +112,14 @@ public class CCHS5256TeleOp extends OpMode {
         }
     }
 
-
-
-//    if (gamepad1.y) {
-//        // if the Y button is pushed on gamepad1, decrease the position of
-//        // the arm servo.
-//        armPosition -= armDelta;
-//    }
-//
-//    // update the position of the claw
-//    if (gamepad1.x) {
-//        clawPosition += clawDelta;
-//    }
-//
-//    if (gamepad1.b) {
-//        clawPosition -= clawDelta;
-//    }
-//
-//    // clip the position values so that they never exceed their allowed range.
-//    armPosition = Range.clip(armPosition, ARM_MIN_RANGE, ARM_MAX_RANGE);
-//    clawPosition = Range.clip(clawPosition, CLAW_MIN_RANGE, CLAW_MAX_RANGE);
-//
+        // clip the position values so that they never exceed their allowed range.
         beaconPusherPosition = Range.clip(beaconPinionPosition, bpusher_MIN_RANGE, bpusher_MAX_RANGE);
-//    // write position values to the wrist and claw servo
-servoBeaconPusher.setPosition(beaconPusherPosition);
+        
+        // write position values to the wrist and claw servo
+        servoBeaconPusher.setPosition(beaconPusherPosition);
 
-
-//telemetry.addData("enc_left_1", (float) leftDrive.getMotorCurrentPosition(1));
-//telemetry.addData("enc_left_2", (float) leftDrive.getMotorCurrentPosition(2));
-//telemetry.addData("enc_right_1", (float) rightDrive.getMotorCurrentPosition(1));
-//telemetry.addData("enc_right_2", (float) rightDrive.getMotorCurrentPosition(2));
         telemetry.addData("left trigger", gamepad1.left_trigger);
+        telemetry.addData("right trigger", gamepad1.right_trigger);
         telemetry.addData("Pinion", servoBeaconPinion.getPosition());
         telemetry.addData("Pusher", servoBeaconPusher.getPosition());
         }
@@ -211,6 +165,4 @@ servoBeaconPusher.setPosition(beaconPusherPosition);
         // scale input * 0.5 (top speed = .375)
         return (0.5 * scaleInput(jVal));
     }
-
 }
-
