@@ -1,4 +1,3 @@
-
 package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -8,6 +7,7 @@ import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.Range;
 import java.util.Date;
@@ -30,35 +30,44 @@ public class CCHS5256Autonomous extends OpMode {
     final static double cdumber_MAX_RANGE  = 1.00;
 
     // target values for servos
-    double beaconPusherTarget;
-    double climberDumperTarget;
-    double beaconPinionTarget;
-
+    double beaconPusherPosition;
+    double climberDumperPosition;
+    double beaconPinionPosition;
 
     //dc motor controllers
     DcMotorController driveTrainController;
+    DcMotorController hangingController;
     //dc motors
-    DcMotor motorRight;
-    DcMotor motorLeft;
+    DcMotor leftDrive;
+    DcMotor rightDrive;
+    DcMotor chinUp;
     //servo controllers
-    ServoController beaconServos;
+    ServoController beaconController;
+    ServoController alignmentController;
     //servos
     Servo servoBeaconPinion;
     Servo servoBeaconPusher;
-    Servo servoClimberDumper;
-    Servo servo1;
+    //Servo servoClimberDumper;
+    Servo servoUltraSense;
+    Servo leftOmniPinion;
+    Servo rightOmniPinion;
     //sensors
-    ColorSensor ColorSense;
-    OpticalDistanceSensor OpticalDistance;
+    ColorSensor beaconColorSense;
+//    ColorSensor floorColorSense;
+//    OpticalDistanceSensor leftWheelAlignment;
+//    OpticalDistanceSensor rightWheelAlignment;
     GyroSensor gyroSense;
     UltrasonicSensor ultraSense;
-    TouchSensor touchSense;
-    //Movestate options
+    TouchSensor beaconPinionAlignment;
+    TouchSensor beaconPinionStop;
+    TouchSensor leftWheelStop;
+    TouchSensor rightWheelStop;
+    //Statemachine options
     MoveState currentMove;
     MoveState nextMove;
     MoveState telemetryMove;
     double ifRedOnBeacon;
-    int beaconPassDistance;
+    double ifBlueOnBeacon;
     boolean lookingForRedFlag;
     boolean sawBlueFlag;
     //delay settings
@@ -91,12 +100,12 @@ public class CCHS5256Autonomous extends OpMode {
         int rightTarget;
         int leftTarget;
 
-        leftTarget = motorLeft.getCurrentPosition() + centimetersToCounts(distanceCM);
-        motorLeft.setTargetPosition(leftTarget);
-        rightTarget = motorRight.getCurrentPosition() + centimetersToCounts(distanceCM);
-        motorRight.setTargetPosition(rightTarget);
-        motorLeft.setPower(speed);
-        motorRight.setPower(speed);
+        leftTarget = leftDrive.getCurrentPosition() + centimetersToCounts(distanceCM);
+        leftDrive.setTargetPosition(leftTarget);
+        rightTarget = rightDrive.getCurrentPosition() + centimetersToCounts(distanceCM);
+        rightDrive.setTargetPosition(rightTarget);
+        leftDrive.setPower(speed);
+        rightDrive.setPower(speed);
     }
 
     /**
@@ -109,12 +118,12 @@ public class CCHS5256Autonomous extends OpMode {
         int rightTarget;
         int leftTarget;
 
-        leftTarget = motorLeft.getCurrentPosition() - degreesToCounts(degrees);
-        motorLeft.setTargetPosition(leftTarget);
-        rightTarget = motorRight.getCurrentPosition() + degreesToCounts(degrees);
-        motorRight.setTargetPosition(rightTarget);
-        motorLeft.setPower(speed);
-        motorRight.setPower(speed);
+        leftTarget = leftDrive.getCurrentPosition() - degreesToCounts(degrees);
+        leftDrive.setTargetPosition(leftTarget);
+        rightTarget = rightDrive.getCurrentPosition() + degreesToCounts(degrees);
+        rightDrive.setTargetPosition(rightTarget);
+        leftDrive.setPower(speed);
+        rightDrive.setPower(speed);
     }
 
     /**
@@ -128,35 +137,35 @@ public class CCHS5256Autonomous extends OpMode {
         preTurnHeading = gyroSense.getHeading();
         if (gyroSense.getHeading() < preTurnHeading + degrees) {
             if (degrees > 0) {
-                motorLeft.setPower(-speed);
-                motorRight.setPower(speed);
-                motorLeft.setTargetPosition(1000000000);
-                motorRight.setTargetPosition(1000000000);
+                leftDrive.setPower(-speed);
+                rightDrive.setPower(speed);
+                leftDrive.setTargetPosition(1000000000);
+                rightDrive.setTargetPosition(1000000000);
             }
             if (degrees < 0) {
-                motorLeft.setPower(speed);
-                motorRight.setPower(-speed);
+                leftDrive.setPower(speed);
+                rightDrive.setPower(-speed);
             }
-            motorLeft.setTargetPosition(1000000000);
-            motorRight.setTargetPosition(1000000000);
+            leftDrive.setTargetPosition(1000000000);
+            rightDrive.setTargetPosition(1000000000);
 
         }
         if (gyroSense.getHeading() >= preTurnHeading + degrees){
-            motorLeft.setPower(0.0);
-            motorRight.setPower(0.0);
+            leftDrive.setPower(0.0);
+            rightDrive.setPower(0.0);
         }
     }
 
     void motorOn(double speed, boolean onoroff) {
         if(onoroff = true){
-            motorLeft.setPower(speed);
-            motorRight.setPower(speed);
-            motorLeft.setTargetPosition(1000000000);
-            motorRight.setTargetPosition(1000000000);
+            leftDrive.setPower(speed);
+            rightDrive.setPower(speed);
+            leftDrive.setTargetPosition(1000000000);
+            rightDrive.setTargetPosition(1000000000);
         }
         if (onoroff = false) {
-            motorLeft.setPower(0.0);
-            motorRight.setPower(0.0);
+            leftDrive.setPower(0.0);
+            rightDrive.setPower(0.0);
         }
     }
 
@@ -178,7 +187,7 @@ public class CCHS5256Autonomous extends OpMode {
     void moveBeaconPress(double beaconPresserPosition) {
         beaconPresserPosition = Range.clip(beaconPresserPosition, bpusher_MIN_RANGE, bpusher_MAX_RANGE);
         servoBeaconPusher.setPosition(beaconPresserPosition);
-        beaconPusherTarget = beaconPresserPosition;
+        beaconPusherPosition = beaconPresserPosition;
     }
 
     /**
@@ -188,40 +197,68 @@ public class CCHS5256Autonomous extends OpMode {
      */
     void moveClimberDump(double climberDumperPosition) {
         climberDumperPosition = Range.clip(climberDumperPosition, cdumper_MIN_RANGE, cdumber_MAX_RANGE);
-        servoClimberDumper.setPosition(climberDumperPosition);
-        climberDumperTarget = climberDumperPosition;
+//        servoClimberDumper.setPosition(climberDumperPosition);
+        climberDumperPosition = climberDumperPosition;
     }
 
+    /**
+     * speed is between -1 and +1
+     *
+     * @param lOmnipinionSpeed
+     */
+    void moveLeftOmnipinion(double lOmnipinionSpeed) {
+        double FomniPinionSpeed = ((lOmnipinionSpeed / 2) + 0.5);
+        servoBeaconPinion.setPosition(FomniPinionSpeed);
+    }
 
+    /**
+     * speed is between -1 and +1
+     *
+     * @param rOmnipinionSpeed
+     */
+    void moveRightOmnipinion(double rOmnipinionSpeed) {
+        double FomniPinionSpeed = ((rOmnipinionSpeed / 2) + 0.5);
+        servoBeaconPinion.setPosition(FomniPinionSpeed);
+    }
 
     @Override
     public void init() {
         //dc Motor Controllers
         driveTrainController = hardwareMap.dcMotorController.get("dtCtlr");
+        hangingController = hardwareMap.dcMotorController.get("hangCtlr");
         //dc Motors
-        motorRight = hardwareMap.dcMotor.get("motorR");
-        motorLeft = hardwareMap.dcMotor.get("motorL");
+        leftDrive = hardwareMap.dcMotor.get("motorL");
+        rightDrive = hardwareMap.dcMotor.get("motorR");
+        chinUp = hardwareMap.dcMotor.get("chinUp");
         //servo controllers
-        beaconServos = hardwareMap.servoController.get("servoCtlr");
+        beaconController = hardwareMap.servoController.get("beaconCtlr");
+        alignmentController = hardwareMap.servoController.get("alignCtlr");
         //servos
-        servoBeaconPinion = hardwareMap.servo.get("beacon_pinion");
-        servoBeaconPusher = hardwareMap.servo.get("beacon_pusher");
-        servoClimberDumper = hardwareMap.servo.get("climber_dumper");
-        servo1 = hardwareMap.servo.get("servo_1");
+        servoBeaconPinion = hardwareMap.servo.get("beaconPinion");
+        servoBeaconPusher = hardwareMap.servo.get("beaconPusher");
+        //servoClimberDumper = hardwareMap.servo.get("climber_dumper");
+        servoUltraSense = hardwareMap.servo.get("servoUltra");
+        leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
+        rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
         //sensors
-        ColorSense = hardwareMap.colorSensor.get("color");
-        ColorSense.enableLed(false);
+        beaconColorSense = hardwareMap.colorSensor.get("bColorSense");
+        beaconColorSense.enableLed(false);
+//        floorColorSense = hardwareMap.colorSensor.get("fColorSense");
+//        floorColorSense.enableLed(true);
         gyroSense = hardwareMap.gyroSensor.get("gyro");
-        gyroSense.calibrate();
-        while (gyroSense.isCalibrating()) {
-        }
+//        gyroSense.calibrate();
+//        while (gyroSense.isCalibrating()) {
+//        }
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
-        touchSense = hardwareMap.touchSensor.get("touchSense");
+        beaconPinionAlignment = hardwareMap.touchSensor.get("bPAlign");
+        beaconPinionStop = hardwareMap.touchSensor.get("bPStop");
+        leftWheelStop = hardwareMap.touchSensor.get("lWStop");
+        rightWheelStop = hardwareMap.touchSensor.get("rWStop");
         //motor configurations
-        motorRight.setDirection(DcMotor.Direction.REVERSE);
-        motorRight.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        motorLeft.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        //movestate settings
+        rightDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+        rightDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+        //statemachine settings
         currentMove = MoveState.FIRSTMOVE;
         telemetryMove = MoveState.FIRSTMOVE;
         lookingForRedFlag = false;
@@ -230,11 +267,18 @@ public class CCHS5256Autonomous extends OpMode {
         moveBeaconPinion(0.0);
         moveClimberDump(1.0);
         moveBeaconPress(1.0);
-        servo1.setPosition(0.25);
+        servoUltraSense.setPosition(0.25);
         // align color sensor
-        // while (touchSense.) {
-        //     servoBeaconPinion.setPosition(0.5)
-        // }
+        while (!beaconPinionStop.isPressed()) {
+            moveBeaconPinion(0.5);
+        }
+        // align omniwheels
+        while (!leftWheelStop.isPressed()) {
+            moveLeftOmnipinion(0.5);
+        }
+        while (!rightWheelStop.isPressed()) {
+            moveRightOmnipinion(0.5);
+        }
 
     }
 
@@ -248,58 +292,39 @@ public class CCHS5256Autonomous extends OpMode {
             switch (currentMove) {
 
                 case STARTMOVE:
-                    if (motorLeft.isBusy() && motorRight.isBusy()) {
+                    if (leftDrive.isBusy() && rightDrive.isBusy()) {
                         currentMove = MoveState.MOVING;
                     }
                     break;
 
                 case MOVING:
-                    if (lookingForRedFlag && ((ColorSense.red() >= 1) || (ColorSense.blue() >= 1)))  {
-                        motorRight.setPower(0.0);
-                        motorLeft.setPower(0.0);
+                    if (lookingForRedFlag && ((beaconColorSense.red() >= 1) || (beaconColorSense.blue() >= 1))) {
+                        leftDrive.setPower(0.0);
+                        rightDrive.setPower(0.0);
                         currentMove = MoveState.MOVEDELAY;
                     }
-                    if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+                    if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
                         currentMove = MoveState.MOVEDELAY;
                     }
                     break;
 
-                // case SERVODUMPERMOVE:
-                //     if (servoClimberDumper.getPosition() > climberDumperTarget ) {
-                //         currentMove = MoveState.SERVODUMPERMOVE;
-                //     } else if (servoClimberDumper.getPosition() < climberDumperTarget) {
-                //         currentMove = MoveState.SERVODUMPERMOVE;
-                //     } else {
-                //         currentMove = MoveState.MOVEDELAY;
-                //     }
-                //     break;
-
-                // case SERVOPUSHERMOVE:
-                //     if (servoBeaconPusher.getPosition() > climberDumperTarget) {
-                //         currentMove = MoveState.SERVOPUSHERMOVE;
-                //     } else if (servoBeaconPusher.getPosition() < climberDumperTarget){
-                //         currentMove = MoveState.SERVOPUSHERMOVE;
-                //     } else {
-                //         currentMove = MoveState.MOVEDELAY;
-                //     }
-                //     break;
 
                 case SERVOPINIONNULLMOVE:
-                    if (ColorSense.red() < 1.0 && ColorSense.blue() < 1.0) {
+                    if (beaconColorSense.red() < 1.0 && beaconColorSense.blue() < 1.0) {
                         moveBeaconPinion(0.0);
                         currentMove = MoveState.MOVEDELAY;
-                    } else if (ColorSense.red() >= 1.0 || ColorSense.blue() >= 1.0) {
-                        moveBeaconPinion(beaconPinionTarget);
+                    } else if (beaconColorSense.red() >= 1.0 || beaconColorSense.blue() >= 1.0) {
+                        moveBeaconPinion(beaconPinionPosition);
                         currentMove = MoveState.SERVOPINIONNULLMOVE;
                     }
                     break;
 
                 case SERVOPINIONREDMOVE:
-                    if (ColorSense.red() >= 1.0) {
+                    if (beaconColorSense.red() >= 1.0) {
                         moveBeaconPinion(0.0);
                         currentMove = MoveState.MOVEDELAY;
-                    } else if (ColorSense.red() < 1.0) {
-                        moveBeaconPinion(beaconPinionTarget);
+                    } else if (beaconColorSense.red() < 1.0) {
+                        moveBeaconPinion(beaconPinionPosition);
                         currentMove = MoveState.SERVOPINIONREDMOVE;
                     }
 
@@ -379,7 +404,8 @@ public class CCHS5256Autonomous extends OpMode {
                     break;
 
                 case ALIGNDUMPER:
-                    ifRedOnBeacon = ColorSense.red();
+                    ifRedOnBeacon = beaconColorSense.red();
+                    ifBlueOnBeacon = beaconColorSense.blue();
                     moveBeaconPinion(0.5);
                     currentMove = MoveState.SERVOPINIONNULLMOVE;
                     nextMove = MoveState.DUMPCLIMBERS;
@@ -399,7 +425,7 @@ public class CCHS5256Autonomous extends OpMode {
                 case ALIGNPRESSER:
                     if (ifRedOnBeacon >= 1.0) {
                         moveBeaconPinion(-0.5);
-                    }else if (ifRedOnBeacon < 1.0){
+                    } else if (ifRedOnBeacon < 1.0) {
                         moveBeaconPinion(0.5);
                     }
                     currentMove = MoveState.SERVOPINIONREDMOVE;
@@ -460,22 +486,22 @@ public class CCHS5256Autonomous extends OpMode {
                     break;
 
                 case DONE:
-                    motorLeft.setPower(0.0);
-                    motorRight.setPower(0.0);
+                    leftDrive.setPower(0.0);
+                    rightDrive.setPower(0.0);
                     telemetryMove = MoveState.DONE;
                     break;
             }
-
 
         telemetry.addData("Text", "*** Robot Data***");
         telemetry.addData("Text", "Look for Red");
         telemetry.addData("Ultrasonic", ultraSense.getUltrasonicLevel());
         telemetry.addData("Current Move", telemetryMove.toString());
-        telemetry.addData("ENCLeft", (float) motorLeft.getCurrentPosition());
-        telemetry.addData("ENCRight", (float) motorRight.getCurrentPosition());
+        telemetry.addData("ENCLeft", (float) leftDrive.getCurrentPosition());
+        telemetry.addData("ENCRight", (float) rightDrive.getCurrentPosition());
     }
 
     @Override
     public void stop() {
     }
 }
+
