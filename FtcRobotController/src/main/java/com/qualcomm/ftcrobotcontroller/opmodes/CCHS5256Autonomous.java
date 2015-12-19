@@ -52,7 +52,7 @@ public class CCHS5256Autonomous extends OpMode {
     OpticalDistanceSensor OpticalDistance;
     GyroSensor gyroSense;
     UltrasonicSensor ultraSense;
-    // TouchSensor touchSense;
+    TouchSensor touchSense;
     //Movestate options
     MoveState currentMove;
     MoveState nextMove;
@@ -216,7 +216,7 @@ public class CCHS5256Autonomous extends OpMode {
         while (gyroSense.isCalibrating()) {
         }
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
-        // touchSense = hardwareMap.touchSensor.get("touchSense");
+        touchSense = hardwareMap.touchSensor.get("touchSense");
         //motor configurations
         motorRight.setDirection(DcMotor.Direction.REVERSE);
         motorRight.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
