@@ -2,76 +2,110 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
-import com.qualcomm.robotcore.hardware.LightSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
+import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.Range;
+
+import java.util.Date;
 
 /**
  * Created by Robotics on 9/29/2015.
  */
 public class CCHS5256TeleOp extends OpMode {
 
-    final static double bpusher_MIN_RANGE = 0.20;
+   final static double bpusher_MIN_RANGE = 0.20;
     final static double bpusher_MAX_RANGE = 0.80;
     final static double cdumper_MIN_RANGE = 0.00;
     final static double cdumper_MAX_RANGE = 1.00;
 
-    // position of the arm servo.
     double beaconPinionPosition;
-
-    // position of the claw servo
     double beaconPusherPosition;
-
-    // amount to change the claw servo position by
-    double beaconPusherDelta = 0.1;
-
-    // position of the arm servo.
     double climberDumperPosition;
 
-    // amount to change the arm servo position.
-    double climberDumperDelta = 0.1;
-
+    // DcMotorControllers
     DcMotorController driveTrainController;
-    // DcMotorController rightDrive;
-//DcMotorController armController1;
-//DcMotorController armController2;
+    DcMotorController hangingController;
+    // DcMotors
     DcMotor leftDrive;
     DcMotor rightDrive;
-    //DcMotor armController1A;
-//DcMotor armController1B;
-//DcMotor armController2A;
-//DcMotor armController2B;
-//ServoController servoController1;
+    DcMotor chinUp;
+    // ServoControllers
+    ServoController beaconController;
+    ServoController alignmentController;
+    // Servos
     Servo servoBeaconPinion;
     Servo servoBeaconPusher;
+    Servo servoUltraSense;
 //    Servo servoClimberDumper;
-//    Servo servoClimberReleaser;
-//Servo servo1E;
-//Servo servo1F;
+    Servo leftOmniPinion;
+    Servo rightOmniPinion;
+    //sensors
+    ColorSensor beaconColorSense;
+//    ColorSensor floorColorSense;
+//    OpticalDistanceSensor leftWheelAlignment;
+//    OpticalDistanceSensor rightWheelAlignment;
+    GyroSensor gyroSense;
+    UltrasonicSensor ultraSense;
+    TouchSensor beaconPinionAlignment;
+    TouchSensor beaconPinionStop;
+    TouchSensor leftWheelStop;
+    TouchSensor rightWheelStop;
+    // State Machine Options
+    // Delay Settings
+    long delayUntil;
+    long moveDelayTime;
+    Date now;
 
     /**
      * Constructor
      */
     public CCHS5256TeleOp() {
-
     }
 
     @Override
     public void init() {
-
+        // DcMotorControllers
         driveTrainController = hardwareMap.dcMotorController.get("dtCtlr");
+        hangingController = hardwareMap.dcMotorController.get("hangCtlr");
+        // DcMotors
         leftDrive = hardwareMap.dcMotor.get("motorL");
         rightDrive = hardwareMap.dcMotor.get("motorR");
+        chinUp = hardwareMap.dcMotor.get("chinUp");
+        // Servo Controllers
+        beaconController = hardwareMap.servoController.get("beaconCtlr");
+        alignmentController = hardwareMap.servoController.get("alignCtlr");
+        // Servos
+        servoBeaconPinion = hardwareMap.servo.get("beaconPinion");
+        servoBeaconPusher = hardwareMap.servo.get("beaconPusher");
+//        servoClimberDumper = hardwareMap.servo.get("climberDumper");
+        servoUltraSense = hardwareMap.servo.get("servoUltra");
+        leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
+        rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
+        // Sensors
+        beaconColorSense = hardwareMap.colorSensor.get("bColorSense");
+        beaconColorSense.enableLed(false);
+//        floorColorSense = hardwareMap.colorSensor.get("fColorSense");
+//        floorColorSense.enableLed(true);
+//        leftWheelAlignment = hardwareMap.opticalDistanceSensor.get("lWAlign");
+//        rightWheelAlignment = hardwareMap.opticalDistanceSensor.get("rWAlign");
+        gyroSense = hardwareMap.gyroSensor.get("gyroSense");
+        ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
+        beaconPinionAlignment = hardwareMap.touchSensor.get("bPALign");
+        beaconPinionStop = hardwareMap.touchSensor.get("bPStop");
+        leftWheelStop = hardwareMap.touchSensor.get("lWStop");
+        rightWheelStop = hardwareMap.touchSensor.get("rWStop");
+        //motor configurations
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
-
-//        servoController1 = hardwareMap.servoController.get("servo_controller_1");
-        servoBeaconPinion = hardwareMap.servo.get("beacon_pinion");
-        servoBeaconPusher = hardwareMap.servo.get("beacon_pusher");
-//        servoClimberDumper = hardwareMap.servo.get("climber_dumper");
-
-        beaconPusherPosition = 0.5;
+        leftDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        rightDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        // state machine settings
+        // servo positions
+            beaconPusherPosition = 0.5;
     }
 
     @Override
@@ -152,7 +186,7 @@ public class CCHS5256TeleOp extends OpMode {
     }
 
     double fast(double jVal) {
-        // scale input * 1.3333333333 (top speed = 1.0)
+        // scale input * 4/3 (top speed = 1.0)
         return ((4 / 3) * scaleInput(jVal));
     }
 
