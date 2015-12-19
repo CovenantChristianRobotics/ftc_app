@@ -70,11 +70,11 @@ public class CCHS4507TeleOp extends OpMode {
         trackLifter.setPower(0.1);
         if (gamepad2.a == true && gamepad2.b == false) {
             trackLifter.setTargetPosition(1220 / 4);
-            //trackLifter.setPower(0.0); 
-        } //else if (gamepad2.b == true && gamepad2.a == false) {
+            trackLifter.setPower(0.0);
+        } else if (gamepad2.b == true && gamepad2.a == false) {
             trackLifter.setTargetPosition(30);
-        } //else {
-            //trackLifter.setPower(0.1);
+        } else {
+            trackLifter.setPower(0.1);
         }
         telemetry.addData("trackLifter", (float)trackLifter.getCurrentPosition());
     }
