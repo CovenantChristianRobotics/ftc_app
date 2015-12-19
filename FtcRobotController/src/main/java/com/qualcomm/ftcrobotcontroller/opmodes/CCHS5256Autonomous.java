@@ -1,3 +1,4 @@
+
 package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -218,8 +219,8 @@ public class CCHS5256Autonomous extends OpMode {
         // touchSense = hardwareMap.touchSensor.get("touchSense");
         //motor configurations
         motorRight.setDirection(DcMotor.Direction.REVERSE);
-        motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
+        motorRight.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+        motorLeft.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         //movestate settings
         currentMove = MoveState.FIRSTMOVE;
         telemetryMove = MoveState.FIRSTMOVE;
