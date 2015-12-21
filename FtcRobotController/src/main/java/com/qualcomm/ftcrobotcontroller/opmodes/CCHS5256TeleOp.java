@@ -51,6 +51,7 @@ public class CCHS5256TeleOp extends OpMode {
 //    OpticalDistanceSensor rightWheelAlignment;
     GyroSensor gyroSense;
     UltrasonicSensor ultraSense;
+    double lowDist;
    //  TouchSensor beaconPinionAlignment;
    //  TouchSensor beaconPinionStop;
    //  TouchSensor leftWheelStop;
@@ -150,7 +151,9 @@ public class CCHS5256TeleOp extends OpMode {
         servoBeaconPinion.setPosition(((beaconPinion / 2) + 0.5));
         
         if (gamepad1.a) {
-           moveStraightWithGyro(0.5);
+           if (ultraSense.getUltrasonicLevel == lowDist) {
+              moveStraightWithGyro(0.5);
+           }
         } else if (gamepad1.b) {
            moveStraightWithGyro(-0.5);
         }
