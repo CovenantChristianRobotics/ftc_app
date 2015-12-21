@@ -54,7 +54,8 @@ public class CCHS4507Autonomous extends OpMode {
 
     boolean nearMountainFlag = false;
     double redBlueFlag = 1.0;
-    // long delayTimeFlag = 10;
+   // long delayTimeFlag = 10;
+   // double tileFlag = 1.0;
     
 
     public CCHS4507Autonomous() {
@@ -131,6 +132,12 @@ public class CCHS4507Autonomous extends OpMode {
             lookingForBlueFlag = true;
             servoDist.setPosition(0.25);
         }
+        // tileFlag = tileSwitch.getState();
+        //if (tileSwitch.getState()) {
+            
+        // } else {
+            
+        // }
         ColorSense.enableLed(true);
         motorRight.setDirection(DcMotor.Direction.REVERSE);
         trackLifter.setDirection(DcMotor.Direction.REVERSE);
