@@ -36,11 +36,11 @@ public class CCHS5256Autonomous extends OpMode {
 
     //dc motor controllers
     DcMotorController driveTrainController;
-    DcMotorController hangingController;
+    // DcMotorController hangingController;
     //dc motors
     DcMotor leftDrive;
     DcMotor rightDrive;
-    DcMotor chinUp;
+    // DcMotor chinUp;
     //servo controllers
     ServoController beaconController;
     ServoController alignmentController;
@@ -49,19 +49,20 @@ public class CCHS5256Autonomous extends OpMode {
     Servo servoBeaconPusher;
     //Servo servoClimberDumper;
     Servo servoUltraSense;
-    Servo leftOmniPinion;
-    Servo rightOmniPinion;
+    // Servo leftOmniPinion;
+    // Servo rightOmniPinion;
     //sensors
     ColorSensor beaconColorSense;
 //    ColorSensor floorColorSense;
 //    OpticalDistanceSensor leftWheelAlignment;
 //    OpticalDistanceSensor rightWheelAlignment;
     GyroSensor gyroSense;
+    int preTurnHeading;
     UltrasonicSensor ultraSense;
-    TouchSensor beaconPinionAlignment;
-    TouchSensor beaconPinionStop;
-    TouchSensor leftWheelStop;
-    TouchSensor rightWheelStop;
+    // TouchSensor beaconPinionAlignment;
+    // TouchSensor beaconPinionStop;
+    // TouchSensor leftWheelStop;
+    // TouchSensor rightWheelStop;
     //Statemachine options
     MoveState currentMove;
     MoveState nextMove;
@@ -133,24 +134,22 @@ public class CCHS5256Autonomous extends OpMode {
      * @param speed
      */
     void moveTurnWithGyro(int degrees, double speed) {
-        int preTurnHeading;
-        preTurnHeading = gyroSense.getHeading();
-        if (gyroSense.getHeading() < preTurnHeading + degrees) {
-            if (degrees > 0) {
-                leftDrive.setPower(-speed);
-                rightDrive.setPower(speed);
-                leftDrive.setTargetPosition(1000000000);
-                rightDrive.setTargetPosition(1000000000);
-            }
-            if (degrees < 0) {
-                leftDrive.setPower(speed);
-                rightDrive.setPower(-speed);
-            }
-            leftDrive.setTargetPosition(1000000000);
-            rightDrive.setTargetPosition(1000000000);
-
-        }
-        if (gyroSense.getHeading() >= preTurnHeading + degrees){
+        if (gyroSense.getHeading == (preTurnHeading + degrees) {
+            leftDrive.setPower(0.0);
+            rightDrive.setPower(0.0);
+        } else if (gyroSense.getHeading == ((preTurnHeading + degrees) - 360) {
+            leftDrive.setPower(0.0);
+            rightDrive.setPower(0.0);
+        } else if (gyroSense.getHeading == ((preTurnHeading + degrees) + 360) {
+            leftDrive.setPower(0.0);
+            rightDrive.setPower(0.0);
+        } else if (degrees > 0 && gyroSense.getHeading < (preTurnHeading + degrees)) {
+            leftDrive.setPower(-speed);
+            rightDrive.setPower(speed);
+        } else if (degrees < 0 && gyroSense.getHeading > (preTurnHeading - degrees)) {
+            leftDrive.setPower(speed);
+            rightDrive.setPower(-speed);
+        } else if (degrees == 0) {
             leftDrive.setPower(0.0);
             rightDrive.setPower(0.0);
         }
@@ -269,16 +268,16 @@ public class CCHS5256Autonomous extends OpMode {
         moveBeaconPress(1.0);
         servoUltraSense.setPosition(0.25);
         // align color sensor
-        while (!beaconPinionStop.isPressed()) {
-            moveBeaconPinion(0.5);
-        }
-        // align omniwheels
-        while (!leftWheelStop.isPressed()) {
-            moveLeftOmnipinion(0.5);
-        }
-        while (!rightWheelStop.isPressed()) {
-            moveRightOmnipinion(0.5);
-        }
+        // while (!beaconPinionStop.isPressed()) {
+        //     moveBeaconPinion(0.5);
+        // }
+        // // align omniwheels
+        // while (!leftWheelStop.isPressed()) {
+        //     moveLeftOmnipinion(0.5);
+        // }
+        // while (!rightWheelStop.isPressed()) {
+        //     moveRightOmnipinion(0.5);
+        // }
 
     }
 
@@ -342,6 +341,7 @@ public class CCHS5256Autonomous extends OpMode {
                     break;
 
                 case FIRSTMOVE:
+                    preTurnHeading = gyroSense.getHeading;
                     moveStraight(80.0, 0.6);
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.TURNDIAG;
@@ -359,6 +359,7 @@ public class CCHS5256Autonomous extends OpMode {
                     break;
 
                 case MOVEDIAG:
+                    preTurnHeading = gyroSense.getHeading;
                     moveStraight(171.0, 0.6);
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.FINDWALL;
@@ -387,6 +388,7 @@ public class CCHS5256Autonomous extends OpMode {
                     break;
 
                 case DRIVEALONGWALL:
+                    preTurnHeading = gyroSense.getHeading;
                     moveStraight(-50.0, 0.6);
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.FINDBEACON;
@@ -462,6 +464,7 @@ public class CCHS5256Autonomous extends OpMode {
                     break;
 
                 case MOVETORAMP:
+                    preTurnHeading = gyroSense.getHeading;
                     moveStraight(-103.0, 0.6);
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.TURNTORAMP;
