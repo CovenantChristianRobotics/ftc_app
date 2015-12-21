@@ -67,7 +67,7 @@ public class CCHS5256TeleOp extends OpMode {
     public CCHS5256TeleOp() {
     }
     
-      void moveStraightWithGyro(double distanceCM, double speed) {
+      void moveStraightWithGyro(double speed) {
          int preMoveHeading 
 
          if (gyroSense.getHeading == (preMoveHeading - 1) || gyroSense.getHeading == preMoveHeading || gyroSense.heading == (preMoveHeading + 1) {
@@ -150,9 +150,9 @@ public class CCHS5256TeleOp extends OpMode {
         servoBeaconPinion.setPosition(((beaconPinion / 2) + 0.5));
         
         if (gamepad1.a) {
-           moveStraightWithGyro(0.5)
+           moveStraightWithGyro(0.5);
         } else if (gamepad1.b) {
-           moveSt
+           moveStraightWithGyro(-0.5);
         }
 
             // update the position of the arm.
