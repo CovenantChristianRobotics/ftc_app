@@ -29,21 +29,21 @@ public class CCHS5256TeleOp extends OpMode {
 
     // DcMotorControllers
     DcMotorController driveTrainController;
-    DcMotorController hangingController;
+   //  DcMotorController hangingController;
     // DcMotors
     DcMotor leftDrive;
     DcMotor rightDrive;
-    DcMotor chinUp;
+   //  DcMotor chinUp;
     // ServoControllers
     ServoController beaconController;
-    ServoController alignmentController;
+   //  ServoController alignmentController;
     // Servos
     Servo servoBeaconPinion;
     Servo servoBeaconPusher;
     Servo servoUltraSense;
 //    Servo servoClimberDumper;
-    Servo leftOmniPinion;
-    Servo rightOmniPinion;
+   //  Servo leftOmniPinion;
+   //  Servo rightOmniPinion;
     //sensors
     ColorSensor beaconColorSense;
 //    ColorSensor floorColorSense;
@@ -51,10 +51,10 @@ public class CCHS5256TeleOp extends OpMode {
 //    OpticalDistanceSensor rightWheelAlignment;
     GyroSensor gyroSense;
     UltrasonicSensor ultraSense;
-    TouchSensor beaconPinionAlignment;
-    TouchSensor beaconPinionStop;
-    TouchSensor leftWheelStop;
-    TouchSensor rightWheelStop;
+   //  TouchSensor beaconPinionAlignment;
+   //  TouchSensor beaconPinionStop;
+   //  TouchSensor leftWheelStop;
+   //  TouchSensor rightWheelStop;
     // State Machine Options
     // Delay Settings
     long delayUntil;
@@ -66,26 +66,41 @@ public class CCHS5256TeleOp extends OpMode {
      */
     public CCHS5256TeleOp() {
     }
+    
+      void moveStraightWithGyro(double distanceCM, double speed) {
+         int preMoveHeading 
+
+         if (gyroSense.getHeading == (preMoveHeading - 1) || gyroSense.getHeading == preMoveHeading || gyroSense.heading == (preMoveHeading + 1) {
+            leftDrive.setPower(speed);
+            rightDrive.setPower(speed);
+         } else if (gyroSense.getHeading > (preMoveHeading + 1)) {
+            leftDrive.setPower(speed);
+            rightDrive.setPower(0.0);
+         } else if (gyroSense.getHeading < (preMoveHeading - 1)) {
+            leftDrive.setPower(0.0);
+            rightDrive.setPower(speed);
+         }
+    }
 
     @Override
     public void init() {
         // DcMotorControllers
         driveTrainController = hardwareMap.dcMotorController.get("dtCtlr");
-        hangingController = hardwareMap.dcMotorController.get("hangCtlr");
+      //  hangingController = hardwareMap.dcMotorController.get("hangCtlr");
         // DcMotors
         leftDrive = hardwareMap.dcMotor.get("motorL");
         rightDrive = hardwareMap.dcMotor.get("motorR");
-        chinUp = hardwareMap.dcMotor.get("chinUp");
+      //  chinUp = hardwareMap.dcMotor.get("chinUp");
         // Servo Controllers
         beaconController = hardwareMap.servoController.get("beaconCtlr");
-        alignmentController = hardwareMap.servoController.get("alignCtlr");
+      //  alignmentController = hardwareMap.servoController.get("alignCtlr");
         // Servos
         servoBeaconPinion = hardwareMap.servo.get("beaconPinion");
         servoBeaconPusher = hardwareMap.servo.get("beaconPusher");
 //        servoClimberDumper = hardwareMap.servo.get("climberDumper");
         servoUltraSense = hardwareMap.servo.get("servoUltra");
-        leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
-        rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
+      //  leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
+      //  rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
         // Sensors
         beaconColorSense = hardwareMap.colorSensor.get("bColorSense");
         beaconColorSense.enableLed(false);
@@ -95,10 +110,10 @@ public class CCHS5256TeleOp extends OpMode {
 //        rightWheelAlignment = hardwareMap.opticalDistanceSensor.get("rWAlign");
         gyroSense = hardwareMap.gyroSensor.get("gyroSense");
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
-        beaconPinionAlignment = hardwareMap.touchSensor.get("bPALign");
-        beaconPinionStop = hardwareMap.touchSensor.get("bPStop");
-        leftWheelStop = hardwareMap.touchSensor.get("lWStop");
-        rightWheelStop = hardwareMap.touchSensor.get("rWStop");
+      //  beaconPinionAlignment = hardwareMap.touchSensor.get("bPALign");
+      //  beaconPinionStop = hardwareMap.touchSensor.get("bPStop");
+      //  leftWheelStop = hardwareMap.touchSensor.get("lWStop");
+      //  rightWheelStop = hardwareMap.touchSensor.get("rWStop");
         //motor configurations
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
         leftDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
@@ -133,18 +148,24 @@ public class CCHS5256TeleOp extends OpMode {
         leftDrive.setPower(left);
         rightDrive.setPower(right);
         servoBeaconPinion.setPosition(((beaconPinion / 2) + 0.5));
+        
+        if (gamepad1.a) {
+           moveStraightWithGyro(0.5)
+        } else if (gamepad1.b) {
+           moveSt
+        }
 
             // update the position of the arm.
-    if (gamepad2.a) {
-        // if the A button is pushed on gamepad1, increment the position of
-        // the arm servo.
-        if(servoBeaconPusher.getPosition()< 0.5) {
-            beaconPusherPosition = 1.0;
-        }
-        if(servoBeaconPusher.getPosition()>= 0.5) {
-            beaconPusherPosition = 0.0;
-        }
-    }
+   //  if (gamepad2.a) {
+   //     // if the A button is pushed on gamepad1, increment the position of
+   //     // the arm servo.
+   //     if(servoBeaconPusher.getPosition()< 0.5) {
+   //          beaconPusherPosition = 1.0;
+   //     }
+   //     if(servoBeaconPusher.getPosition()>= 0.5) {
+   //          beaconPusherPosition = 0.0;
+   //     }
+   //  }
 
         // clip the position values so that they never exceed their allowed range.
         beaconPusherPosition = Range.clip(beaconPinionPosition, bpusher_MIN_RANGE, bpusher_MAX_RANGE);
