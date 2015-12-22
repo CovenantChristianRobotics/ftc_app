@@ -42,6 +42,7 @@ public class CCHS5256TeleOp extends OpMode {
     Servo servoBeaconPusher;
     Servo servoUltraSense;
     Servo sweeper;
+    boolean sweepOn;
 //    Servo servoClimberDumper;
    //  Servo leftOmniPinion;
    //  Servo rightOmniPinion;
@@ -88,8 +89,10 @@ public class CCHS5256TeleOp extends OpMode {
       void sweep(double speed) {
          if (speed == 0) {
             sweeper.setPosition(0.5);
+            sweepOn = false;
          } else if (speed < 0 || speed > 0) {
             sweeper.setPostion((speed/2) + 0.5);
+            sweepOn = true;
          }
       }
 
@@ -178,7 +181,9 @@ public class CCHS5256TeleOp extends OpMode {
            }
         } else if (gamepad1.y) {
            moveStraightWithGyro(-0.5);
-        } 
+        }
+
+        
 
             // update the position of the arm.
    //  if (gamepad2.a) {
