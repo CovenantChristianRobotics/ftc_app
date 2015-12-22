@@ -41,6 +41,7 @@ public class CCHS5256TeleOp extends OpMode {
     Servo servoBeaconPinion;
     Servo servoBeaconPusher;
     Servo servoUltraSense;
+    Servo sweeper;
 //    Servo servoClimberDumper;
    //  Servo leftOmniPinion;
    //  Servo rightOmniPinion;
@@ -83,6 +84,14 @@ public class CCHS5256TeleOp extends OpMode {
             rightDrive.setPower(speed);
          }
     }
+    
+      void sweep(double speed) {
+         if (speed == 0) {
+            sweeper.setPosition(0.5);
+         } else if (speed < 0 || speed > 0) {
+            sweeper.setPostion((speed/2) + 0.5);
+         }
+      }
 
     @Override
     public void init() {
