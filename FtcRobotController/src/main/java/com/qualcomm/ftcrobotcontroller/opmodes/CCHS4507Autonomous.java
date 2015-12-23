@@ -1,5 +1,6 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
@@ -41,7 +42,6 @@ public class CCHS4507Autonomous extends OpMode {
     Date now;
     GyroSensor gyroSense;
     UltrasonicSensor ultraSense;
-    OpticalDistanceSensor liftCheck;
 
     // robot constants
     double wheelDiameter = 6.75 / 2.0;   // wheel diameter in cm 2 to 1 gear ratio
@@ -52,7 +52,11 @@ public class CCHS4507Autonomous extends OpMode {
     DigitalChannel nearMountainSwitch;
     DigitalChannel redBlueSwitch;
     // DigitalChannel delaySwitch;
-    // DigitalChannel tileSwitch
+    // DigitalChannel tileSwitch;
+
+    // Analog Inputs
+    AnalogInput delayPot;
+    OpticalDistanceSensor liftCheck;
 
     boolean nearMountainFlag = false;
     double redBlueFlag = 1.0;
@@ -123,6 +127,8 @@ public class CCHS4507Autonomous extends OpMode {
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
         gyroSense = hardwareMap.gyroSensor.get("gyro");
         liftCheck = hardwareMap.opticalDistanceSensor.get("liftCheck");
+        delayPot = hardwareMap.analogInput.get("delayPot");
+        moveDelayTime = (long)(delayPot.getValue() * (15000 / 1024));
         nearMountainFlag = nearMountainSwitch.getState();
         if (redBlueSwitch.getState()) {
             redBlueFlag = 1.0;
@@ -147,8 +153,9 @@ public class CCHS4507Autonomous extends OpMode {
         motorRight.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        currentMove = MoveState.FIRSTMOVE;
-        telemetryMove = MoveState.FIRSTMOVE;
+        nextMove = MoveState.FIRSTMOVE;
+        currentMove = MoveState.MOVEDELAY;
+        telemetryMove = MoveState.MOVEDELAY;
         sawRedFlag = false;
         sawBlueFlag = false;
         speed = 1.0;
@@ -354,6 +361,7 @@ public class CCHS4507Autonomous extends OpMode {
         telemetry.addData("gyro", (float) gyroSense.getHeading());
         telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
         telemetry.addData("liftCheck", liftCheck.getLightDetected());
+        telemetry.addData("delayPot", delayPot.getValue());
     }
 
     @Override
