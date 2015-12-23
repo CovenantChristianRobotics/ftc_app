@@ -72,15 +72,15 @@ public class CCHS5256TeleOp extends OpMode {
     }
     
       void moveStraightWithGyro(double speed) {
-         int preMoveHeading 
+         int preMoveHeading = 666; // TODO Mark of the beast (the computer)
 
-         if (gyroSense.getHeading == (preMoveHeading - 1) || gyroSense.getHeading == preMoveHeading || gyroSense.heading == (preMoveHeading + 1) {
+         if (gyroSense.getHeading() == (preMoveHeading - 1) || gyroSense.getHeading() == preMoveHeading || gyroSense.getHeading() == (preMoveHeading + 1)) {
             leftDrive.setPower(speed);
             rightDrive.setPower(speed);
-         } else if (gyroSense.getHeading > (preMoveHeading + 1)) {
+         } else if (gyroSense.getHeading() > (preMoveHeading + 1)) {
             leftDrive.setPower(speed);
             rightDrive.setPower(0.0);
-         } else if (gyroSense.getHeading < (preMoveHeading - 1)) {
+         } else if (gyroSense.getHeading() < (preMoveHeading - 1)) {
             leftDrive.setPower(0.0);
             rightDrive.setPower(speed);
          }
@@ -91,7 +91,7 @@ public class CCHS5256TeleOp extends OpMode {
             sweeper.setPosition(0.5);
             sweepOn = false;
          } else if (speed < 0 || speed > 0) {
-            sweeper.setPostion((speed/2) + 0.5);
+            sweeper.setPosition((speed/2) + 0.5);
             sweepOn = true;
          }
       }
@@ -164,20 +164,20 @@ public class CCHS5256TeleOp extends OpMode {
         servoBeaconPinion.setPosition(((beaconPinion / 2) + 0.5));
         
         if (gamepad1.a) {
-           if (ultraSense.getUltrasonicLevel <= lowDist) {
+           if (ultraSense.getUltrasonicLevel() <= lowDist) {
               moveStraightWithGyro(0.5);
            } else {
-              moveStraightWithGyro(0.0)
+              moveStraightWithGyro(0.0);
            }
         } else if (gamepad1.b) {
            moveStraightWithGyro(-0.5);
         }
 
           if (gamepad1.x) {
-           if (ultraSense.getUltrasonicLevel <= medDist) {
+           if (ultraSense.getUltrasonicLevel() <= medDist) {
               moveStraightWithGyro(0.5);
            } else {
-              moveStraightWithGyro(0.0)
+              moveStraightWithGyro(0.0);
            }
         } else if (gamepad1.y) {
            moveStraightWithGyro(-0.5);

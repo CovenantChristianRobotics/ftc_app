@@ -42,9 +42,9 @@ public class CCHS4507Autonomous extends OpMode {
     UltrasonicSensor ultraSense;
 
     // robot constants
-    double wheelDiameter = 6.0 / 2.0;   // wheel diameter in cm 2 to 1 gear ratio
+    double wheelDiameter = 6.75 / 2.0;   // wheel diameter in cm 2 to 1 gear ratio
     double encoderCounts = 1120.0;      // encoder counts per revolution of the drive train motors
-    double wheelBase = 39.8;            // wheelbase of the primary drive wheels
+    double wheelBase = 41.0;            // wheelbase of the primary drive wheels
 
     // Switches
     DigitalChannel nearMountainSwitch;
