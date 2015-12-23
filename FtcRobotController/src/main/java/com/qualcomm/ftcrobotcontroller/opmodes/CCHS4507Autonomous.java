@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import java.util.Date;
@@ -40,6 +41,7 @@ public class CCHS4507Autonomous extends OpMode {
     Date now;
     GyroSensor gyroSense;
     UltrasonicSensor ultraSense;
+    OpticalDistanceSensor liftCheck;
 
     // robot constants
     double wheelDiameter = 6.75 / 2.0;   // wheel diameter in cm 2 to 1 gear ratio
@@ -120,6 +122,7 @@ public class CCHS4507Autonomous extends OpMode {
         // tileSwitch = hardwareMap.digitalChannel.get("tSw")
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
         gyroSense = hardwareMap.gyroSensor.get("gyro");
+        liftCheck = hardwareMap.opticalDistanceSensor.get("liftCheck");
         nearMountainFlag = nearMountainSwitch.getState();
         if (redBlueSwitch.getState()) {
             redBlueFlag = 1.0;
@@ -350,6 +353,7 @@ public class CCHS4507Autonomous extends OpMode {
         telemetry.addData("Color", (float) ColorSense.red());
         telemetry.addData("gyro", (float) gyroSense.getHeading());
         telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
+        telemetry.addData("liftCheck", liftCheck.getLightDetected());
     }
 
     @Override

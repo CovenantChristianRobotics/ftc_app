@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 
@@ -25,12 +26,13 @@ public class CCHS4507TeleOp extends OpMode {
     ColorSensor ColorSense;
     GyroSensor gyroSense;
     UltrasonicSensor ultraSense;
+    OpticalDistanceSensor liftCheck;
     //switches
     DigitalChannel nearMountainSwitch;
     DigitalChannel redBlueSwitch;
     boolean nearMountainFlag = false;
     boolean redAllianceFlag = false;
-
+    int trackLifterUp = 0;
 
 
     @Override
@@ -48,6 +50,8 @@ public class CCHS4507TeleOp extends OpMode {
         redBlueSwitch = hardwareMap.digitalChannel.get("rbSw");
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
         gyroSense = hardwareMap.gyroSensor.get("gyro");
+        liftCheck = hardwareMap.opticalDistanceSensor.get("liftCheck");
+        //WHATEVER WE ARE GOING TO CALL THIS THING = hardwareMap.opticalDistanceSensor.get("STUFFANDTHINGS");
         nearMountainFlag = nearMountainSwitch.getState();
         //set up motors
         motorLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -66,14 +70,23 @@ public class CCHS4507TeleOp extends OpMode {
 
         motorRight.setPower(right);
         motorLeft.setPower(left);
-        trackLifter.setPower(0.1);
-        if (gamepad2.a && !gamepad2.b) {
+        if (gamepad2.a) {
             trackLifter.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
+            trackLifter.setPower(0.0);
             trackLifter.setPowerFloat();
-        } else if (gamepad2.b && !gamepad2.a) {
+        } else if (gamepad2.right_bumper) {
             trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
-            trackLifter.setTargetPosition(30);
+            trackLifter.setTargetPosition(trackLifterUp);
+            trackLifter.setPower(0.1);
+        } else if (gamepad2.right_trigger > 0.5) {
+            trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+            trackLifter.setTargetPosition(trackLifterUp + 1220 / 4);
+            trackLifter.setPower(0.1);
+        } else if (liftCheck.getLightDetected() > 0.3) {
+            trackLifterUp = trackLifter.getCurrentPosition();
+            trackLifter.setTargetPosition(trackLifterUp);
         }
-        telemetry.addData("trackLifter", (float)trackLifter.getCurrentPosition());
+        telemetry.addData("trackLifter", (float) trackLifter.getCurrentPosition());
+        telemetry.addData("liftCheck", liftCheck.getLightDetected());
     }
 }
