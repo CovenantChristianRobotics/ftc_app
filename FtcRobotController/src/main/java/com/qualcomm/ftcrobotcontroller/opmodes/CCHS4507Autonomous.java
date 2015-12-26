@@ -26,6 +26,7 @@ public class CCHS4507Autonomous extends OpMode {
     Servo servoBeaconPusher;
     Servo servoClimberDumper;Servo servoDist;
     ColorSensor ColorSense;
+    ColorSensor colorGroundSense;
     MoveState currentMove;
     MoveState nextMove;
     MoveState telemetryMove;
@@ -43,10 +44,17 @@ public class CCHS4507Autonomous extends OpMode {
     GyroSensor gyroSense;
     UltrasonicSensor ultraSense;
 
+    //Global State Variables
+    int dumperCounter = 0;
+    double dumperPosition = 0.9;
+
     // robot constants
-    double wheelDiameter = 6.75 / 2.0;   // wheel diameter in cm 2 to 1 gear ratio
+    double wheelDiameter = 6.75 / 2.0;  // wheel diameter in cm 2 to 1 gear ratio
     double encoderCounts = 1120.0;      // encoder counts per revolution of the drive train motors
     double wheelBase = 41.0;            // wheelbase of the primary drive wheels
+    double countsPerMeter = 10439.0;    // Found this experimentally: Measured one meter, drove distance, read counts
+    int dumperCounterThresh = 8;       // Doesn't let the dumper counter get above a certain number
+    double countsPerDonut = 14236.0;    // Encoder counts per 360 degrees
 
     // Switches
     DigitalChannel nearMountainSwitch;
@@ -57,7 +65,7 @@ public class CCHS4507Autonomous extends OpMode {
     // Analog Inputs
     AnalogInput delayPot;
     OpticalDistanceSensor liftCheck;
-
+    int trackLifterUp = 0;
     boolean nearMountainFlag = false;
     double redBlueFlag = 1.0;
    // long delayTimeFlag = 10;
@@ -67,18 +75,27 @@ public class CCHS4507Autonomous extends OpMode {
     public CCHS4507Autonomous() {
     }
 
+
     int centimetersToCounts(double centimeters) {
-        return (int) ((centimeters / (wheelDiameter * Math.PI)) * encoderCounts);
+        return (int)(centimeters * (countsPerMeter / 100.0));
+        //double wheelDiameter = 10.1;    // wheel diameter in cm
+        //double encoderCounts = 1120.0;  // encoder counts per revolution of the drive train motors
+        // return (int) ((centimeters / (wheelDiameter * Math.PI)) * encoderCounts);
+        // ^ Previous code to find the amount of counts for every wheel rotation
     }
 
     double countsToCentimeters(int counts) {
-        return (((double) counts / encoderCounts) * (wheelDiameter * Math.PI));
+        return (double)counts * (100.0 / countsPerMeter);
+        //return (((double) counts / encoderCounts) * (wheelDiameter * Math.PI));
+        // ^ Previous code to find the amount of centimeters for the counts
     }
 
     int degreesToCounts(double degrees) {
-        double wheelBase = 40.3225; // wheelbase of the primary drive wheels
-        double oneDegree = ((wheelBase * Math.PI) / 360);   // calculates the distance of one degree
-        return centimetersToCounts(oneDegree * degrees);
+        return (int)(degrees * (countsPerDonut / 360.0));
+        //double wheelBase = 40.3225; // wheelbase of the primary drive wheels
+        //double oneDegree = ((wheelBase * Math.PI) / 360);   // calculates the distance of one degree
+        //return centimetersToCounts(oneDegree * degrees);
+        // ^ Previous code to find the degrees per count using the diamemter of the wheels
     }
 
     void moveStraight(double distanceCM, double speed) {
@@ -120,6 +137,7 @@ public class CCHS4507Autonomous extends OpMode {
         servoClimberDumper = hardwareMap.servo.get("climber_dumper");
         servoDist = hardwareMap.servo.get("servoDist");
         ColorSense = hardwareMap.colorSensor.get("color");
+        colorGroundSense = hardwareMap.colorSensor.get("colorGround");
         nearMountainSwitch = hardwareMap.digitalChannel.get("nearMtnSw");
         redBlueSwitch = hardwareMap.digitalChannel.get("rbSw");
         // delaySwitch = hardwareMap.digitalChannel.get("dSw")
@@ -141,6 +159,11 @@ public class CCHS4507Autonomous extends OpMode {
             lookingForBlueFlag = true;
             servoDist.setPosition(0.25);
         }
+
+        if (liftCheck.getLightDetected() > 0.3) {
+            trackLifterUp = trackLifter.getCurrentPosition();
+            trackLifter.setTargetPosition(trackLifterUp);
+        }
         // tileFlag = tileSwitch.getState();
         //if (tileSwitch.getState()) {
             
@@ -161,11 +184,15 @@ public class CCHS4507Autonomous extends OpMode {
         speed = 1.0;
         slowSpeed = 0.75;
         turnSpeed = 0.75;
-        delay = 100;
+        delay = 150;
         trackLifter.setPower(0.1);
         trackLifter.setTargetPosition(30);
         servoClimberDumper.setPosition(0.9);
         servoBeaconPusher.setPosition(0.0);
+        if (liftCheck.getLightDetected() > 0.3) {
+            trackLifterUp = trackLifter.getCurrentPosition();
+            trackLifter.setTargetPosition(trackLifterUp);
+        }
         gyroSense.calibrate();
         while (gyroSense.isCalibrating()) {
         }
@@ -174,9 +201,6 @@ public class CCHS4507Autonomous extends OpMode {
     @Override
     public void loop() {
         double distanceToWall;
-        int dumperCounter = 0;
-        int dumperCounterThresh = 30;
-        double dumperPosition = 0.9;
         if (gyroSense.isCalibrating()) {
             return;
         }
@@ -216,7 +240,7 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case FIRSTMOVE:
-                moveStraight(80.0, speed);
+                moveStraight(60.0, speed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNDIAG;
                 telemetryMove = MoveState.FIRSTMOVE;
@@ -236,7 +260,7 @@ public class CCHS4507Autonomous extends OpMode {
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDWALL;
                 telemetryMove = MoveState.MOVEDIAG;
-                moveDelayTime = 1000;
+                moveDelayTime = delay;
                 break;
 
             case FINDWALL:
@@ -270,7 +294,7 @@ public class CCHS4507Autonomous extends OpMode {
             case DUMPTRUCK:
                 // If timer hits threshold, reset timer and move servo
                 if (dumperCounter >= dumperCounterThresh) {
-                    dumperPosition -= .02;
+                    dumperPosition -= .04;
                     servoClimberDumper.setPosition(dumperPosition);
                     dumperCounter = 0;
                     // Target position reached; moving to next state
@@ -281,7 +305,7 @@ public class CCHS4507Autonomous extends OpMode {
                         moveDelayTime = 1000;
                     }
                 }
-                dumperCounter ++;
+                dumperCounter++;
                 break;
 
             case ROTATEFROMBEACON:
@@ -297,7 +321,7 @@ public class CCHS4507Autonomous extends OpMode {
             case MOVETORAMP:
                 double distance = -71.0;
                 if (!sawBlueFlag) {
-                    distance -= 10.0;
+                    distance -= 30.0;
                 }
                 if (!nearMountainFlag) {
                     distance -= 67.0;
@@ -337,6 +361,9 @@ public class CCHS4507Autonomous extends OpMode {
                 distanceToWall = ultraSense.getUltrasonicLevel();
                 if ((distanceToWall > 30.0) && (distanceToWall <= 70.0)) {
                     moveStraight(distanceToWall - 5.0, slowSpeed);
+                    trackLifter.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
+                    trackLifter.setPower(0.0);
+                    trackLifter.setPowerFloat();
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.DONE;
                     telemetryMove = MoveState.UPRAMP;
@@ -354,11 +381,11 @@ public class CCHS4507Autonomous extends OpMode {
             currentMove = MoveState.FIRSTMOVE;
         }
 
-        telemetry.addData("Text", "*** Robot Data***");
-        telemetry.addData("Text", "Look for Red");
+        telemetry.addData("colorGround", (float)colorGroundSense.argb());
+        telemetry.addData("colorGround", (float)colorGroundSense.alpha());
         telemetry.addData("Current Move", telemetryMove.toString());
-        telemetry.addData("Color", (float) ColorSense.red());
-        telemetry.addData("gyro", (float) gyroSense.getHeading());
+        telemetry.addData("Color", (float)ColorSense.red());
+        telemetry.addData("gyro", (float)gyroSense.getHeading());
         telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
         telemetry.addData("liftCheck", liftCheck.getLightDetected());
         telemetry.addData("delayPot", delayPot.getValue());
