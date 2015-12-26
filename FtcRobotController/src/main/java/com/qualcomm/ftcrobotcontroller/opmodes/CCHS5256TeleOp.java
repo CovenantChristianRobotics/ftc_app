@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import java.util.Date;
@@ -18,7 +19,11 @@ import java.util.Date;
  */
 public class CCHS5256TeleOp extends OpMode {
 
-   final static double bpusher_MIN_RANGE = 0.20;
+    enum LEDcontrol {
+        PREMATCH, START,OFF, ENDGAME, ON, BlINK
+    }
+
+    final static double bpusher_MIN_RANGE = 0.20;
     final static double bpusher_MAX_RANGE = 0.80;
     final static double cdumper_MIN_RANGE = 0.00;
     final static double cdumper_MAX_RANGE = 1.00;
@@ -33,6 +38,7 @@ public class CCHS5256TeleOp extends OpMode {
     // DcMotors
     DcMotor leftDrive;
     DcMotor rightDrive;
+    DcMotor endGameLights;
    //  DcMotor chinUp;
     // ServoControllers
     ServoController beaconController;
@@ -40,9 +46,9 @@ public class CCHS5256TeleOp extends OpMode {
     // Servos
     Servo servoBeaconPinion;
     Servo servoBeaconPusher;
-    Servo servoUltraSense;
-    Servo sweeper;
-    boolean sweepOn;
+//    Servo servoUltraSense;
+//    Servo sweeper;
+//    boolean sweepOn;
 //    Servo servoClimberDumper;
    //  Servo leftOmniPinion;
    //  Servo rightOmniPinion;
@@ -52,7 +58,8 @@ public class CCHS5256TeleOp extends OpMode {
 //    OpticalDistanceSensor leftWheelAlignment;
 //    OpticalDistanceSensor rightWheelAlignment;
     GyroSensor gyroSense;
-    UltrasonicSensor ultraSense;
+//    UltrasonicSensor fUltraSense;
+    UltrasonicSensor bUltraSense;
     double lowDist;
     double medDist;
    //  TouchSensor beaconPinionAlignment;
@@ -60,6 +67,8 @@ public class CCHS5256TeleOp extends OpMode {
    //  TouchSensor leftWheelStop;
    //  TouchSensor rightWheelStop;
     // State Machine Options
+    LEDcontrol CurrentControl;
+    ElapsedTime endGameTime;
     // Delay Settings
     long delayUntil;
     long moveDelayTime;
@@ -72,7 +81,7 @@ public class CCHS5256TeleOp extends OpMode {
     }
     
       void moveStraightWithGyro(double speed) {
-         int preMoveHeading = 666; // TODO Mark of the beast (the computer)
+         int preMoveHeading = gyroSense.getHeading();
 
          if (gyroSense.getHeading() == (preMoveHeading - 1) || gyroSense.getHeading() == preMoveHeading || gyroSense.getHeading() == (preMoveHeading + 1)) {
             leftDrive.setPower(speed);
@@ -86,15 +95,15 @@ public class CCHS5256TeleOp extends OpMode {
          }
     }
     
-      void sweep(double speed) {
-         if (speed == 0) {
-            sweeper.setPosition(0.5);
-            sweepOn = false;
-         } else if (speed < 0 || speed > 0) {
-            sweeper.setPosition((speed/2) + 0.5);
-            sweepOn = true;
-         }
-      }
+//      void sweep(double speed) {
+//         if (speed == 0) {
+//            sweeper.setPosition(0.5);
+//            sweepOn = false;
+//         } else if (speed < 0 || speed > 0) {
+//            sweeper.setPosition((speed/2) + 0.5);
+//            sweepOn = true;
+//         }
+//      }
 
     @Override
     public void init() {
@@ -104,6 +113,7 @@ public class CCHS5256TeleOp extends OpMode {
         // DcMotors
         leftDrive = hardwareMap.dcMotor.get("motorL");
         rightDrive = hardwareMap.dcMotor.get("motorR");
+        endGameLights = hardwareMap.dcMotor.get("endGameLights");
       //  chinUp = hardwareMap.dcMotor.get("chinUp");
         // Servo Controllers
         beaconController = hardwareMap.servoController.get("beaconCtlr");
@@ -112,7 +122,7 @@ public class CCHS5256TeleOp extends OpMode {
         servoBeaconPinion = hardwareMap.servo.get("beaconPinion");
         servoBeaconPusher = hardwareMap.servo.get("beaconPusher");
 //        servoClimberDumper = hardwareMap.servo.get("climberDumper");
-        servoUltraSense = hardwareMap.servo.get("servoUltra");
+//        servoUltraSense = hardwareMap.servo.get("servoUltra");
       //  leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
       //  rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
         // Sensors
@@ -122,8 +132,9 @@ public class CCHS5256TeleOp extends OpMode {
 //        floorColorSense.enableLed(true);
 //        leftWheelAlignment = hardwareMap.opticalDistanceSensor.get("lWAlign");
 //        rightWheelAlignment = hardwareMap.opticalDistanceSensor.get("rWAlign");
-        gyroSense = hardwareMap.gyroSensor.get("gyroSense");
-        ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
+//        gyroSense = hardwareMap.gyroSensor.get("gyroSense");
+//        fUltraSense = hardwareMap.ultrasonicSensor.get("fUltraSense");
+//        bUltraSense = hardwareMap.ultrasonicSensor.get("bUltraSense");
       //  beaconPinionAlignment = hardwareMap.touchSensor.get("bPALign");
       //  beaconPinionStop = hardwareMap.touchSensor.get("bPStop");
       //  leftWheelStop = hardwareMap.touchSensor.get("lWStop");
@@ -132,9 +143,12 @@ public class CCHS5256TeleOp extends OpMode {
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
         leftDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         rightDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         // state machine settings
+        CurrentControl = LEDcontrol.PREMATCH;
         // servo positions
-            beaconPusherPosition = 0.5;
+        beaconPusherPosition = 0.5;
+        endGameTime = new ElapsedTime();
     }
 
     @Override
@@ -163,39 +177,36 @@ public class CCHS5256TeleOp extends OpMode {
         rightDrive.setPower(right);
         servoBeaconPinion.setPosition(((beaconPinion / 2) + 0.5));
         
-        if (gamepad1.a) {
-           if (ultraSense.getUltrasonicLevel() <= lowDist) {
-              moveStraightWithGyro(0.5);
-           } else {
-              moveStraightWithGyro(0.0);
-           }
-        } else if (gamepad1.b) {
-           moveStraightWithGyro(-0.5);
-        }
-
-          if (gamepad1.x) {
-           if (ultraSense.getUltrasonicLevel() <= medDist) {
-              moveStraightWithGyro(0.5);
-           } else {
-              moveStraightWithGyro(0.0);
-           }
-        } else if (gamepad1.y) {
-           moveStraightWithGyro(-0.5);
-        }
+//        if (gamepad1.a) {
+//           if (bUltraSense.getUltrasonicLevel() <= lowDist) {
+//              moveStraightWithGyro(0.5);
+//           } else {
+//              moveStraightWithGyro(0.0);
+//           }
+//        } else if (gamepad1.b) {
+//           moveStraightWithGyro(-0.5);
+//        }
+//
+//          if (gamepad1.x) {
+//           if (bUltraSense.getUltrasonicLevel() <= medDist) {
+//              moveStraightWithGyro(0.5);
+//           } else {
+//              moveStraightWithGyro(0.0);j3
+//           }
+//        } else if (gamepad1.y) {
+//           moveStraightWithGyro(-0.5);
+//        }
 
         
 
             // update the position of the arm.
-   //  if (gamepad2.a) {
-   //     // if the A button is pushed on gamepad1, increment the position of
-   //     // the arm servo.
-   //     if(servoBeaconPusher.getPosition()< 0.5) {
-   //          beaconPusherPosition = 1.0;
-   //     }
-   //     if(servoBeaconPusher.getPosition()>= 0.5) {
-   //          beaconPusherPosition = 0.0;
-   //     }
-   //  }
+        if (gamepad2.a) {
+            // if the A button is pushed on gamepad1, increment the position of
+            // the arm servo.
+            beaconPusherPosition = 1.0;
+        } else if (gamepad2.b) {
+            beaconPusherPosition = 0.0;
+        }
 
         // clip the position values so that they never exceed their allowed range.
         beaconPusherPosition = Range.clip(beaconPinionPosition, bpusher_MIN_RANGE, bpusher_MAX_RANGE);
@@ -203,15 +214,62 @@ public class CCHS5256TeleOp extends OpMode {
         // write position values to the wrist and claw servo
         servoBeaconPusher.setPosition(beaconPusherPosition);
 
+        switch (CurrentControl) {
+            case PREMATCH:
+                CurrentControl = LEDcontrol.START;
+                break;
+
+            case START:
+                endGameTime.reset();
+                endGameLights.setPower(1.0);
+                CurrentControl = LEDcontrol.OFF;
+                break;
+
+            case OFF:
+                if (endGameTime.time() > 90.0) {
+                    CurrentControl = LEDcontrol.ENDGAME;
+                } else {
+                    CurrentControl = LEDcontrol.OFF;
+                }
+                break;
+
+            case ENDGAME:
+                endGameLights.setPower(1.0);
+                CurrentControl = LEDcontrol.ON;
+                break;
+
+            case ON:
+                endGameLights.setPower(1.0);
+                moveDelayTime = 100;
+                now = new Date();
+                delayUntil = now.getTime() + moveDelayTime;
+                if (now.getTime() >= delayUntil) {
+                    CurrentControl = LEDcontrol.BlINK;
+                }
+                break;
+
+            case BlINK:
+                endGameLights.setPower(0.0);
+                moveDelayTime = 100;
+                now = new Date();
+                delayUntil = now.getTime() + moveDelayTime;
+                if (now.getTime() >= delayUntil) {
+                    CurrentControl = LEDcontrol.ON;
+                }
+                break;
+        }
+
         telemetry.addData("left trigger", gamepad1.left_trigger);
         telemetry.addData("right trigger", gamepad1.right_trigger);
         telemetry.addData("Pinion", servoBeaconPinion.getPosition());
         telemetry.addData("Pusher", servoBeaconPusher.getPosition());
-        }
+        telemetry.addData("LED", CurrentControl.toString());
+        telemetry.addData("Elapsed Time", endGameTime.time());
+    }
 
-        @Override
-        public void stop () {
-        }
+    @Override
+    public void stop () {
+    }
 
 
     double scaleInput(double dVal) {
