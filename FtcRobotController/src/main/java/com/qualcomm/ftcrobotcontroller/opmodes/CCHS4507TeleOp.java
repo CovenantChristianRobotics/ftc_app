@@ -86,7 +86,9 @@ public class CCHS4507TeleOp extends OpMode {
             trackLifterUp = trackLifter.getCurrentPosition();
             trackLifter.setTargetPosition(trackLifterUp);
         }
-        telemetry.addData("trackLifter", (float) trackLifter.getCurrentPosition());
+        telemetry.addData("trackLifter", (float)trackLifter.getCurrentPosition());
         telemetry.addData("liftCheck", liftCheck.getLightDetected());
+        telemetry.addData("ENCLeft", (float)motorLeft.getCurrentPosition());
+        telemetry.addData("ENCRight", (float)motorRight.getCurrentPosition());
     }
 }
