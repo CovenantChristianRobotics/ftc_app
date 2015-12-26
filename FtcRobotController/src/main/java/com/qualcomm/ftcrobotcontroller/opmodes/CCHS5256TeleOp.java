@@ -20,7 +20,7 @@ import java.util.Date;
 public class CCHS5256TeleOp extends OpMode {
 
     enum LEDcontrol {
-        PREMATCH, START,OFF, ENDGAME, ON, BlINK
+        PREMATCH, START,OFF, ENDGAME, ON, BlINK, DELAYSETTINGS, DELAY
     }
 
     final static double bpusher_MIN_RANGE = 0.20;
@@ -68,6 +68,7 @@ public class CCHS5256TeleOp extends OpMode {
    //  TouchSensor rightWheelStop;
     // State Machine Options
     LEDcontrol CurrentControl;
+    LEDcontrol NowControl;
     ElapsedTime endGameTime;
     // Delay Settings
     long delayUntil;
@@ -149,6 +150,7 @@ public class CCHS5256TeleOp extends OpMode {
         // servo positions
         beaconPusherPosition = 0.5;
         endGameTime = new ElapsedTime();
+        endGameLights.setPower(0.0);
     }
 
     @Override
@@ -201,20 +203,28 @@ public class CCHS5256TeleOp extends OpMode {
 
             // update the position of the arm.
         if (gamepad2.a) {
-            // if the A button is pushed on gamepad1, increment the position of
-            // the arm servo.
-            beaconPusherPosition = 1.0;
+            beaconPusherPosition = 0.7;
         } else if (gamepad2.b) {
-            beaconPusherPosition = 0.0;
+            beaconPusherPosition = 0.3;
         }
 
-        // clip the position values so that they never exceed their allowed range.
-        beaconPusherPosition = Range.clip(beaconPinionPosition, bpusher_MIN_RANGE, bpusher_MAX_RANGE);
-        
         // write position values to the wrist and claw servo
         servoBeaconPusher.setPosition(beaconPusherPosition);
 
         switch (CurrentControl) {
+            case DELAYSETTINGS:
+                now = new Date();
+                delayUntil = now.getTime() + moveDelayTime;
+                CurrentControl = LEDcontrol.DELAY;
+                break;
+
+            case DELAY:
+                now = new Date();
+                if (now.getTime() >= delayUntil) {
+                    CurrentControl = NowControl;
+                }
+                break;
+
             case PREMATCH:
                 CurrentControl = LEDcontrol.START;
                 break;
@@ -240,22 +250,16 @@ public class CCHS5256TeleOp extends OpMode {
 
             case ON:
                 endGameLights.setPower(1.0);
-                moveDelayTime = 100;
-                now = new Date();
-                delayUntil = now.getTime() + moveDelayTime;
-                if (now.getTime() >= delayUntil) {
-                    CurrentControl = LEDcontrol.BlINK;
-                }
+                moveDelayTime = 500;
+                CurrentControl = LEDcontrol.DELAYSETTINGS;
+                NowControl = LEDcontrol.BlINK;
                 break;
 
             case BlINK:
-                endGameLights.setPower(0.0);
-                moveDelayTime = 100;
-                now = new Date();
-                delayUntil = now.getTime() + moveDelayTime;
-                if (now.getTime() >= delayUntil) {
-                    CurrentControl = LEDcontrol.ON;
-                }
+                endGameLights.setPowerFloat();
+                moveDelayTime = 500;
+                CurrentControl = LEDcontrol.DELAYSETTINGS;
+                NowControl = LEDcontrol.ON;
                 break;
         }
 
