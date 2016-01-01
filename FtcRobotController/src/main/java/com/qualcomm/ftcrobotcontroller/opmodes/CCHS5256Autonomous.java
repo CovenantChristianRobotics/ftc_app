@@ -38,7 +38,6 @@ public class CCHS5256Autonomous extends OpMode {
     //dc motor controllers
     DcMotorController driveTrainController;
     DcMotorController hangingController;
-    DcMotorController LED;
     //dc motors
     DcMotor leftDrive;
     DcMotor rightDrive;
@@ -230,7 +229,6 @@ public class CCHS5256Autonomous extends OpMode {
         //dc Motor Controllers
         driveTrainController = hardwareMap.dcMotorController.get("dtCtlr");
         hangingController = hardwareMap.dcMotorController.get("hangCtlr");
-        LED = hardwareMap.dcMotorController.get("LED");
         //dc Motors
         leftDrive = hardwareMap.dcMotor.get("motorL");
         rightDrive = hardwareMap.dcMotor.get("motorR");
