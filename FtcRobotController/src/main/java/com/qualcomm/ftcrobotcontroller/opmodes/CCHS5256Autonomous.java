@@ -510,6 +510,8 @@ public class CCHS5256Autonomous extends OpMode {
         telemetry.addData("Current Move", telemetryMove.toString());
         telemetry.addData("ENCLeft", (float) leftDrive.getCurrentPosition());
         telemetry.addData("ENCRight", (float) rightDrive.getCurrentPosition());
+        telemetry.addData("Gyro Heading", gyroSense.getHeading());
+
     }
 
     @Override

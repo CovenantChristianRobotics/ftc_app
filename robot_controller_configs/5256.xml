@@ -16,8 +16,13 @@
     <DeviceInterfaceModule name="Core Interface Module" serialNumber="AL00VFP2">
         <ColorSensor name="bColorSense" port="0" />
         <Gyro name="gyro" port="1"/>
+        <AnalogInput name="dP" port="0"/>
+        <DigitalDevice name="nMtnSw" port="0"/>
+        <DigitalDevice name="rBSw" port="1"/>
+        <DigitalDevice name="dSw" port="2"/>
     </DeviceInterfaceModule>
     <LegacyModuleController name="Legacy Module 1" serialNumber="AL00XU3L">
+        <UltrasonicSensor name="bUltraSense" port="4"/>
         <UltrasonicSensor name="fUltraSense" port="5"/>
     </LegacyModuleController>
 </Robot>
