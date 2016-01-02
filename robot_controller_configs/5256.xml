@@ -1,8 +1,10 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <Robot>
     <ServoController name="beaconCtlr" serialNumber="AL00YAL7">
+        <Servo name="servoUltra" port="1" />
         <Servo name="beaconPinion" port="2" />
         <Servo name="beaconPusher" port="3" />
+        <Servo name="climber_dumper" port="4" />
     </ServoController>
     <MotorController name="dtCtlr" serialNumber="AL00XTFA">
         <Motor name="motorR" port="1" />
@@ -13,5 +15,9 @@
     </MotorController>
     <DeviceInterfaceModule name="Core Interface Module" serialNumber="AL00VFP2">
         <ColorSensor name="bColorSense" port="0" />
+        <Gyro name="gyro" port="1"/>
     </DeviceInterfaceModule>
+    <LegacyModuleController name="Legacy Module 1" serialNumber="AL00XU3L">
+        <UltrasonicSensor name="fUltraSense" port="5"/>
+    </LegacyModuleController>
 </Robot>
