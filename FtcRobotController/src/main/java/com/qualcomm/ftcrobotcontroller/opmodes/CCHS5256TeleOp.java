@@ -171,8 +171,10 @@ public class CCHS5256TeleOp extends OpMode {
             left = (float) slow(left);
             right = (float) slow(right);
         } else {
-            left = (float) medium(left);
-            right = (float) medium(right);
+//            left = (float) medium(left);
+//            right = (float) medium(right);
+            left = (float) -0.05;
+            right = (float) -0.05;
         }
 
         leftDrive.setPower(left);
@@ -269,6 +271,8 @@ public class CCHS5256TeleOp extends OpMode {
         telemetry.addData("Pusher", servoBeaconPusher.getPosition());
         telemetry.addData("LED", CurrentControl.toString());
         telemetry.addData("Elapsed Time", endGameTime.time());
+        telemetry.addData("leftDrive", leftDrive.getCurrentPosition());
+        telemetry.addData("right Drive", rightDrive.getCurrentPosition());
     }
 
     @Override
