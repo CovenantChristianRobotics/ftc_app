@@ -34,7 +34,7 @@ public class CCHS5256TeleOp extends OpMode {
 
     // DcMotorControllers
     DcMotorController driveTrainController;
-   //  DcMotorController hangingController;
+     DcMotorController hangingController;
     // DcMotors
     DcMotor leftDrive;
     DcMotor rightDrive;
@@ -46,10 +46,10 @@ public class CCHS5256TeleOp extends OpMode {
     // Servos
     Servo servoBeaconPinion;
     Servo servoBeaconPusher;
-//    Servo servoUltraSense;
+    Servo servoUltraSense;
 //    Servo sweeper;
 //    boolean sweepOn;
-//    Servo servoClimberDumper;
+    Servo servoClimberDumper;
    //  Servo leftOmniPinion;
    //  Servo rightOmniPinion;
     //sensors
@@ -58,8 +58,8 @@ public class CCHS5256TeleOp extends OpMode {
 //    OpticalDistanceSensor leftWheelAlignment;
 //    OpticalDistanceSensor rightWheelAlignment;
     GyroSensor gyroSense;
-//    UltrasonicSensor fUltraSense;
-    UltrasonicSensor bUltraSense;
+    UltrasonicSensor fUltraSense;
+//    UltrasonicSensor bUltraSense;
     double lowDist;
     double medDist;
    //  TouchSensor beaconPinionAlignment;
@@ -110,7 +110,7 @@ public class CCHS5256TeleOp extends OpMode {
     public void init() {
         // DcMotorControllers
         driveTrainController = hardwareMap.dcMotorController.get("dtCtlr");
-      //  hangingController = hardwareMap.dcMotorController.get("hangCtlr");
+        hangingController = hardwareMap.dcMotorController.get("hangCtlr");
         // DcMotors
         leftDrive = hardwareMap.dcMotor.get("motorL");
         rightDrive = hardwareMap.dcMotor.get("motorR");
@@ -118,12 +118,12 @@ public class CCHS5256TeleOp extends OpMode {
       //  chinUp = hardwareMap.dcMotor.get("chinUp");
         // Servo Controllers
         beaconController = hardwareMap.servoController.get("beaconCtlr");
-      //  alignmentController = hardwareMap.servoController.get("alignCtlr");
+//        alignmentController = hardwareMap.servoController.get("alignCtlr");
         // Servos
         servoBeaconPinion = hardwareMap.servo.get("beaconPinion");
         servoBeaconPusher = hardwareMap.servo.get("beaconPusher");
-//        servoClimberDumper = hardwareMap.servo.get("climberDumper");
-//        servoUltraSense = hardwareMap.servo.get("servoUltra");
+        servoClimberDumper = hardwareMap.servo.get("climberDumper");
+        servoUltraSense = hardwareMap.servo.get("servoUltra");
       //  leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
       //  rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
         // Sensors
@@ -133,8 +133,8 @@ public class CCHS5256TeleOp extends OpMode {
 //        floorColorSense.enableLed(true);
 //        leftWheelAlignment = hardwareMap.opticalDistanceSensor.get("lWAlign");
 //        rightWheelAlignment = hardwareMap.opticalDistanceSensor.get("rWAlign");
-//        gyroSense = hardwareMap.gyroSensor.get("gyroSense");
-//        fUltraSense = hardwareMap.ultrasonicSensor.get("fUltraSense");
+        gyroSense = hardwareMap.gyroSensor.get("gyroSense");
+        fUltraSense = hardwareMap.ultrasonicSensor.get("fUltraSense");
 //        bUltraSense = hardwareMap.ultrasonicSensor.get("bUltraSense");
       //  beaconPinionAlignment = hardwareMap.touchSensor.get("bPALign");
       //  beaconPinionStop = hardwareMap.touchSensor.get("bPStop");

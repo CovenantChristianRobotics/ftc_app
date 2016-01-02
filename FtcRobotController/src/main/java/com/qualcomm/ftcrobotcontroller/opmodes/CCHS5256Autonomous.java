@@ -328,8 +328,6 @@ public class CCHS5256Autonomous extends OpMode {
         // }
         while (gyroSense.isCalibrating()) {
         }
-
-
     }
 
     @Override
