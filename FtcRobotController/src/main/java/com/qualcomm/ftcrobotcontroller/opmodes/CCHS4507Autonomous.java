@@ -68,8 +68,7 @@ public class CCHS4507Autonomous extends OpMode {
     OpticalDistanceSensor liftCheck;
     int trackLifterUp = 0;
     boolean nearMountainFlag = false;
-    double redBlueDirection = 1.0;
-    double redBlueRotation = 0.0;
+    boolean redAlliance = false;
    // long delayTimeFlag = 10;
    // double tileFlag = 1.0;
 
@@ -151,14 +150,12 @@ public class CCHS4507Autonomous extends OpMode {
         moveDelayTime = (long)(delayPot.getValue() * (15000 / 1024));
         nearMountainFlag = nearMountainSwitch.getState();
         if (redBlueSwitch.getState()) { //This is for when we're going to blue
-            redBlueDirection = -1.0;
-            redBlueRotation = 180.0;
+            redAlliance = false;
             lookingForRedFlag = false;
             lookingForBlueFlag = true;
             servoDist.setPosition(0.75);
         } else { //This is for red
-            redBlueDirection = 1.0;
-            redBlueRotation = 0.0;
+            redAlliance = true;
             lookingForRedFlag = true;
             lookingForBlueFlag = false;
             servoDist.setPosition(0.25);
@@ -257,7 +254,11 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case TURNDIAG:
-                moveTurn(45.0 * redBlueDirection, turnSpeed);
+                if (redAlliance) {
+                    moveTurn(-45.0, turnSpeed);
+                } else {
+                    moveTurn(45.0, turnSpeed);
+                }
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.MOVEDIAG;
                 telemetryMove = MoveState.TURNDIAG;
@@ -284,7 +285,11 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case TURNALONGWALL:
-                moveTurn(-45.0 + redBlueRotation, turnSpeed);
+                if (redAlliance) {
+                    moveTurn(45.0, turnSpeed);
+                } else {
+                    moveTurn(-135.0, turnSpeed);
+                }
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDBEACON;
                 telemetryMove = MoveState.TURNALONGWALL;
@@ -292,7 +297,11 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case FINDBEACON:
-                moveStraight(-122.0 * redBlueDirection, speed);
+                if (redAlliance) {
+                    moveStraight(-122.0, speed);
+                } else {
+                    moveStraight(122.0, speed);
+                }
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DUMPTRUCK;
                 telemetryMove = MoveState.FINDBEACON;
@@ -317,7 +326,11 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case ROTATEFROMBEACON:
-                moveTurn((-50.0 + redBlueRotation) * redBlueDirection, turnSpeed);
+                if (redAlliance) {
+                    moveTurn(-50.0, turnSpeed);
+                } else {
+                    moveTurn(-130, turnSpeed);
+                }
                 lookingForRedFlag = false;
                 lookingForBlueFlag = false;
                 servoClimberDumper.setPosition(1.0);
@@ -344,9 +357,17 @@ public class CCHS4507Autonomous extends OpMode {
 
             case TURNTORAMP:
                 if (nearMountainFlag) {
-                    moveTurn(91.0 * redBlueDirection, turnSpeed);
+                    if (redAlliance) {
+                        moveTurn(-91.0, turnSpeed);
+                    } else {
+                        moveTurn(91.0, turnSpeed);
+                    }
                 } else {
-                    moveTurn(-98.0 * redBlueDirection, turnSpeed);
+                    if (redAlliance) {
+                        moveTurn(98.0, turnSpeed);
+                    } else {
+                        moveTurn(-98.0, turnSpeed);
+                    }
                 }
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.STOPATRAMP;
@@ -369,7 +390,7 @@ public class CCHS4507Autonomous extends OpMode {
             case UPRAMP:
                 distanceToWall = ultraSense.getUltrasonicLevel();
                 if ((distanceToWall > 30.0) && (distanceToWall <= 70.0)) {
-                    moveStraight(distanceToWall - 5.0 * redBlueDirection, slowSpeed);
+                    moveStraight(distanceToWall - 5.0, slowSpeed);
                     trackLifter.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
                     trackLifter.setPower(0.0);
                     trackLifter.setPowerFloat();
