@@ -24,7 +24,8 @@ public class CCHS4507Autonomous extends OpMode {
     DcMotor trackLifter;
     //servos
     Servo servoBeaconPusher;
-    Servo servoClimberDumper;Servo servoDist;
+    Servo servoClimberDumper;
+    Servo servoDist;
     ColorSensor ColorSense;
     ColorSensor colorGroundSense;
     MoveState currentMove;
@@ -67,10 +68,11 @@ public class CCHS4507Autonomous extends OpMode {
     OpticalDistanceSensor liftCheck;
     int trackLifterUp = 0;
     boolean nearMountainFlag = false;
-    double redBlueFlag = 1.0;
+    double redBlueDirection = 1.0;
+    double redBlueRotation = 0.0;
    // long delayTimeFlag = 10;
    // double tileFlag = 1.0;
-    
+
 
     public CCHS4507Autonomous() {
     }
@@ -148,15 +150,17 @@ public class CCHS4507Autonomous extends OpMode {
         delayPot = hardwareMap.analogInput.get("delayPot");
         moveDelayTime = (long)(delayPot.getValue() * (15000 / 1024));
         nearMountainFlag = nearMountainSwitch.getState();
-        if (redBlueSwitch.getState()) {
-            redBlueFlag = 1.0;
-            lookingForRedFlag = true;
-            lookingForBlueFlag = false;
-            servoDist.setPosition(0.75);
-        } else {
-            redBlueFlag = -1.0;
+        if (redBlueSwitch.getState()) { //This is for when we're going to blue
+            redBlueDirection = -1.0;
+            redBlueRotation = 180.0;
             lookingForRedFlag = false;
             lookingForBlueFlag = true;
+            servoDist.setPosition(0.75);
+        } else { //This is for red
+            redBlueDirection = 1.0;
+            redBlueRotation = 0.0;
+            lookingForRedFlag = true;
+            lookingForBlueFlag = false;
             servoDist.setPosition(0.25);
         }
 
@@ -166,9 +170,9 @@ public class CCHS4507Autonomous extends OpMode {
         }
         // tileFlag = tileSwitch.getState();
         //if (tileSwitch.getState()) {
-            
+
         // } else {
-            
+
         // }
         ColorSense.enableLed(true);
         motorRight.setDirection(DcMotor.Direction.REVERSE);
@@ -221,6 +225,11 @@ public class CCHS4507Autonomous extends OpMode {
                     motorLeft.setPower(0.0);
                     currentMove = MoveState.MOVEDELAY;
                 }
+                if (lookingForBlueFlag && (ColorSense.blue() >= 1))  {
+                    motorRight.setPower(0.0);
+                    motorLeft.setPower(0.0);
+                    currentMove = MoveState.MOVEDELAY;
+                }
                 if (!motorLeft.isBusy() && !motorRight.isBusy()) {
                     currentMove = MoveState.MOVEDELAY;
                 }
@@ -248,7 +257,7 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case TURNDIAG:
-                moveTurn(45.0 * redBlueFlag, turnSpeed);
+                moveTurn(45.0 * redBlueDirection, turnSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.MOVEDIAG;
                 telemetryMove = MoveState.TURNDIAG;
@@ -256,7 +265,7 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case MOVEDIAG:
-                moveStraight(219.0, speed);
+                moveStraight(209.0, speed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDWALL;
                 telemetryMove = MoveState.MOVEDIAG;
@@ -275,7 +284,7 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case TURNALONGWALL:
-                moveTurn(-45.0 * redBlueFlag, turnSpeed);
+                moveTurn(-45.0 + redBlueRotation, turnSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDBEACON;
                 telemetryMove = MoveState.TURNALONGWALL;
@@ -283,8 +292,7 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case FINDBEACON:
-                moveStraight(-122.0, speed);
-                lookingForRedFlag = true;
+                moveStraight(-122.0 * redBlueDirection, speed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DUMPTRUCK;
                 telemetryMove = MoveState.FINDBEACON;
@@ -309,8 +317,9 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case ROTATEFROMBEACON:
-                moveTurn(50.0 * redBlueFlag, turnSpeed);
+                moveTurn((-50.0 + redBlueRotation) * redBlueDirection, turnSpeed);
                 lookingForRedFlag = false;
+                lookingForBlueFlag = false;
                 servoClimberDumper.setPosition(1.0);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.MOVETORAMP;
@@ -335,9 +344,9 @@ public class CCHS4507Autonomous extends OpMode {
 
             case TURNTORAMP:
                 if (nearMountainFlag) {
-                    moveTurn(91.0 * redBlueFlag, turnSpeed);
+                    moveTurn(91.0 * redBlueDirection, turnSpeed);
                 } else {
-                    moveTurn(-98.0 * redBlueFlag, turnSpeed);
+                    moveTurn(-98.0 * redBlueDirection, turnSpeed);
                 }
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.STOPATRAMP;
@@ -360,7 +369,7 @@ public class CCHS4507Autonomous extends OpMode {
             case UPRAMP:
                 distanceToWall = ultraSense.getUltrasonicLevel();
                 if ((distanceToWall > 30.0) && (distanceToWall <= 70.0)) {
-                    moveStraight(distanceToWall - 5.0, slowSpeed);
+                    moveStraight(distanceToWall - 5.0 * redBlueDirection, slowSpeed);
                     trackLifter.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
                     trackLifter.setPower(0.0);
                     trackLifter.setPowerFloat();

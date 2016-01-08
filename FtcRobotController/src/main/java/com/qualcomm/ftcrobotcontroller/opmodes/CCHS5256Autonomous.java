@@ -6,8 +6,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.GyroSensor;
-import com.qualcomm.robotcore.hardware.LED;
-import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -21,10 +19,13 @@ import java.util.Date;
  */
 public class CCHS5256Autonomous extends OpMode {
     enum MoveState {
-        DELAY, STARTMOVE, MOVING, PRETURN, SERVOPINIONREDMOVE, SERVOPINIONNULLMOVE, SERVOPINIONBLUEMOVE,
-        SERVOPUSHERMOVE, SERVODUMPERMOVE, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
-        DRIVEALONGWALL, FINDBEACON, ALIGNDUMPER, DUMPCLIMBERS, ALIGNPRESSER, PRESSBUTTON,
-        PULLAHEADALONGWALL, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, UPRAMP, DONE
+        DELAY, STARTSTRAIGHTMOVE, STRAIGHTMOVING, STARTENCODERTURN, ENCODERTURNMOVING, GYROTURN,
+        PRETURN, SERVOPINIONREDMOVE, SERVOPINIONNULLMOVE, SERVOPINIONBLUEMOVE, SERVOPUSHERMOVE,
+        SERVODUMPERMOVE, MOVEDELAY, FIRSTMOVE, TURNDIAGWITHGYRO, TURNDIAGWITHENCODERS, MOVEDIAG,
+        FINDWALL, TURNALONGWALLWITHGYRO, TURNALONGWALLWITHENCODERS, DRIVEALONGWALL, FINDBEACON,
+        ALIGNDUMPER, DUMPCLIMBERS, ALIGNPRESSER, PRESSBUTTON, PULLAHEADALONGWALL,
+        ROTATEFROMBEACONWITHGYRO, ROTATEFROMBEACONWITHENCODERS, MOVETORAMP, TURNTORAMPWITHGYRO,
+        TURNTORAMPWITHENCODERS, UPRAMP, DONE
     }
 
     // maximum and minimum values to use when clipping the ranges
@@ -64,10 +65,8 @@ public class CCHS5256Autonomous extends OpMode {
 //    OpticalDistanceSensor rightWheelAlignment;
     GyroSensor gyroSense;
     int preTurnHeading;
-    UltrasonicSensor fUltraSense;
-//    UltrasonicSensor bUltraSense;
-//    TouchSensor beaconPinionAlignment;
-//    TouchSensor beaconPinionStop;
+    UltrasonicSensor UltraSense;
+    TouchSensor beaconPinionStop;
 //    TouchSensor leftWheelStop;
 //    TouchSensor rightWheelStop;
     //Statemachine options
@@ -77,7 +76,7 @@ public class CCHS5256Autonomous extends OpMode {
     MoveState telemetryMove;
     double ifRedOnBeacon;
     double ifBlueOnBeacon;
-    boolean lookingForRedFlag;
+    boolean lookingForFlag;
     // Switches
     DigitalChannel nearMtnSwitch;
     DigitalChannel redBlueBeaconSwitch;
@@ -286,10 +285,8 @@ public class CCHS5256Autonomous extends OpMode {
 //        floorColorSense.enableLed(true);
         gyroSense = hardwareMap.gyroSensor.get("gyro");
         gyroSense.calibrate();
-        fUltraSense = hardwareMap.ultrasonicSensor.get("fUltraSense");
-//        bUltraSense = hardwareMap.ultrasonicSensor.get("bUltraSense");
-//        beaconPinionAlignment = hardwareMap.touchSensor.get("bPAlign");
-//        beaconPinionStop = hardwareMap.touchSensor.get("bPStop");
+        UltraSense = hardwareMap.ultrasonicSensor.get("UltraSense");
+        beaconPinionStop = hardwareMap.touchSensor.get("bPStop");
 //        leftWheelStop = hardwareMap.touchSensor.get("lWStop");
 //        rightWheelStop = hardwareMap.touchSensor.get("rWStop");
         //motor configurations
@@ -300,7 +297,7 @@ public class CCHS5256Autonomous extends OpMode {
         currentMove = MoveState.MOVEDELAY;
         nextMove = MoveState.FIRSTMOVE;
         telemetryMove = MoveState.FIRSTMOVE;
-        lookingForRedFlag = false;
+        lookingForFlag = false;
         // switches
         nearMtnSwitch = hardwareMap.digitalChannel.get("nMtnSw");
         redBlueBeaconSwitch = hardwareMap.digitalChannel.get("rBSw");
@@ -312,13 +309,19 @@ public class CCHS5256Autonomous extends OpMode {
         moveBeaconPinion(0.0);
         moveClimberDump(1.0);
         moveBeaconPress(1.0);
-        redBlue = 1;
         servoUltraSense.setPosition(0.25);
         moveDelayTime = delayTime;
+        if (redBlueBeaconSwitch.getState()) { //red alliance
+            redBlue = 1;
+            servoUltraSense.setPosition(.75);
+        } else { // blue alliance
+            redBlue = -1;
+            servoUltraSense.setPosition(.25);
+        }
         // align color sensor
-        // while (!beaconPinionStop.isPressed()) {
-        //     moveBeaconPinion(0.5);
-        // }
+         while (!beaconPinionStop.isPressed()) {
+             moveBeaconPinion(0.5);
+         }
         // // align omniwheels
         // while (!leftWheelStop.isPressed()) {
         //     moveLeftOmnipinion(0.5);
@@ -344,14 +347,14 @@ public class CCHS5256Autonomous extends OpMode {
                 currentMove = turnMove;
                 break;
 
-            case STARTMOVE:
+            case STARTSTRAIGHTMOVE:
                 if (leftDrive.isBusy() && rightDrive.isBusy()) {
-                    currentMove = MoveState.MOVING;
+                    currentMove = MoveState.STRAIGHTMOVING;
                 }
                 break;
 
-            case MOVING:
-                if (lookingForRedFlag && ((beaconColorSense.red() >= 1) || (beaconColorSense.blue() >= 1))) {
+            case STRAIGHTMOVING:
+                if (lookingForFlag && ((beaconColorSense.red() >= 1) || (beaconColorSense.blue() >= 1))) {
                     leftDrive.setPower(0.0);
                     rightDrive.setPower(0.0);
                     currentMove = MoveState.MOVEDELAY;
@@ -359,6 +362,18 @@ public class CCHS5256Autonomous extends OpMode {
                 if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
                     currentMove = MoveState.MOVEDELAY;
                 }
+                break;
+
+            case ENCODERTURNMOVING:
+                if (lookingForFlag && ((beaconColorSense.red() >= 1) || (beaconColorSense.blue() >= 1))) {
+                    leftDrive.setPower(0.0);
+                    rightDrive.setPower(0.0);
+                    currentMove = MoveState.MOVEDELAY;
+                }
+                if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+                    currentMove = MoveState.MOVEDELAY;
+                }
+                moveDelayTime = 75;
                 break;
 
 
@@ -399,57 +414,61 @@ public class CCHS5256Autonomous extends OpMode {
             case FIRSTMOVE:
                 preTurnHeading = gyroSense.getHeading();
                 moveStraight(80.0, 0.4);
-                currentMove = MoveState.STARTMOVE;
+                currentMove = MoveState.STARTSTRAIGHTMOVE;
                 nextMove = MoveState.PRETURN;
-                turnMove = MoveState.TURNDIAG;
                 telemetryMove = MoveState.FIRSTMOVE;
                 moveDelayTime = 100;
                 break;
 
-            case TURNDIAG:
+            case TURNDIAGWITHENCODERS:
+                moveTurn(45, 0.5);
+                currentMove = MoveState.STARTENCODERTURN;
+                nextMove = MoveState.TURNDIAGWITHGYRO;
+                break;
+
+            case TURNDIAGWITHGYRO:
                 if (moveTurnWithGyro(45, 0.5, true) == true) {
                     currentMove = MoveState.MOVEDELAY;
                     moveDelayTime = 100;
                 }
                 nextMove = MoveState.MOVEDIAG;
-                telemetryMove = MoveState.TURNDIAG;
+                telemetryMove = MoveState.TURNDIAGWITHGYRO;
                 break;
 
             case MOVEDIAG:
                 preTurnHeading = gyroSense.getHeading();
                 moveStraight(171.0, 0.4);
-                currentMove = MoveState.STARTMOVE;
+                currentMove = MoveState.STARTSTRAIGHTMOVE;
                 nextMove = MoveState.FINDWALL;
                 telemetryMove = MoveState.MOVEDIAG;
                 moveDelayTime = 250;
                 break;
 
             case FINDWALL:
-                distanceToWall = fUltraSense.getUltrasonicLevel();
+                distanceToWall = UltraSense.getUltrasonicLevel();
                 if ((distanceToWall > 30.0) && (distanceToWall <= 90.0))
                 {
                     moveStraight((distanceToWall - 33.0) * 1.414, 0.4);
-                    currentMove = MoveState.STARTMOVE;
+                    currentMove = MoveState.STARTSTRAIGHTMOVE;
                     nextMove = MoveState.PRETURN;
-                    turnMove = MoveState.TURNALONGWALL;
                     telemetryMove = MoveState.FINDWALL;
                     moveDelayTime = 250;
                 }
                 break;
 
-            case TURNALONGWALL:
+            case TURNALONGWALLWITHGYRO:
                 if (moveTurnWithGyro(135, 0.5, true) == true) {
                     currentMove = MoveState.MOVEDELAY;
                     moveDelayTime = 100;
                 }
                 nextMove = MoveState.DRIVEALONGWALL;
-                telemetryMove = MoveState.TURNALONGWALL;
+                telemetryMove = MoveState.TURNALONGWALLWITHGYRO;
                 break;
 
             case DRIVEALONGWALL:
                 preTurnHeading = gyroSense.getHeading();
                 moveStraight(50.0, 0.4);
-                currentMove = MoveState.STARTMOVE;
+                currentMove = MoveState.STARTSTRAIGHTMOVE;
                 nextMove = MoveState.FINDBEACON;
                 telemetryMove = MoveState.DRIVEALONGWALL;
                 moveDelayTime = 100;
@@ -457,8 +476,8 @@ public class CCHS5256Autonomous extends OpMode {
 
             case FINDBEACON:
                 moveStraight(-30, 0.20);
-                lookingForRedFlag = true;
-                currentMove = MoveState.STARTMOVE;
+                lookingForFlag = true;
+                currentMove = MoveState.STARTSTRAIGHTMOVE;
                 nextMove = MoveState.ALIGNDUMPER;
                 telemetryMove = MoveState.FINDBEACON;
                 moveDelayTime = 500;
@@ -506,46 +525,44 @@ public class CCHS5256Autonomous extends OpMode {
 
             case PULLAHEADALONGWALL:
                 moveStraight(30, 0.4);
-                currentMove = MoveState.STARTMOVE;
+                currentMove = MoveState.STARTSTRAIGHTMOVE;
                 nextMove = MoveState.PRETURN;
-                turnMove = MoveState.ROTATEFROMBEACON;
                 telemetryMove = MoveState.PULLAHEADALONGWALL;
                 moveDelayTime = 200;
                 break;
 
-            case ROTATEFROMBEACON:
+            case ROTATEFROMBEACONWITHGYRO:
                 if (moveTurnWithGyro(50, 0.5, true) == true) {
                     currentMove = MoveState.MOVEDELAY;
                     moveDelayTime = 100;
                 }
-                lookingForRedFlag = false;
+                lookingForFlag = false;
                 nextMove = MoveState.MOVETORAMP;
-                telemetryMove = MoveState.ROTATEFROMBEACON;
+                telemetryMove = MoveState.ROTATEFROMBEACONWITHGYRO;
                 break;
 
             case MOVETORAMP:
                 preTurnHeading = gyroSense.getHeading();
                 moveStraight(-103.0, 0.4);
-                currentMove = MoveState.STARTMOVE;
+                currentMove = MoveState.STARTSTRAIGHTMOVE;
                 nextMove = MoveState.PRETURN;
-                turnMove = MoveState.TURNTORAMP;
                 telemetryMove = MoveState.MOVETORAMP;
                 moveDelayTime = 100;
                 break;
 
-            case TURNTORAMP:
+            case TURNTORAMPWITHGYRO:
                 if (moveTurnWithGyro(-101, 0.5, true) == true) {
                     currentMove = MoveState.MOVEDELAY;
                     moveDelayTime = 100;
                 }
                 nextMove = MoveState.UPRAMP;
-                telemetryMove = MoveState.TURNTORAMP;
+                telemetryMove = MoveState.TURNTORAMPWITHGYRO;
 
                 break;
 
             case UPRAMP:
                 moveStraight(0, 0.3);
-                currentMove = MoveState.STARTMOVE;
+                currentMove = MoveState.STARTSTRAIGHTMOVE;
                 nextMove = MoveState.DONE;
                 telemetryMove = MoveState.UPRAMP;
                 break;
@@ -557,7 +574,7 @@ public class CCHS5256Autonomous extends OpMode {
                 break;
         }
 
-        telemetry.addData("Ultrasonic", fUltraSense.getUltrasonicLevel());
+        telemetry.addData("Ultrasonic", UltraSense.getUltrasonicLevel());
         telemetry.addData("Current Move", telemetryMove.toString());
         telemetry.addData("ENCLeft", (float) leftDrive.getCurrentPosition());
         telemetry.addData("ENCRight", (float) rightDrive.getCurrentPosition());
