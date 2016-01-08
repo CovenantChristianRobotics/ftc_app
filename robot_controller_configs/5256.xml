@@ -15,7 +15,7 @@
     </MotorController>
     <DeviceInterfaceModule name="Core Interface Module" serialNumber="AL00VFP2">
         <ColorSensor name="bColorSense" port="0" />
-        <Gyro name="gyro" port="1"/>
+        <Gyro name="gyroSense" port="1"/>
         <AnalogInput name="dP" port="0"/>
         <DigitalDevice name="nMtnSw" port="0"/>
         <DigitalDevice name="rBSw" port="1"/>
