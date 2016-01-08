@@ -2,12 +2,12 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
-import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -19,8 +19,8 @@ import java.util.Date;
  */
 public class CCHS5256TeleOp extends OpMode {
 
-    enum LEDcontrol {
-        PREMATCH, START,OFF, ENDGAME, ON, BlINK, DELAYSETTINGS, DELAY
+    enum ledControl {
+        PREMATCH, START, ON, ENDGAME, BLINKOFF, BlINKON, DELAYSETTINGS, DELAY
     }
 
     final static double bpusher_MIN_RANGE = 0.20;
@@ -50,13 +50,12 @@ public class CCHS5256TeleOp extends OpMode {
 //    Servo sweeper;
 //    boolean sweepOn;
     Servo servoClimberDumper;
-   //  Servo leftOmniPinion;
-   //  Servo rightOmniPinion;
+     Servo leftOmniPinion;
+     Servo rightOmniPinion;
     //sensors
     ColorSensor beaconColorSense;
 //    ColorSensor floorColorSense;
-//    OpticalDistanceSensor leftWheelAlignment;
-//    OpticalDistanceSensor rightWheelAlignment;
+    OpticalDistanceSensor wheelAlignment;
     GyroSensor gyroSense;
     boolean goStraightWithGyro;
     UltrasonicSensor fUltraSense;
@@ -65,11 +64,11 @@ public class CCHS5256TeleOp extends OpMode {
     double medDist;
    //  TouchSensor beaconPinionAlignment;
    //  TouchSensor beaconPinionStop;
-   //  TouchSensor leftWheelStop;
-   //  TouchSensor rightWheelStop;
+     TouchSensor leftWheelStop;
+     TouchSensor rightWheelStop;
     // State Machine Options
-    LEDcontrol CurrentControl;
-    LEDcontrol NowControl;
+    ledControl currentControl;
+    ledControl nextControl;
     ElapsedTime endGameTime;
     // Delay Settings
     long delayUntil;
@@ -125,6 +124,25 @@ public class CCHS5256TeleOp extends OpMode {
 //            sweepOn = true;
 //         }
 //      }
+    /**
+     * speed is between -1 and +1
+     *
+     * @param lOmnipinionSpeed
+     */
+    void moveLeftOmnipinion(double lOmnipinionSpeed) {
+        double FomniPinionSpeed = ((lOmnipinionSpeed / 2) + 0.5);
+        servoBeaconPinion.setPosition(FomniPinionSpeed);
+    }
+
+    /**
+     * speed is between -1 and +1
+     *
+     * @param rOmnipinionSpeed
+     */
+    void moveRightOmnipinion(double rOmnipinionSpeed) {
+        double FomniPinionSpeed = ((rOmnipinionSpeed / 2) + 0.5);
+        servoBeaconPinion.setPosition(FomniPinionSpeed);
+    }
 
     @Override
     public void init() {
@@ -144,29 +162,28 @@ public class CCHS5256TeleOp extends OpMode {
         servoBeaconPusher = hardwareMap.servo.get("beaconPusher");
         servoClimberDumper = hardwareMap.servo.get("climberDumper");
         servoUltraSense = hardwareMap.servo.get("servoUltra");
-      //  leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
-      //  rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
+        leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
+        rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
         // Sensors
         beaconColorSense = hardwareMap.colorSensor.get("bColorSense");
         beaconColorSense.enableLed(false);
 //        floorColorSense = hardwareMap.colorSensor.get("fColorSense");
 //        floorColorSense.enableLed(true);
-//        leftWheelAlignment = hardwareMap.opticalDistanceSensor.get("lWAlign");
-//        rightWheelAlignment = hardwareMap.opticalDistanceSensor.get("rWAlign");
+        wheelAlignment = hardwareMap.opticalDistanceSensor.get("wAlign");
         gyroSense = hardwareMap.gyroSensor.get("gyroSense");
         fUltraSense = hardwareMap.ultrasonicSensor.get("fUltraSense");
 //        bUltraSense = hardwareMap.ultrasonicSensor.get("bUltraSense");
       //  beaconPinionAlignment = hardwareMap.touchSensor.get("bPALign");
       //  beaconPinionStop = hardwareMap.touchSensor.get("bPStop");
-      //  leftWheelStop = hardwareMap.touchSensor.get("lWStop");
-      //  rightWheelStop = hardwareMap.touchSensor.get("rWStop");
+        leftWheelStop = hardwareMap.touchSensor.get("lWStop");
+        rightWheelStop = hardwareMap.touchSensor.get("rWStop");
         //motor configurations
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
         leftDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         rightDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         // state machine settings
-        CurrentControl = LEDcontrol.PREMATCH;
+        currentControl = ledControl.PREMATCH;
         // servo positions
         beaconPusherPosition = 0.5;
         endGameTime = new ElapsedTime();
@@ -180,6 +197,8 @@ public class CCHS5256TeleOp extends OpMode {
         float left = gamepad1.left_stick_y;
         float right = gamepad1.right_stick_y;
         float beaconPinion = gamepad2.right_stick_y;
+        float rightStickPos = gamepad1.right_stick_y;
+        float rightStickNeg = gamepad1.right_stick_y;
 
         left = Range.clip(left, -1, 1);
         right = Range.clip(right, -1, 1);
@@ -198,11 +217,49 @@ public class CCHS5256TeleOp extends OpMode {
 //            right = (float) -0.05;
         }
 
-        if (gamepad1.dpad_up) {
-            moveStraightWithGyro(0.75);
-        } else if (gamepad1.dpad_down) {
-            moveStraightWithGyro(-0.75);
+        if (rightStickPos < 0 ) {
+            rightStickPos = 0;
+        } else if (rightStickPos >= 0) {
+            rightStickPos = gamepad1.right_stick_y;
         }
+
+        if (rightStickNeg > 0 ) {
+            rightStickNeg = 0;
+        } else if (rightStickNeg <= 0) {
+            rightStickNeg = gamepad1.right_stick_y;
+        }
+
+        if (gamepad1.dpad_up) {
+            moveStraightWithGyro(rightStickPos);
+        } else if (gamepad1.dpad_down) {
+            moveStraightWithGyro(rightStickNeg);
+        }
+
+//        if (gamepad2.dpad_up) {
+//            if (leftWheelStop.isPressed() == false && rightWheelStop.isPressed() == false) {
+//                moveLeftOmnipinion(0.5);
+//                moveRightOmnipinion(0.5);
+//            } else if (leftWheelStop.isPressed() == true || rightWheelStop.isPressed() == true) {
+//                moveLeftOmnipinion(0.0);
+//                moveRightOmnipinion(0.0);
+//            } else if (wheelAlignment.getLightDetected() > 0.3) {
+//                moveLeftOmnipinion(0.0);
+//                moveRightOmnipinion(0.0);
+//            }
+//        }
+//
+//        if (gamepad2.dpad_down) {
+//            if (leftWheelStop.isPressed() == false && rightWheelStop.isPressed() == false) {
+//                moveLeftOmnipinion(-0.5);
+//                moveRightOmnipinion(-0.5);
+//            } else if (leftWheelStop.isPressed() == true || rightWheelStop.isPressed() == true) {
+//                moveLeftOmnipinion(0.0);
+//                moveRightOmnipinion(0.0);
+//            } else if (wheelAlignment.getLightDetected() > 0.3) {
+//                moveLeftOmnipinion(0.0);
+//                moveRightOmnipinion(0.0);
+//            }
+//        }
 
         leftDrive.setPower(left);
         rightDrive.setPower(right);
@@ -240,55 +297,55 @@ public class CCHS5256TeleOp extends OpMode {
         // write position values to the wrist and claw servo
         servoBeaconPusher.setPosition(beaconPusherPosition);
 
-        switch (CurrentControl) {
+        switch (currentControl) {
             case DELAYSETTINGS:
                 now = new Date();
                 delayUntil = now.getTime() + moveDelayTime;
-                CurrentControl = LEDcontrol.DELAY;
+                currentControl = ledControl.DELAY;
                 break;
 
             case DELAY:
                 now = new Date();
                 if (now.getTime() >= delayUntil) {
-                    CurrentControl = NowControl;
+                    currentControl = nextControl;
                 }
                 break;
 
             case PREMATCH:
-                CurrentControl = LEDcontrol.START;
+                currentControl = ledControl.START;
                 break;
 
             case START:
                 endGameTime.reset();
                 endGameLights.setPower(1.0);
-                CurrentControl = LEDcontrol.OFF;
+                currentControl = ledControl.ON;
                 break;
 
-            case OFF:
+            case ON:
                 if (endGameTime.time() > 90.0) {
-                    CurrentControl = LEDcontrol.ENDGAME;
+                    currentControl = ledControl.ENDGAME;
                 } else {
-                    CurrentControl = LEDcontrol.OFF;
+                    currentControl = ledControl.ON;
                 }
                 break;
 
             case ENDGAME:
-                endGameLights.setPower(1.0);
-                CurrentControl = LEDcontrol.ON;
+                endGameLights.setPower(0.0);
+                currentControl = ledControl.ON;
                 break;
 
-            case ON:
+            case BlINKON:
                 endGameLights.setPower(1.0);
-                moveDelayTime = 500;
-                CurrentControl = LEDcontrol.DELAYSETTINGS;
-                NowControl = LEDcontrol.BlINK;
+                moveDelayTime = 200;
+                currentControl = ledControl.DELAYSETTINGS;
+                nextControl = ledControl.BlINKON;
                 break;
 
-            case BlINK:
-                endGameLights.setPowerFloat();
-                moveDelayTime = 500;
-                CurrentControl = LEDcontrol.DELAYSETTINGS;
-                NowControl = LEDcontrol.ON;
+            case BLINKOFF:
+                endGameLights.setPower(0.0);
+                moveDelayTime = 200;
+                currentControl = ledControl.DELAYSETTINGS;
+                nextControl = ledControl.ON;
                 break;
         }
 
@@ -296,7 +353,7 @@ public class CCHS5256TeleOp extends OpMode {
         telemetry.addData("right trigger", gamepad1.right_trigger);
         telemetry.addData("Pinion", servoBeaconPinion.getPosition());
         telemetry.addData("Pusher", servoBeaconPusher.getPosition());
-        telemetry.addData("LED", CurrentControl.toString());
+        telemetry.addData("LED", currentControl.toString());
         telemetry.addData("Elapsed Time", endGameTime.time());
         telemetry.addData("leftDrive", leftDrive.getCurrentPosition());
         telemetry.addData("right Drive", rightDrive.getCurrentPosition());
