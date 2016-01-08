@@ -144,10 +144,12 @@ public class CCHS5256Autonomous extends OpMode {
      * if degree magnitude is negative, robot turns clockwise
      *
      * @param degrees
-     * @param speed
      */
-    boolean moveTurnWithGyro(int degrees, double speed, boolean reverseByColor) {
+    void moveTurnWithGyro(int degrees, boolean reverseByColor) {
         int turnTo;
+        int centerDist;
+        int currentHeading;
+        int difference;
 
         turnTo = preTurnHeading + degrees;
         if (turnTo > 359) {
@@ -155,41 +157,44 @@ public class CCHS5256Autonomous extends OpMode {
         } else if (turnTo < 0) {
             turnTo = turnTo + 360;
         }
-        if (reverseByColor == true) {
-            if (gyroSense.getHeading() == turnTo) {
-                leftDrive.setPower(0.0 * redBlue);
-                rightDrive.setPower(0.0 * redBlue);
-                return true;
-            } else if (degrees > 0) {
-                leftDrive.setPower(-speed * redBlue);
-                rightDrive.setPower(speed * redBlue);
-            } else if (degrees < 0) {
-                leftDrive.setPower(speed * redBlue);
-                rightDrive.setPower(-speed * redBlue);
-            } else if (degrees == 0) {
-                leftDrive.setPower(0.0 * redBlue);
-                rightDrive.setPower(0.0 * redBlue);
-                return true;
-            }
-        } else if (reverseByColor == false){
-            if (gyroSense.getHeading() == turnTo) {
-                leftDrive.setPower(0.0);
-                rightDrive.setPower(0.0);
-                return true;
-            } else if (degrees > 0) {
-                leftDrive.setPower(-speed);
-                rightDrive.setPower(speed);
-            } else if (degrees < 0) {
-                leftDrive.setPower(speed);
-                rightDrive.setPower(-speed);
-            } else if (degrees == 0) {
-                leftDrive.setPower(0.0);
-                rightDrive.setPower(0.0);
-                return true;
+
+        centerDist = 180 - turnTo;
+        currentHeading = gyroSense.getHeading();
+
+        while (currentHeading != turnTo) {
+            difference = (turnTo + centerDist) - (currentHeading + centerDist);
+            currentHeading = gyroSense.getHeading();
+
+            if (reverseByColor == true) {
+                if (currentHeading + centerDist > turnTo + centerDist) {
+                    leftDrive.setPower((-(difference / 100) * 3) * redBlue);
+                    rightDrive.setPower(((difference / 100) * 3) * redBlue);
+                } else if (currentHeading + centerDist > turnTo + centerDist) {
+                    leftDrive.setPower(((difference / 100) * 3) * redBlue);
+                    rightDrive.setPower((-(difference / 100) * 3) * redBlue);
+                }
+            } else if (reverseByColor == false){
+                if (currentHeading + centerDist > turnTo + centerDist) {
+                    leftDrive.setPower(-(difference / 100) * 3);
+                    rightDrive.setPower((difference / 100) * 3);
+                } else if (currentHeading + centerDist > turnTo + centerDist) {
+                    leftDrive.setPower((difference / 100) * 3);
+                    rightDrive.setPower(-(difference / 100) * 3);
+                }
+
             }
         }
-        return false;
-    }
+
+        if (reverseByColor == true) {
+
+
+        } else if (reverseByColor == false){
+
+            }
+        }
+
+
+
 
     void motorOn(double speed, boolean onoroff) {
         if(onoroff = true){
@@ -427,10 +432,9 @@ public class CCHS5256Autonomous extends OpMode {
                 break;
 
             case TURNDIAGWITHGYRO:
-                if (moveTurnWithGyro(45, 0.5, true) == true) {
-                    currentMove = MoveState.MOVEDELAY;
-                    moveDelayTime = 100;
-                }
+                moveTurnWithGyro(45, true);
+                currentMove = MoveState.MOVEDELAY;
+                moveDelayTime = 100;
                 nextMove = MoveState.MOVEDIAG;
                 telemetryMove = MoveState.TURNDIAGWITHGYRO;
                 break;
@@ -457,10 +461,9 @@ public class CCHS5256Autonomous extends OpMode {
                 break;
 
             case TURNALONGWALLWITHGYRO:
-                if (moveTurnWithGyro(135, 0.5, true) == true) {
-                    currentMove = MoveState.MOVEDELAY;
-                    moveDelayTime = 100;
-                }
+                moveTurnWithGyro(135, true);
+                currentMove = MoveState.MOVEDELAY;
+                moveDelayTime = 100;
                 nextMove = MoveState.DRIVEALONGWALL;
                 telemetryMove = MoveState.TURNALONGWALLWITHGYRO;
                 break;
@@ -532,10 +535,9 @@ public class CCHS5256Autonomous extends OpMode {
                 break;
 
             case ROTATEFROMBEACONWITHGYRO:
-                if (moveTurnWithGyro(50, 0.5, true) == true) {
-                    currentMove = MoveState.MOVEDELAY;
-                    moveDelayTime = 100;
-                }
+                moveTurnWithGyro(50, true);
+                currentMove = MoveState.MOVEDELAY;
+                moveDelayTime = 100;
                 lookingForFlag = false;
                 nextMove = MoveState.MOVETORAMP;
                 telemetryMove = MoveState.ROTATEFROMBEACONWITHGYRO;
@@ -551,10 +553,10 @@ public class CCHS5256Autonomous extends OpMode {
                 break;
 
             case TURNTORAMPWITHGYRO:
-                if (moveTurnWithGyro(-101, 0.5, true) == true) {
-                    currentMove = MoveState.MOVEDELAY;
-                    moveDelayTime = 100;
-                }
+                moveTurnWithGyro(-101, true);
+                currentMove = MoveState.MOVEDELAY;
+                moveDelayTime = 100;
+
                 nextMove = MoveState.UPRAMP;
                 telemetryMove = MoveState.TURNTORAMPWITHGYRO;
 

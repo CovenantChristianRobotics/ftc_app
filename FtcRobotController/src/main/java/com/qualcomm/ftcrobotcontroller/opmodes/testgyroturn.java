@@ -192,13 +192,6 @@ public class testgyroturn extends OpMode {
 
             }
         }
-
-        if (reverseByColor == true) {
-
-
-        } else if (reverseByColor == false){
-
-        }
     }
 
 

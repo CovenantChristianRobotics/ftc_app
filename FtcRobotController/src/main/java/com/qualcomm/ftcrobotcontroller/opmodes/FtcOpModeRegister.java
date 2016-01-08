@@ -85,6 +85,7 @@ public class FtcOpModeRegister implements OpModeRegister {
 //    manager.register("SpareParts5256Autonomous", SpareParts5256Autonomous.class);
     manager.register("CCHS4507TeleOp", CCHS4507TeleOp.class);
     manager.register("CCHS4507Autonomous", CCHS4507Autonomous.class);
+    manager.register("testgyroturn", testgyroturn.class);
 
     //manager.register("NxtTeleOp", NxtTeleOp.class);
 
