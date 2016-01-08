@@ -58,6 +58,7 @@ public class CCHS5256TeleOp extends OpMode {
 //    OpticalDistanceSensor leftWheelAlignment;
 //    OpticalDistanceSensor rightWheelAlignment;
     GyroSensor gyroSense;
+    boolean goStraightWithGyro;
     UltrasonicSensor fUltraSense;
 //    UltrasonicSensor bUltraSense;
     double lowDist;
@@ -82,18 +83,37 @@ public class CCHS5256TeleOp extends OpMode {
     }
     
       void moveStraightWithGyro(double speed) {
-         int preMoveHeading = gyroSense.getHeading();
+         int centerDist;
+         int preMoveHeading;
+         int currentHeading;
 
-         if (gyroSense.getHeading() == (preMoveHeading - 1) || gyroSense.getHeading() == preMoveHeading || gyroSense.getHeading() == (preMoveHeading + 1)) {
-            leftDrive.setPower(speed);
-            rightDrive.setPower(speed);
-         } else if (gyroSense.getHeading() > (preMoveHeading + 1)) {
-            leftDrive.setPower(speed);
-            rightDrive.setPower(0.0);
-         } else if (gyroSense.getHeading() < (preMoveHeading - 1)) {
-            leftDrive.setPower(0.0);
-            rightDrive.setPower(speed);
+         preMoveHeading = gyroSense.getHeading();
+         centerDist = 180 - preMoveHeading;
+
+         while (goStraightWithGyro == true) {
+             currentHeading = gyroSense.getHeading();
+
+             if (currentHeading + centerDist > 359) {
+                 currentHeading = currentHeading - 360;
+             } else if ( currentHeading + centerDist < 0) {
+                 currentHeading = currentHeading + 360;
+             }
+
+             if (currentHeading == preMoveHeading) {
+                 leftDrive.setPower(speed);
+                 rightDrive.setPower(speed);
+             } else if (currentHeading != preMoveHeading){
+                 if ((currentHeading + centerDist) > (preMoveHeading + centerDist)) {
+                     leftDrive.setPower(speed * 0.2);
+                     rightDrive.setPower(-speed * 0.2);
+                 } else if ((currentHeading + centerDist) < (preMoveHeading + centerDist)) {
+                     leftDrive.setPower(-speed * 0.2);
+                     rightDrive.setPower(speed * 0.2);
+                 }
+             }
+
          }
+
     }
     
 //      void sweep(double speed) {
@@ -151,6 +171,7 @@ public class CCHS5256TeleOp extends OpMode {
         beaconPusherPosition = 0.5;
         endGameTime = new ElapsedTime();
         endGameLights.setPower(0.0);
+        goStraightWithGyro = true;
     }
 
     @Override
@@ -171,10 +192,16 @@ public class CCHS5256TeleOp extends OpMode {
             left = (float) slow(left);
             right = (float) slow(right);
         } else {
-//            left = (float) medium(left);
-//            right = (float) medium(right);
-            left = (float) -0.05;
-            right = (float) -0.05;
+            left = (float) medium(left);
+            right = (float) medium(right);
+//            left = (float) -0.05;
+//            right = (float) -0.05;
+        }
+
+        if (gamepad1.dpad_up) {
+            moveStraightWithGyro(0.75);
+        } else if (gamepad1.dpad_down) {
+            moveStraightWithGyro(-0.75);
         }
 
         leftDrive.setPower(left);
