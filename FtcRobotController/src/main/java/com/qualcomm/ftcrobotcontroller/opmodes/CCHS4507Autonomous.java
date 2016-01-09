@@ -234,7 +234,9 @@ public class CCHS4507Autonomous extends OpMode {
 
     @Override
     public void loop() {
-        double distanceToWall;
+        double distanceToWall = 0.0;
+        double distance = 0.0;
+
         if (gyroSense.isCalibrating()) {
             return;
         }
@@ -346,7 +348,11 @@ public class CCHS4507Autonomous extends OpMode {
             case FINDWALL:
                 distanceToWall = ultraSense.getUltrasonicLevel();
                 if ((distanceToWall > 30.0) && (distanceToWall <= 80.0)) {
-                    moveStraight((distanceToWall - 26.0) * 1.414, slowSpeed);
+                    if (redAlliance) {
+                        moveStraight((distanceToWall - 26.0) * 1.414, slowSpeed);
+                    } else {
+                        moveStraight((distanceToWall - 34.0) * 1.414, slowSpeed);
+                    }
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.TURNALONGWALL;
                     telemetryMove = MoveState.FINDWALL;
@@ -399,7 +405,7 @@ public class CCHS4507Autonomous extends OpMode {
                 if (redAlliance) {
                     moveTurn(-45.0, turnSpeed);
                 } else {
-                    moveTurn(-145, turnSpeed);
+                    moveTurn(-135, turnSpeed);
                 }
                 lookingForRedFlag = false;
                 lookingForBlueFlag = false;
@@ -411,9 +417,13 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case MOVETORAMP:
-                double distance = -81.0;
+                if (redAlliance) {
+                    distance = -81.0;
+                } else {
+                    distance = -88.0;
+                }
                 if (!sawBlueFlag) {
-                    distance -= 30.0;
+                    distance -= 53.0; // saw red first
                 }
                 if (!nearMountainFlag) {
                     distance -= 57.0;
