@@ -18,7 +18,7 @@ import java.util.Date;
 public class CCHS4507Autonomous extends OpMode {
     enum MoveState {
         DELAY, STARTMOVE, MOVING, STARTTURN, TURNING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
-        FINDBEACON, DUMPTRUCK, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, UPRAMP, DONE
+        FINDBEACON, CENTERBUCKET, DUMPTRUCK, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, UPRAMP, DONE
     }
 
     DcMotor motorRight;
@@ -56,9 +56,9 @@ public class CCHS4507Autonomous extends OpMode {
     double dumperPosition = 0.9;
 
     // robot constants
-    double wheelDiameter = 6.75 / 2.0;  // wheel diameter in cm 2 to 1 gear ratio
-    double encoderCounts = 1120.0;      // encoder counts per revolution of the drive train motors
-    double wheelBase = 41.0;            // wheelbase of the primary drive wheels
+//    double wheelDiameter = 6.75 / 2.0;  // wheel diameter in cm 2 to 1 gear ratio
+//    double encoderCounts = 1120.0;      // encoder counts per revolution of the drive train motors
+//    double wheelBase = 41.0;            // wheelbase of the primary drive wheels
     double countsPerMeter = 10439.0;    // Found this experimentally: Measured one meter, drove distance, read counts
     int dumperCounterThresh = 8;       // Doesn't let the dumper counter get above a certain number
     double countsPerDonut = 14161.0;    // Encoder counts per 360 degrees
@@ -218,7 +218,7 @@ public class CCHS4507Autonomous extends OpMode {
         fastSpeed = 0.95;
         slowSpeed = 0.75;
         turnSpeed = 0.75;
-        delay = 150;
+        delay = 50;
         trackLifter.setPower(0.1);
         trackLifter.setTargetPosition(30);
         servoClimberDumper.setPosition(0.9);
@@ -263,6 +263,9 @@ public class CCHS4507Autonomous extends OpMode {
                 motorLeft.setPower(Range.clip(speed - (gyroError * 0.2), -1.0, 1.0));
                 if (ColorSense.blue() >= 1) {
                     sawBlueFlag = true;
+                }
+                if (ColorSense.red() >= 1) {
+                    sawRedFlag = true;
                 }
                 if (lookingForRedFlag && (ColorSense.red() >= 1))  {
                     motorRight.setPower(0.0);
@@ -349,7 +352,7 @@ public class CCHS4507Autonomous extends OpMode {
                 distanceToWall = ultraSense.getUltrasonicLevel();
                 if ((distanceToWall > 30.0) && (distanceToWall <= 80.0)) {
                     if (redAlliance) {
-                        moveStraight((distanceToWall - 26.0) * 1.414, slowSpeed);
+                        moveStraight((distanceToWall - 18.0) * 1.414, slowSpeed);
                     } else {
                         moveStraight((distanceToWall - 34.0) * 1.414, slowSpeed);
                     }
@@ -374,14 +377,32 @@ public class CCHS4507Autonomous extends OpMode {
 
             case FINDBEACON:
                 if (redAlliance) {
-                    moveStraight(-122.0, fastSpeed);
+                    moveStraight(-90.0, fastSpeed);
                 } else {
-                    moveStraight(122.0, fastSpeed);
+                    moveStraight(90.0, fastSpeed);
                 }
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DUMPTRUCK;
+                nextMove = MoveState.CENTERBUCKET;
                 telemetryMove = MoveState.FINDBEACON;
                 moveDelayTime = delay;
+                break;
+
+            case CENTERBUCKET:
+                lookingForRedFlag = false;
+                lookingForBlueFlag = false;
+                if ((redAlliance && sawRedFlag) || (!redAlliance && sawBlueFlag)) {
+                    if (redAlliance) {
+                        moveStraight(-10.0, fastSpeed);
+                    } else {
+                        moveStraight(10.0, fastSpeed);
+                    }
+                    currentMove = MoveState.STARTMOVE;
+                    nextMove = MoveState.DUMPTRUCK;
+                    telemetryMove = MoveState.CENTERBUCKET;
+                    moveDelayTime = delay;
+                } else {
+                    currentMove = MoveState.DUMPTRUCK;
+                }
                 break;
 
             case DUMPTRUCK:
@@ -407,8 +428,6 @@ public class CCHS4507Autonomous extends OpMode {
                 } else {
                     moveTurn(-135, turnSpeed);
                 }
-                lookingForRedFlag = false;
-                lookingForBlueFlag = false;
                 servoClimberDumper.setPosition(1.0);
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.MOVETORAMP;
@@ -418,15 +437,15 @@ public class CCHS4507Autonomous extends OpMode {
 
             case MOVETORAMP:
                 if (redAlliance) {
-                    distance = -81.0;
+                    distance = -114.0;
                 } else {
-                    distance = -88.0;
+                    distance = -96.0;
                 }
                 if (!sawBlueFlag) {
-                    distance -= 53.0; // saw red first
+                    distance += 10.0; // saw red first
                 }
                 if (!nearMountainFlag) {
-                    distance -= 57.0;
+                    distance -= 61.0;
                 }
                 moveStraight(distance, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
