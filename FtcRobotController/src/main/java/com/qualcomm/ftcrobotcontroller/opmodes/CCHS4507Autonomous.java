@@ -127,6 +127,13 @@ public class CCHS4507Autonomous extends OpMode {
         int rightTarget;
         int leftTarget;
 
+        desiredHeading = desiredHeading + (int)degrees;
+        if (desiredHeading >= 360) {
+            desiredHeading = desiredHeading - 360;
+        }
+        if (desiredHeading < 0) {
+            desiredHeading = desiredHeading + 360;
+        }
         speed = targetSpeed;
         leftTarget = motorLeft.getCurrentPosition() - degreesToCounts(degrees);
         motorLeft.setTargetPosition(leftTarget);
@@ -190,6 +197,7 @@ public class CCHS4507Autonomous extends OpMode {
         telemetryMove = MoveState.MOVEDELAY;
         sawRedFlag = false;
         sawBlueFlag = false;
+        desiredHeading = 0;
         speed = 0;
         fastSpeed = 0.95;
         slowSpeed = 0.75;
@@ -245,7 +253,9 @@ public class CCHS4507Autonomous extends OpMode {
                     motorLeft.setPower(0.0);
                     currentMove = MoveState.MOVEDELAY;
                 }
-                if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+                if (!motorLeft.isBusy() || !motorRight.isBusy()) {
+                    motorRight.setPower(0.0);
+                    motorLeft.setPower(0.0);
                     currentMove = MoveState.MOVEDELAY;
                 }
                 break;
@@ -284,7 +294,6 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case FIRSTMOVE:
-                desiredHeading = 0;
                 moveStraight(60.0, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNDIAG;
@@ -294,10 +303,8 @@ public class CCHS4507Autonomous extends OpMode {
 
             case TURNDIAG:
                 if (redAlliance) {
-                    desiredHeading = 315;
                     moveTurn(-45.0, turnSpeed);
                 } else {
-                    desiredHeading = 45;
                     moveTurn(45.0, turnSpeed);
                 }
                 currentMove = MoveState.STARTTURN;
@@ -327,10 +334,8 @@ public class CCHS4507Autonomous extends OpMode {
 
             case TURNALONGWALL:
                 if (redAlliance) {
-                    desiredHeading = 0;
                     moveTurn(45.0, turnSpeed); //origanal is -45
                 } else {
-                    desiredHeading = 90;
                     moveTurn(135.0, turnSpeed);
                 }
                 currentMove = MoveState.STARTTURN;
@@ -370,10 +375,8 @@ public class CCHS4507Autonomous extends OpMode {
 
             case ROTATEFROMBEACON:
                 if (redAlliance) {
-                    desiredHeading = 315;
-                    moveTurn(45.0, turnSpeed);
+                    moveTurn(-45.0, turnSpeed);
                 } else {
-                    desiredHeading = 45;
                     moveTurn(-145, turnSpeed);
                 }
                 lookingForRedFlag = false;
@@ -403,18 +406,14 @@ public class CCHS4507Autonomous extends OpMode {
             case TURNTORAMP:
                 if (nearMountainFlag) {
                     if (redAlliance) {
-                        desiredHeading = 225;
-                        moveTurn(90.0, turnSpeed);
+                        moveTurn(-90.0, turnSpeed);
                     } else {
-                        desiredHeading = 180;
                         moveTurn(90.0, turnSpeed);
                     }
                 } else {
                     if (redAlliance) {
-                        desiredHeading = 48;
                         moveTurn(98.0, turnSpeed);
                     } else {
-                        desiredHeading = -48;
                         moveTurn(-98.0, turnSpeed);
                     }
                 }
@@ -459,11 +458,9 @@ public class CCHS4507Autonomous extends OpMode {
         if (gamepad1.start) {
             currentMove = MoveState.FIRSTMOVE;
         }
-
-        telemetry.addData("colorGround", (float)colorGroundSense.argb());
-        telemetry.addData("colorGround", (float)colorGroundSense.alpha());
         telemetry.addData("Current Move", telemetryMove.toString());
         telemetry.addData("Color", (float)ColorSense.red());
+        telemetry.addData("desiredHeading", (float)desiredHeading);
         telemetry.addData("gyro", (float)gyroSense.getHeading());
         telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
         telemetry.addData("liftCheck", liftCheck.getLightDetected());
