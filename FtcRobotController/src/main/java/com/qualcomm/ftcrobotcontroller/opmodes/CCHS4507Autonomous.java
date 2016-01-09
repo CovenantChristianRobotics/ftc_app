@@ -264,7 +264,10 @@ public class CCHS4507Autonomous extends OpMode {
                 if (gyroError < -180) {
                     gyroError = 360 + gyroError;
                 }
-                moveTurn(gyroError, speed);
+//                moveTurn(gyroError, speed);
+                if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+                    currentMove = MoveState.MOVEDELAY;
+                }
                 break;
 
             case MOVEDELAY:
@@ -291,7 +294,7 @@ public class CCHS4507Autonomous extends OpMode {
 
             case TURNDIAG:
                 if (redAlliance) {
-                    desiredHeading = -45;
+                    desiredHeading = 315;
                     moveTurn(-45.0, turnSpeed);
                 } else {
                     desiredHeading = 45;
@@ -325,9 +328,9 @@ public class CCHS4507Autonomous extends OpMode {
             case TURNALONGWALL:
                 if (redAlliance) {
                     desiredHeading = 0;
-                    moveTurn(-45.0, turnSpeed);
+                    moveTurn(45.0, turnSpeed); //origanal is -45
                 } else {
-                    desiredHeading = 180;
+                    desiredHeading = 90;
                     moveTurn(135.0, turnSpeed);
                 }
                 currentMove = MoveState.STARTTURN;
@@ -367,7 +370,7 @@ public class CCHS4507Autonomous extends OpMode {
 
             case ROTATEFROMBEACON:
                 if (redAlliance) {
-                    desiredHeading = 45;
+                    desiredHeading = 315;
                     moveTurn(45.0, turnSpeed);
                 } else {
                     desiredHeading = 45;
@@ -383,7 +386,7 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case MOVETORAMP:
-                double distance = -71.0;
+                double distance = -91.44;
                 if (!sawBlueFlag) {
                     distance -= 30.0;
                 }
@@ -400,10 +403,10 @@ public class CCHS4507Autonomous extends OpMode {
             case TURNTORAMP:
                 if (nearMountainFlag) {
                     if (redAlliance) {
-                        desiredHeading = 135;
+                        desiredHeading = 225;
                         moveTurn(90.0, turnSpeed);
                     } else {
-                        desiredHeading = 140;
+                        desiredHeading = 180;
                         moveTurn(90.0, turnSpeed);
                     }
                 } else {
