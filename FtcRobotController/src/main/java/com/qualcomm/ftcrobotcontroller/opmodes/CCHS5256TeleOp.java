@@ -39,7 +39,7 @@ public class CCHS5256TeleOp extends OpMode {
     DcMotor leftDrive;
     DcMotor rightDrive;
     DcMotor endGameLights;
-   //  DcMotor chinUp;
+    DcMotor chinUp;
     // ServoControllers
 //    ServoController beaconController;
    //  ServoController alignmentController;
@@ -56,7 +56,7 @@ public class CCHS5256TeleOp extends OpMode {
 //    ColorSensor beaconColorSense;
 //    ColorSensor floorColorSense;
 //    OpticalDistanceSensor wheelAlignment;
-//    GyroSensor gyroSense;
+    GyroSensor gyroSense;
 //    boolean goStraightWithGyro;
 //    UltrasonicSensor fUltraSense;
 //    UltrasonicSensor bUltraSense;
@@ -151,7 +151,7 @@ public class CCHS5256TeleOp extends OpMode {
         leftDrive = hardwareMap.dcMotor.get("motorL");
         rightDrive = hardwareMap.dcMotor.get("motorR");
         endGameLights = hardwareMap.dcMotor.get("endGameLights");
-      //  chinUp = hardwareMap.dcMotor.get("chinUp");
+        chinUp = hardwareMap.dcMotor.get("chinUp");
         // Servo Controllers
 //        beaconController = hardwareMap.servoController.get("beaconCtlr");
 //        alignmentController = hardwareMap.servoController.get("alignCtlr");
@@ -168,7 +168,7 @@ public class CCHS5256TeleOp extends OpMode {
 //        floorColorSense = hardwareMap.colorSensor.get("fColorSense");
 //        floorColorSense.enableLed(true);
 //        wheelAlignment = hardwareMap.opticalDistanceSensor.get("wAlign");
-//        gyroSense = hardwareMap.gyroSensor.get("gyroSense");
+        gyroSense = hardwareMap.gyroSensor.get("gyroSense");
 //        fUltraSense = hardwareMap.ultrasonicSensor.get("fUltraSense");
 //        bUltraSense = hardwareMap.ultrasonicSensor.get("bUltraSense");
       //  beaconPinionAlignment = hardwareMap.touchSensor.get("bPALign");
