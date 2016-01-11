@@ -366,18 +366,12 @@ public class CCHS5256Autonomous extends OpMode {
 //                 }
 //                 motorRight.setPower(Range.clip(speed + (gyroError * 0.2), -1.0, 1.0));
 //                 motorLeft.setPower(Range.clip(speed - (gyroError * 0.2), -1.0, 1.0));
-//                 if (ColorSense.blue() >= 1) {
-//                     sawBlueFlag = true;
-//                 }
-//                 if (ColorSense.red() >= 1) {
-//                     sawRedFlag = true;
-//                 }
-//                 if (lookingForRedFlag && (ColorSense.red() >= 1))  {
+//                 if (lookingForFlag && (ColorSense.red() >= 1))  {
 //                     motorRight.setPower(0.0);
 //                     motorLeft.setPower(0.0);
 //                     currentMove = MoveState.MOVEDELAY;
 //                 }
-//                 if (lookingForBlueFlag && (ColorSense.blue() >= 1))  {
+//                 if (lookingForFlag && (ColorSense.blue() >= 1))  {
 //                     motorRight.setPower(0.0);
 //                     motorLeft.setPower(0.0);
 //                     currentMove = MoveState.MOVEDELAY;
@@ -494,12 +488,6 @@ public class CCHS5256Autonomous extends OpMode {
 
 //             case CENTERBUCKET:
 //                 lookingForFlag = false;
-//                 if ((redAlliance && sawRedFlag) || (!redAlliance && sawBlueFlag)) {
-//                     if (redAlliance) {
-//                         moveStraight(-10.0, fastSpeed);
-//                     } else {
-//                         moveStraight(10.0, fastSpeed);
-//                     }
 //                     currentMove = MoveState.STARTMOVE;
 //                     nextMove = MoveState.DUMPTRUCK;
 //                     telemetryMove = MoveState.CENTERBUCKET;
