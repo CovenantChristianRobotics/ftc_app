@@ -344,6 +344,266 @@ public class CCHS5256Autonomous extends OpMode {
         if (gyroSense.isCalibrating()) {
             return;
         }
+        
+//         switch (currentMove) {
+
+//             case STARTMOVE:
+//                 if (motorLeft.isBusy() && motorRight.isBusy()) {
+//                     currentMove = MoveState.MOVING;
+//                 }
+//                 break;
+
+//             case MOVING:
+//                 gyroError = desiredHeading - gyroSense.getHeading();
+//                 if (gyroError > 180) {
+//                     gyroError = 360 - gyroError;
+//                 }
+//                 if (gyroError < -180) {
+//                     gyroError = 360 + gyroError;
+//                 }
+//                 if (!movingForward) {
+//                     gyroError = -gyroError;
+//                 }
+//                 motorRight.setPower(Range.clip(speed + (gyroError * 0.2), -1.0, 1.0));
+//                 motorLeft.setPower(Range.clip(speed - (gyroError * 0.2), -1.0, 1.0));
+//                 if (ColorSense.blue() >= 1) {
+//                     sawBlueFlag = true;
+//                 }
+//                 if (ColorSense.red() >= 1) {
+//                     sawRedFlag = true;
+//                 }
+//                 if (lookingForRedFlag && (ColorSense.red() >= 1))  {
+//                     motorRight.setPower(0.0);
+//                     motorLeft.setPower(0.0);
+//                     currentMove = MoveState.MOVEDELAY;
+//                 }
+//                 if (lookingForBlueFlag && (ColorSense.blue() >= 1))  {
+//                     motorRight.setPower(0.0);
+//                     motorLeft.setPower(0.0);
+//                     currentMove = MoveState.MOVEDELAY;
+//                 }
+//                 if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+//                     currentMove = MoveState.MOVEDELAY;
+//                 }
+//                 break;
+
+//             case STARTTURN:
+//                 if (motorLeft.isBusy() && motorRight.isBusy()) {
+//                     currentMove = MoveState.TURNING;
+//                 }
+//                 break;
+
+//             case TURNING:
+//                 gyroError =  gyroSense.getHeading() - desiredHeading;
+//                 if(gyroError > 180) {
+//                     gyroError = 360 - gyroError;
+//                 }
+//                 if (gyroError < -180) {
+//                     gyroError = 360 + gyroError;
+//                 }
+// //                moveTurn(gyroError, speed);
+//                 if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+//                     currentMove = MoveState.MOVEDELAY;
+//                 }
+//                 break;
+
+//             case MOVEDELAY:
+//                 now = new Date();
+//                 delayUntil = now.getTime() + moveDelayTime;
+//                 currentMove = MoveState.DELAY;
+//                 break;
+
+//             case DELAY:
+//                 if (motorLeft.isBusy() || motorRight.isBusy()) {
+//                     // If we aren't quite done moving, restart the delay
+//                     currentMove = MoveState.MOVEDELAY;
+//                 } else {
+//                     now = new Date();
+//                     if (now.getTime() >= delayUntil) {
+//                         currentMove = nextMove;
+//                     }
+//                 }
+//                 break;
+
+//             case FIRSTMOVE:
+//                 moveStraight(60.0, fastSpeed);
+//                 currentMove = MoveState.STARTMOVE;
+//                 nextMove = MoveState.TURNDIAG;
+//                 telemetryMove = MoveState.FIRSTMOVE;
+//                 moveDelayTime = delay;
+//                 break;
+
+//             case TURNDIAG:
+//                 if (redAlliance) {
+//                     moveTurn(-45.0, turnSpeed);
+//                 } else {
+//                     moveTurn(45.0, turnSpeed);
+//                 }
+//                 currentMove = MoveState.STARTTURN;
+//                 nextMove = MoveState.MOVEDIAG;
+//                 telemetryMove = MoveState.TURNDIAG;
+//                 moveDelayTime = delay;
+//                 break;
+
+//             case MOVEDIAG:
+//                 moveStraight(209.0, fastSpeed);
+//                 currentMove = MoveState.STARTMOVE;
+//                 nextMove = MoveState.FINDWALL;
+//                 telemetryMove = MoveState.MOVEDIAG;
+//                 moveDelayTime = delay;
+//                 break;
+
+//             case FINDWALL:
+//                 distanceToWall = ultraSense.getUltrasonicLevel();
+//                 if ((distanceToWall > 30.0) && (distanceToWall <= 80.0)) {
+//                     if (redAlliance) {
+//                         moveStraight((distanceToWall - 18.0) * 1.414, slowSpeed);
+//                     } else {
+//                         moveStraight((distanceToWall - 34.0) * 1.414, slowSpeed);
+//                     }
+//                     currentMove = MoveState.STARTMOVE;
+//                     nextMove = MoveState.TURNALONGWALL;
+//                     telemetryMove = MoveState.FINDWALL;
+//                     moveDelayTime = delay;
+//                 }
+//                 break;
+
+//             case TURNALONGWALL:
+//                 if (redAlliance) {
+//                     moveTurn(45.0, turnSpeed); //original is -45
+//                 } else {
+//                     moveTurn(135.0, turnSpeed);
+//                 }
+//                 currentMove = MoveState.STARTTURN;
+//                 nextMove = MoveState.FINDBEACON;
+//                 telemetryMove = MoveState.TURNALONGWALL;
+//                 moveDelayTime = delay;
+//                 break;
+
+//             case FINDBEACON:
+//                 if (redAlliance) {
+//                     moveStraight(-90.0, fastSpeed);
+//                 } else {
+//                     moveStraight(90.0, fastSpeed);
+//                 }
+//                 currentMove = MoveState.STARTMOVE;
+//                 nextMove = MoveState.CENTERBUCKET;
+//                 telemetryMove = MoveState.FINDBEACON;
+//                 moveDelayTime = delay;
+//                 break;
+
+//             case CENTERBUCKET:
+//                 lookingForFlag = false;
+//                 if ((redAlliance && sawRedFlag) || (!redAlliance && sawBlueFlag)) {
+//                     if (redAlliance) {
+//                         moveStraight(-10.0, fastSpeed);
+//                     } else {
+//                         moveStraight(10.0, fastSpeed);
+//                     }
+//                     currentMove = MoveState.STARTMOVE;
+//                     nextMove = MoveState.DUMPTRUCK;
+//                     telemetryMove = MoveState.CENTERBUCKET;
+//                     moveDelayTime = delay;
+//                 } else {
+//                     currentMove = MoveState.DUMPTRUCK;
+//                 }
+//                 break;
+
+//             case DUMPTRUCK:
+//                 // If timer hits threshold, reset timer and move servo
+//                 if (dumperCounter >= dumperCounterThresh) {
+//                     dumperPosition -= .04;
+//                     servoClimberDumper.setPosition(dumperPosition);
+//                     dumperCounter = 0;
+//                     // Target position reached; moving to next state
+//                     if (dumperPosition <= .25) {
+//                         nextMove = MoveState.ROTATEFROMBEACON;
+//                         currentMove = MoveState.MOVEDELAY;
+//                         telemetryMove = MoveState.DUMPTRUCK;
+//                         moveDelayTime = 1000;
+//                     }
+//                 }
+//                 dumperCounter++;
+//                 break;
+
+//             case ROTATEFROMBEACON:
+//                 if (redAlliance) {
+//                     moveTurn(-45.0, turnSpeed);
+//                 } else {
+//                     moveTurn(-135, turnSpeed);
+//                 }
+//                 servoClimberDumper.setPosition(1.0);
+//                 currentMove = MoveState.STARTTURN;
+//                 nextMove = MoveState.MOVETORAMP;
+//                 telemetryMove = MoveState.ROTATEFROMBEACON;
+//                 moveDelayTime = delay;
+//                 break;
+
+//             case MOVETORAMP:
+//                 if (redAlliance) {
+//                     distance = -114.0;
+//                 } else {
+//                     distance = -96.0;
+//                 }
+//                 if (!nearMountainFlag) {
+//                     distance -= 61.0;
+//                 }
+//                 moveStraight(distance, fastSpeed);
+//                 currentMove = MoveState.STARTMOVE;
+//                 nextMove = MoveState.TURNTORAMP;
+//                 telemetryMove = MoveState.MOVETORAMP;
+//                 moveDelayTime = delay;
+//                 break;
+
+//             case TURNTORAMP:
+//                 if (nearMountainFlag) {
+//                     if (redAlliance) {
+//                         moveTurn(-90.0, turnSpeed);
+//                     } else {
+//                         moveTurn(90.0, turnSpeed);
+//                     }
+//                 } else {
+//                     if (redAlliance) {
+//                         moveTurn(90.0, turnSpeed);
+//                     } else {
+//                         moveTurn(-90.0, turnSpeed);
+//                     }
+//                 }
+//                 currentMove = MoveState.STARTTURN;
+//                 nextMove = MoveState.STOPATRAMP;
+//                 telemetryMove = MoveState.TURNTORAMP;
+//                 moveDelayTime = delay;
+//                 break;
+
+//             case STOPATRAMP:
+//                 if (nearMountainFlag) {
+//                     moveStraight(40.0, fastSpeed);
+//                 } else {
+//                     moveStraight(200.0, fastSpeed);
+//                 }
+//                 servoDist.setPosition(0.5);
+//                 currentMove = MoveState.STARTMOVE;
+//                 nextMove = MoveState.UPRAMP;
+//                 telemetryMove = MoveState.STOPATRAMP;
+//                 break;
+
+//             case UPRAMP:
+//                 distanceToWall = ultraSense.getUltrasonicLevel();
+//                 if ((distanceToWall > 30.0) && (distanceToWall <= 70.0)) {
+//                     moveStraight(distanceToWall - 5.0, slowSpeed);
+//                     //place code for extending omni wheels here
+//                     currentMove = MoveState.STARTMOVE;
+//                     nextMove = MoveState.DONE;
+//                     telemetryMove = MoveState.UPRAMP;
+//                 }
+//                 break;
+
+//             case DONE:
+//                 motorLeft.setPower(0.0);
+//                 motorRight.setPower(0.0);
+//                 telemetryMove = MoveState.DONE;
+//                 break;
+//         }
         switch (currentMove) {
 
             case PRETURN:
