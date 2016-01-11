@@ -218,23 +218,27 @@ public class CCHS5256TeleOp extends OpMode {
 //            right = (float) -0.05;
         }
 
-//        if (rightStickPos < 0 ) {
-//            rightStickPos = 0;
-//        } else if (rightStickPos >= 0) {
-//            rightStickPos = gamepad1.right_stick_y;
-//        }
+        if (rightStickPos < 0 ) {
+            rightStickPos = 0;
+        } else if (rightStickPos >= 0) {
+            rightStickPos = gamepad1.right_stick_y;
+        }
+
+        if (rightStickNeg > 0 ) {
+            rightStickNeg = 0;
+        } else if (rightStickNeg <= 0) {
+            rightStickNeg = gamepad1.right_stick_y;
+        }
 //
-//        if (rightStickNeg > 0 ) {
-//            rightStickNeg = 0;
-//        } else if (rightStickNeg <= 0) {
-//            rightStickNeg = gamepad1.right_stick_y;
-//        }
-//
-//        if (gamepad1.dpad_up) {
-//            moveStraightWithGyro(rightStickPos);
-//        } else if (gamepad1.dpad_down) {
-//            moveStraightWithGyro(rightStickNeg);
-//        }
+        if (gamepad1.dpad_up) {
+            // moveStraightWithGyro(rightStickPos);
+            leftDrive.setPower(rightStickPos);
+            rightDrive.setPower(rightStickPos);
+        } else if (gamepad1.dpad_down) {
+            // moveStraightWithGyro(rightStickNeg);
+            leftDrive.setPower(rightStickNeg);
+            rightDrive.setPower(rightStickNeg);
+        }
 
 //        if (gamepad2.dpad_up) {
 //            if (leftWheelStop.isPressed() == false && rightWheelStop.isPressed() == false) {
@@ -337,27 +341,21 @@ public class CCHS5256TeleOp extends OpMode {
 
             case BlINKON:
                 endGameLights.setPower(1.0);
-                moveDelayTime = 1000;
+                moveDelayTime = 500;
                 currentControl = ledControl.DELAYSETTINGS;
                 nextControl = ledControl.BLINKOFF;
                 break;
 
             case BLINKOFF:
                 endGameLights.setPower(0.0);
-                moveDelayTime = 1000;
+                moveDelayTime = 500;
                 currentControl = ledControl.DELAYSETTINGS;
                 nextControl = ledControl.BlINKON;
                 break;
         }
 
-        telemetry.addData("left trigger", gamepad1.left_trigger);
-        telemetry.addData("right trigger", gamepad1.right_trigger);
-//        telemetry.addData("Pinion", servoBeaconPinion.getPosition());
-//        telemetry.addData("Pusher", servoBeaconPusher.getPosition());
         telemetry.addData("LED", currentControl.toString());
         telemetry.addData("Elapsed Time", endGameTime.time());
-        telemetry.addData("leftDrive", leftDrive.getCurrentPosition());
-        telemetry.addData("right Drive", rightDrive.getCurrentPosition());
     }
 
     @Override
