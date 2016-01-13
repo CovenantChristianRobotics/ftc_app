@@ -18,7 +18,7 @@ import java.util.Date;
 public class CCHS4507Autonomous extends OpMode {
     enum MoveState {
         DELAY, STARTMOVE, MOVING, STARTTURN, TURNING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
-        FINDBEACON, CENTERBUCKET, DUMPTRUCK, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, UPRAMP, DONE
+        FINDBEACON, CENTERBUCKET, DUMPTRUCK, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, ALIGNRAMP, UPRAMP, DONE
     }
 
     DcMotor motorRight;
@@ -38,6 +38,7 @@ public class CCHS4507Autonomous extends OpMode {
     boolean lookingForBlueFlag;
     boolean sawBlueFlag;
     boolean sawRedFlag;
+    boolean fourthTileFlag;
     long delayUntil;
     double speed;
     boolean movingForward;
@@ -67,7 +68,7 @@ public class CCHS4507Autonomous extends OpMode {
     DigitalChannel nearMountainSwitch;
     DigitalChannel redBlueSwitch;
     // DigitalChannel delaySwitch;
-    // DigitalChannel tileSwitch;
+    DigitalChannel fourthTileSwitch;
 
     // Analog Inputs
     AnalogInput delayPot;
@@ -172,13 +173,14 @@ public class CCHS4507Autonomous extends OpMode {
         nearMountainSwitch = hardwareMap.digitalChannel.get("nearMtnSw");
         redBlueSwitch = hardwareMap.digitalChannel.get("rbSw");
         // delaySwitch = hardwareMap.digitalChannel.get("dSw")
-        // tileSwitch = hardwareMap.digitalChannel.get("tSw")
+        fourthTileSwitch = hardwareMap.digitalChannel.get("fourthTileSw");
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
         gyroSense = hardwareMap.gyroSensor.get("gyro");
         liftCheck = hardwareMap.opticalDistanceSensor.get("liftCheck");
         delayPot = hardwareMap.analogInput.get("delayPot");
         moveDelayTime = (long)(delayPot.getValue() * (15000 / 1024));
         nearMountainFlag = nearMountainSwitch.getState();
+        fourthTileFlag = fourthTileSwitch.getState();
         if (redBlueSwitch.getState()) { //This is for when we're going to blue
             redAlliance = false;
             lookingForRedFlag = false;
@@ -321,7 +323,7 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case FIRSTMOVE:
-                moveStraight(60.0, fastSpeed);
+                moveStraight(60.0 + (fourthTileFlag ? 45.0 : 0.0), fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNDIAG;
                 telemetryMove = MoveState.FIRSTMOVE;
@@ -341,7 +343,7 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case MOVEDIAG:
-                moveStraight(209.0, fastSpeed);
+                moveStraight(209.0 - (fourthTileFlag ? 60.0 : 0.0), fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDWALL;
                 telemetryMove = MoveState.MOVEDIAG;
@@ -350,11 +352,11 @@ public class CCHS4507Autonomous extends OpMode {
 
             case FINDWALL:
                 distanceToWall = ultraSense.getUltrasonicLevel();
-                if ((distanceToWall > 30.0) && (distanceToWall <= 80.0)) {
+                if ((distanceToWall > 20.0) && (distanceToWall <= 80.0)) {
                     if (redAlliance) {
-                        moveStraight((distanceToWall - 18.0) * 1.414, slowSpeed);
+                        moveStraight((distanceToWall - 26.0) * 1.414, slowSpeed);
                     } else {
-                        moveStraight((distanceToWall - 34.0) * 1.414, slowSpeed);
+                        moveStraight((distanceToWall - 30.0) * 1.414, slowSpeed);
                     }
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.TURNALONGWALL;
@@ -390,7 +392,7 @@ public class CCHS4507Autonomous extends OpMode {
             case CENTERBUCKET:
                 lookingForRedFlag = false;
                 lookingForBlueFlag = false;
-                if ((redAlliance && sawRedFlag) || (!redAlliance && sawBlueFlag)) {
+                if ((redAlliance && !sawBlueFlag) || (!redAlliance && !sawRedFlag)) {
                     if (redAlliance) {
                         moveStraight(-10.0, fastSpeed);
                     } else {
@@ -436,13 +438,10 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case MOVETORAMP:
-                if (redAlliance) {
-                    distance = -114.0;
-                } else {
-                    distance = -96.0;
-                }
-                if (!sawBlueFlag) {
-                    distance += 10.0; // saw red first
+                if (redAlliance) {      // red alliance
+                    distance = -108.0;
+                } else {                // blue alliance
+                    distance = -89.0;
                 }
                 if (!nearMountainFlag) {
                     distance -= 61.0;
@@ -482,8 +481,15 @@ public class CCHS4507Autonomous extends OpMode {
                 }
                 servoDist.setPosition(0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.UPRAMP;
+                nextMove = MoveState.ALIGNRAMP;
                 telemetryMove = MoveState.STOPATRAMP;
+                break;
+
+            case ALIGNRAMP:
+                moveTurn(0.0, turnSpeed);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.UPRAMP;
+                telemetryMove = MoveState.ALIGNRAMP;
                 break;
 
             case UPRAMP:
