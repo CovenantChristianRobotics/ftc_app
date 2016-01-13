@@ -30,7 +30,7 @@ public class CCHS5256Autonomous extends OpMode {
     enum MoveState {
         DELAY, STARTMOVE, MOVING, STARTTURN, TURNING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG,
         FINDWALL, TURNALONGWALL, DRIVETOBEACON, FINDBEACON, CENTERBUCKET, DUMPTRUCK, ROTATEFROMBEACON,
-        MOVETORAMP, TURNTORAMP, STOPATRAMP, UPRAMP, DONE, GETVALUES, CHOOSEFIRST, PUSHBUTTON, ALIGNDUMPER,
+        MOVETORAMP, TURNTORAMP, STOPATRAMP, UPRAMP, DONE, GETVALUES, CHOOSEFIRST, PUSHBUTTON, ALIGNPUSHER, ALIGNDUMPER,
         DUMPCLIMBERS
     }
 
@@ -71,6 +71,8 @@ public class CCHS5256Autonomous extends OpMode {
     TouchSensor beaconPinionStop;
 //    TouchSensor leftWheelStop;
 //    TouchSensor rightWheelStop;
+    TouchSensor beaconPinionIn;
+    TouchSensor beaconPinionOut;
     //Statemachine options
     MoveState currentMove;
     MoveState nextMove;
@@ -362,6 +364,8 @@ public class CCHS5256Autonomous extends OpMode {
         beaconPinionStop = hardwareMap.touchSensor.get("bPStop");
 //        leftWheelStop = hardwareMap.touchSensor.get("lWStop");
 //        rightWheelStop = hardwareMap.touchSensor.get("rWStop");
+        // beaconPinionIn = hardwareMap.touchSensor.get("bPIn");
+        // beaconPinionOut = hardwareMap.touchSensor.get("bPOut");
         //motor configurations
         leftDrive.setDirection(DcMotor.Direction.REVERSE);
         leftDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
@@ -405,9 +409,18 @@ public class CCHS5256Autonomous extends OpMode {
             servoUltraSense.setPosition(0.25);
         }
         // align color sensor
-         while (!beaconPinionStop.isPressed()) {
-             servoBeaconPinion.setPosition(0.5);
-         }
+        // if (redAlliance) {
+        //     while (beaconPinionIn.isPressed == false) {
+        //         servoBeaconPinion.setPosition(1.0);
+        //     }
+        // } else {
+        //     while (beaconPinionOut.isPressed == true) {
+        //         servoBeaconPinion.setPosition(0.0);
+        //     }
+        // }
+        //  while (!beaconPinionStop.isPressed()) {
+        //      servoBeaconPinion.setPosition(0.5);
+        //  }
         // // align omniwheels
         // while (!leftWheelStop.isPressed()) {
         //     moveLeftOmnipinion(0.5);
@@ -589,6 +602,22 @@ public class CCHS5256Autonomous extends OpMode {
                      currentMove = MoveState.ALIGNDUMPER;
                  }
                  break;
+                 
+            //  case ALIGNPUSHER:
+            //     if (dumpedClimbers == false) {
+            //         currentMove = MoveState.PUSHBUTTON;
+            //     } else {
+            //         if(redAlliance) {
+            //             while (colorSense.red() <= 1.0) {
+            //                 servoBeaconPinion.setPosition(1.0);
+            //             }
+            //         } else {
+            //             while (colorSense.blue() <= 1.0) {
+            //                 servoBeaconPinion.setPosition(1.0);
+            //             }
+            //         }
+            //         currentMove = MoveState.PUSHBUTTON;
+            //     }    
 
              case PUSHBUTTON:
                  servoBeaconPusher.setPosition(0.7);
@@ -606,6 +635,16 @@ public class CCHS5256Autonomous extends OpMode {
                      servoBeaconPusher.setPosition(1.0);
                  }
                  currentMove = MoveState.DUMPCLIMBERS;
+                 
+                //  if (redAlliance) {
+                //      while (colorSense.red() >= 1.0 || colorSense.blue() >=1.0) {
+                //          servoBeaconPinion.setPosition(0.0);
+                //      }
+                //  } else {
+                //      while (colorSense.red() >= 1.0 || colorSense.blue() >=1.0) {
+                //          servoBeaconPinion.setPosition(1.0);
+                //      }
+                 }
                  break;
 
              case DUMPCLIMBERS:
