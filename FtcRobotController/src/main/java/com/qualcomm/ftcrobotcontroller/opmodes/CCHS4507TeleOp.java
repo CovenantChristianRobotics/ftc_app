@@ -18,11 +18,15 @@ public class CCHS4507TeleOp extends OpMode {
     DcMotor motorRight;
     DcMotor motorLeft;
     DcMotor trackLifter;
+    DcMotor armPivot;
+    DcMotor armExtend;
+
     //servos
-    Servo servoBeaconPinion;
     Servo servoBeaconPusher;
     Servo servoClimberDumper;
     Servo servoDist;
+    Servo climberTriggerLeft;
+    Servo climberTriggerRight;
     ColorSensor ColorSense;
     GyroSensor gyroSense;
     UltrasonicSensor ultraSense;
@@ -41,10 +45,15 @@ public class CCHS4507TeleOp extends OpMode {
         motorRight = hardwareMap.dcMotor.get("motorR");
         motorLeft = hardwareMap.dcMotor.get("motorL");
         trackLifter = hardwareMap.dcMotor.get("trkLftr");
+        armPivot = hardwareMap.dcMotor.get("armPivot");
+        armExtend = hardwareMap.dcMotor.get("armExtend");
+
         //servos
         servoBeaconPusher = hardwareMap.servo.get("beacon_pusher");
         servoClimberDumper = hardwareMap.servo.get("climber_dumper");
         servoDist = hardwareMap.servo.get("servoDist");
+        climberTriggerLeft = hardwareMap.servo.get("trigLeft");
+        climberTriggerRight = hardwareMap.servo.get("trigRight");
         ColorSense = hardwareMap.colorSensor.get("color");
         nearMountainSwitch = hardwareMap.digitalChannel.get("nearMtnSw");
         redBlueSwitch = hardwareMap.digitalChannel.get("rbSw");
@@ -60,25 +69,24 @@ public class CCHS4507TeleOp extends OpMode {
         motorRight.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         motorLeft.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+        armPivot.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
+        armExtend.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
     }
 
     @Override
     public void loop() {
-        //getting the gamepad values on the y axis
-        float right = gamepad1.left_stick_y;
-        float left = gamepad1.right_stick_y;
+        motorRight.setPower(gamepad1.left_stick_y);
+        motorLeft.setPower(gamepad1.right_stick_y);
 
-        motorRight.setPower(right);
-        motorLeft.setPower(left);
-        if (gamepad2.a) {
+        if (gamepad1.y) {
             trackLifter.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
             trackLifter.setPower(0.0);
             trackLifter.setPowerFloat();
-        } else if (gamepad2.right_bumper) {
+        } else if (gamepad1.right_bumper) {
             trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
             trackLifter.setTargetPosition(trackLifterUp);
             trackLifter.setPower(0.1);
-        } else if (gamepad2.right_trigger > 0.5) {
+        } else if (gamepad1.right_trigger > 0.5) {
             trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
             trackLifter.setTargetPosition(trackLifterUp + 1220 / 4);
             trackLifter.setPower(0.1);
@@ -86,6 +94,22 @@ public class CCHS4507TeleOp extends OpMode {
             trackLifterUp = trackLifter.getCurrentPosition();
             trackLifter.setTargetPosition(trackLifterUp);
         }
+
+        armPivot.setPower(gamepad2.right_stick_x);
+        armExtend.setPower(gamepad2.left_stick_y);
+
+        if (gamepad2.left_bumper) {
+            climberTriggerLeft.setPosition(0.0);
+        } else {
+            climberTriggerLeft.setPosition(1.0);
+        }
+
+        if (gamepad2.right_bumper) {
+            climberTriggerRight.setPosition(0.0);
+        } else {
+            climberTriggerRight.setPosition(1.0);
+        }
+
         telemetry.addData("trackLifter", (float)trackLifter.getCurrentPosition());
         telemetry.addData("liftCheck", liftCheck.getLightDetected());
         telemetry.addData("ENCLeft", (float)motorLeft.getCurrentPosition());
