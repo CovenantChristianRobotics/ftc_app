@@ -44,10 +44,10 @@ public class CCHS5256TeleOp extends OpMode {
 //    ServoController beaconController;
    //  ServoController alignmentController;
     // Servos
-//    Servo servoBeaconPinion;
-//    Servo servoBeaconPusher;
-//    Servo servoUltraSense;
-//    Servo sweeper;
+    Servo servoBeaconPinion;
+    Servo servoBeaconPusher;
+    Servo servoUltraSense;
+    Servo sweeper;
 //    boolean sweepOn;
 //    Servo servoClimberDumper;
      Servo leftOmniPinion;
@@ -156,10 +156,10 @@ public class CCHS5256TeleOp extends OpMode {
 //        beaconController = hardwareMap.servoController.get("beaconCtlr");
 //        alignmentController = hardwareMap.servoController.get("alignCtlr");
         // Servos
-//        servoBeaconPinion = hardwareMap.servo.get("beaconPinion");
-//        servoBeaconPusher = hardwareMap.servo.get("beaconPusher");
+        servoBeaconPinion = hardwareMap.servo.get("beaconPinion");
+        servoBeaconPusher = hardwareMap.servo.get("beaconPusher");
 //        servoClimberDumper = hardwareMap.servo.get("climberDumper");
-//        servoUltraSense = hardwareMap.servo.get("servoUltra");
+        servoUltraSense = hardwareMap.servo.get("servoUltra");
         leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
         rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
         // Sensors
@@ -212,10 +212,10 @@ public class CCHS5256TeleOp extends OpMode {
             left = (float) slow(left);
             right = (float) slow(right);
         } else {
-            left = (float) medium(left);
-            right = (float) medium(right);
-//            left = (float) -0.05;
-//            right = (float) -0.05;
+//            left = (float) medium(left);
+//            right = (float) medium(right);
+            left = (float) -0.05;
+            right = (float) +0.05;
         }
 
         if (rightStickPos < 0 ) {
@@ -268,7 +268,7 @@ public class CCHS5256TeleOp extends OpMode {
 
         leftDrive.setPower(left);
         rightDrive.setPower(right);
-//        servoBeaconPinion.setPosition(((beaconPinion / 2) + 0.5));
+        servoBeaconPinion.setPosition(((beaconPinion / 2) + 0.5));
 //
 //        if (gamepad1.a) {
 //           if (bUltraSense.getUltrasonicLevel() <= lowDist) {
@@ -356,6 +356,8 @@ public class CCHS5256TeleOp extends OpMode {
 
         telemetry.addData("LED", currentControl.toString());
         telemetry.addData("Elapsed Time", endGameTime.time());
+        telemetry.addData("enc right", rightDrive.getCurrentPosition());
+        telemetry.addData("enc left", leftDrive.getCurrentPosition());
     }
 
     @Override
