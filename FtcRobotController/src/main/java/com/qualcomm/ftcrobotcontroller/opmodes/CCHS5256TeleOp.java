@@ -243,6 +243,51 @@ public class CCHS5256TeleOp extends OpMode {
             left = 0.1;
             right = -0.1;
         }
+        
+        // if (gamepad1.right_trigger > 0.5) {
+        //     left = (float) fast(left);
+        //     right = (float) fast(right);
+        // } else if (gamepad1.left_trigger > 0.5) {
+        //     left = (float) slow(left);
+        //     right = (float) slow(right);
+        // } else if (gamepad1.dpad_up) {
+        //     left = rightStickPos * -1;
+        //     right = rightStickPos * -1;
+        // } else if (gamepad1.dpad_down) {
+        //     left = rightStickNeg * -1;
+        //     right = rightStickNeg * -1;
+        // } else if (gamepad1.dpad_right) {
+        //     left = -0.1;
+        //     right = 0.1;
+        //     if(gamepad1.right_trigger > 0.5) {
+        //         left = (double) fast(left);
+        //         right = (double) fast(right);
+        //     } else if (gamepad1.left_trigger > 0.5) {
+        //         left = (float) slow(left);
+        //         right = (float) slow(right);
+        //     } else {
+        //         left = left;
+        //         right = right;
+        //     }
+        // } else if (gamepad1.dpad_left) {
+        //     left = 0.1;
+        //     right = -0.1;
+        //     if(gamepad1.right_trigger > 0.5) {
+        //         left = (double) fast(left);
+        //         right = (double) fast(right);
+        //     } else if (gamepad1.left_trigger > 0.5) {
+        //         left = (float) slow(left);
+        //         right = (float) slow(right);
+        //     } else {
+        //         left = left;
+        //         right = right;
+        //     }
+        // } else {
+        //     left = (float) medium(left);
+        //     right = (float) medium(right);
+        //     // left = (float) -0.05;   // for calibrating autonomous distances only
+        //     // right = (float) +0.05;   // for calibrating autonomous distances only
+        // }
 
 //        if (gamepad2.dpad_up) {
 //            if (leftWheelStop.isPressed() == false && rightWheelStop.isPressed() == false) {
