@@ -288,6 +288,10 @@ public class CCHS5256TeleOp extends OpMode {
         //     // left = (float) -0.05;   // for calibrating autonomous distances only
         //     // right = (float) +0.05;   // for calibrating autonomous distances only
         // }
+        
+        // if (endGameTime.time() >= 90 && gamepad1.y) {
+        //     chinUp.setPower(- gamepad1.left_stick_y)
+        // }
 
 //        if (gamepad2.dpad_up) {
 //            if (leftWheelStop.isPressed() == false && rightWheelStop.isPressed() == false) {
