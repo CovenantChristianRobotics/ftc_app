@@ -1,4 +1,5 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -18,7 +19,7 @@ import java.util.Date;
  * Created by Robotics on 10/7/2015.
  */
 public class CCHS5256Autonomous extends OpMode {
-//    enum MoveState {
+    //    enum MoveState {
 //        DELAY, STARTSTRAIGHTMOVE, STRAIGHTMOVING, STARTENCODERTURN, ENCODERTURNMOVING, GYROTURN,
 //        PRETURN, SERVOPINIONREDMOVE, SERVOPINIONNULLMOVE, SERVOPINIONBLUEMOVE, SERVOPUSHERMOVE,
 //        SERVODUMPERMOVE, MOVEDELAY, FIRSTMOVE, TURNDIAGWITHGYRO, TURNDIAGWITHENCODERS, MOVEDIAG,
@@ -30,15 +31,15 @@ public class CCHS5256Autonomous extends OpMode {
     enum MoveState {
         DELAY, STARTMOVE, MOVING, STARTTURN, TURNING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG,
         FINDWALL, TURNALONGWALL, DRIVETOBEACON, FINDBEACON, CENTERBUCKET, DUMPTRUCK, ROTATEFROMBEACON,
-        MOVETORAMP, TURNTORAMP, STOPATRAMP, UPRAMP, DONE, GETVALUES, CHOOSEFIRST, PUSHBUTTON, ALIGNPUSHER, ALIGNDUMPER,
+        MOVETORAMP, TURNTORAMP, STOPATRAMP, UPRAMP, DONE, GETVALUES, CHOOSEFIRST, PUSHBUTTON, UNPUSHBUTTON, ALIGNPUSHER, ALIGNDUMPER,
         DUMPCLIMBERS
     }
 
     // maximum and minimum values to use when clipping the ranges
-    final static double bpusher_MIN_RANGE  = 0.20;
-    final static double bpusher_MAX_RANGE  = 0.80;
-    final static double cdumper_MIN_RANGE  = 0.00;
-    final static double cdumber_MAX_RANGE  = 1.00;
+    final static double bpusher_MIN_RANGE = 0.20;
+    final static double bpusher_MAX_RANGE = 0.80;
+    final static double cdumper_MIN_RANGE = 0.00;
+    final static double cdumber_MAX_RANGE = 1.00;
 
     // target values for servos
     double beaconPusherPosition;
@@ -48,19 +49,19 @@ public class CCHS5256Autonomous extends OpMode {
     //dc motors
     DcMotor leftDrive;
     DcMotor rightDrive;
-//    DcMotor chinUp;
+    //    DcMotor chinUp;
     //servos
     Servo servoBeaconPinion;
     Servo servoBeaconPusher;
     Servo servoClimberDumper;
     Servo servoUltraSense;
-//    Servo leftOmniPinion;
+    //    Servo leftOmniPinion;
 //    Servo rightOmniPinion;
     //LED
 //    LED endGameLights;
     //sensors
     ColorSensor beaconColorSense;
-//    ColorSensor floorColorSense;
+    //    ColorSensor floorColorSense;
 //    OpticalDistanceSensor leftWheelAlignment;
 //    OpticalDistanceSensor rightWheelAlignment;
     GyroSensor gyroSense;
@@ -69,7 +70,7 @@ public class CCHS5256Autonomous extends OpMode {
     int desiredHeading;
     UltrasonicSensor ultraSense;
     TouchSensor beaconPinionStop;
-//    TouchSensor leftWheelStop;
+    //    TouchSensor leftWheelStop;
 //    TouchSensor rightWheelStop;
     TouchSensor beaconPinionIn;
     TouchSensor beaconPinionOut;
@@ -92,7 +93,7 @@ public class CCHS5256Autonomous extends OpMode {
     DigitalChannel nearMtnSwitch;
     DigitalChannel redBlueBeaconSwitch;
     DigitalChannel delayPotSwitch;
-//    DigitalChannel tileSwitch;
+    //    DigitalChannel tileSwitch;
     AnalogInput delayPotentiometer;
     int nearMtn;
     int redBlue;
@@ -116,7 +117,8 @@ public class CCHS5256Autonomous extends OpMode {
     double countsPerDonut = 14161.0;    // Encoder counts per 360 degrees
     double countsPerMeter = 10439.0;    // Found this experimentally: Measured one meter, drove distance, read counts
     int dumperCounterThresh = 8;       // Doesn't let the dumper counter get above a certain number
-    public CCHS5256Autonomous () {
+
+    public CCHS5256Autonomous() {
     }
 
     // Figure out how far off we are at the end of the previous move so we can correct
@@ -125,15 +127,15 @@ public class CCHS5256Autonomous extends OpMode {
         int leftTarget;
 
         // Figure out how far off we are at the end of the previous move so we can correct
-        gyroError =  desiredHeading - gyroSense.getHeading();
-        if(gyroError > 180) {
+        gyroError = desiredHeading - gyroSense.getHeading();
+        if (gyroError > 180) {
             gyroError = 360 - gyroError;
         }
         if (gyroError < -180) {
             gyroError = 360 + gyroError;
         }
 
-        desiredHeading = desiredHeading + (int)degrees;
+        desiredHeading = desiredHeading + (int) degrees;
         if (desiredHeading >= 360) {
             desiredHeading = desiredHeading - 360;
         }
@@ -152,23 +154,24 @@ public class CCHS5256Autonomous extends OpMode {
     int degreesToCounts(double degrees) {
         return (int) (degrees * (countsPerDonut / 360.0));
     }
-        void moveStraight(double distanceCM, double targetSpeed) {
-            int rightTarget;
-            int leftTarget;
 
-            speed = targetSpeed;
-            if (distanceCM > 0.0) {
-                movingForward = true;
-            } else {
-                movingForward = false;
-            }
-            leftTarget = leftDrive.getCurrentPosition() + centimetersToCounts(distanceCM);
-            leftDrive.setTargetPosition(leftTarget);
-            rightTarget = rightDrive.getCurrentPosition() + centimetersToCounts(distanceCM);
-            rightDrive.setTargetPosition(rightTarget);
-            leftDrive.setPower(targetSpeed);
-            rightDrive.setPower(targetSpeed);
+    void moveStraight(double distanceCM, double targetSpeed) {
+        int rightTarget;
+        int leftTarget;
+
+        speed = targetSpeed;
+        if (distanceCM > 0.0) {
+            movingForward = true;
+        } else {
+            movingForward = false;
         }
+        leftTarget = leftDrive.getCurrentPosition() + centimetersToCounts(distanceCM);
+        leftDrive.setTargetPosition(leftTarget);
+        rightTarget = rightDrive.getCurrentPosition() + centimetersToCounts(distanceCM);
+        rightDrive.setTargetPosition(rightTarget);
+        leftDrive.setPower(targetSpeed);
+        rightDrive.setPower(targetSpeed);
+    }
 
     int centimetersToCounts(double centimeters) {
         return (int) (centimeters * (countsPerMeter / 100.0));
@@ -380,7 +383,7 @@ public class CCHS5256Autonomous extends OpMode {
         redBlueBeaconSwitch = hardwareMap.digitalChannel.get("rBSw");
         delayPotSwitch = hardwareMap.digitalChannel.get("dSw");
         delayPotentiometer = hardwareMap.analogInput.get("dP");
-        delayTime = (long)(delayPotentiometer.getValue() * (10000/1024));
+        delayTime = (long) (delayPotentiometer.getValue() * (10000 / 1024));
         matchTime = new ElapsedTime();
         //servo positions
         servoBeaconPinion.setPosition(0.0);
@@ -439,170 +442,176 @@ public class CCHS5256Autonomous extends OpMode {
         if (gyroSense.isCalibrating()) {
             return;
         }
-        
-         switch (currentMove) {
 
-             case STARTMOVE:
-                 if (leftDrive.isBusy() && rightDrive.isBusy()) {
-                     currentMove = MoveState.MOVING;
-                 }
-                 break;
+        switch (currentMove) {
 
-             case MOVING:
-                 gyroError = desiredHeading - gyroSense.getHeading();
-                 if (gyroError > 180) {
-                     gyroError = 360 - gyroError;
-                 }
-                 if (gyroError < -180) {
-                     gyroError = 360 + gyroError;
-                 }
-                 if (!movingForward) {
-                     gyroError = -gyroError;
-                 }
-                 rightDrive.setPower(Range.clip(speed + (gyroError * 0.2), -1.0, 1.0));
-                 leftDrive.setPower(Range.clip(speed - (gyroError * 0.2), -1.0, 1.0));
-                 if (lookingForFlag && (beaconColorSense.red() >= 1))  {
-                     rightDrive.setPower(0.0);
-                     leftDrive.setPower(0.0);
-                     currentMove = MoveState.MOVEDELAY;
-                 }
-                 if (lookingForFlag && (beaconColorSense.blue() >= 1))  {
-                     rightDrive.setPower(0.0);
-                     leftDrive.setPower(0.0);
-                     currentMove = MoveState.MOVEDELAY;
-                 }
-                 if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
-                     currentMove = MoveState.MOVEDELAY;
-                 }
-                 break;
+            case STARTMOVE:
+                if (leftDrive.isBusy() && rightDrive.isBusy()) {
+                    currentMove = MoveState.MOVING;
+                }
+                break;
 
-             case STARTTURN:
-                 if (leftDrive.isBusy() && rightDrive.isBusy()) {
-                     currentMove = MoveState.TURNING;
-                 }
-                 break;
+            case MOVING:
+                gyroError = desiredHeading - gyroSense.getHeading();
+                if (gyroError > 180) {
+                    gyroError = 360 - gyroError;
+                }
+                if (gyroError < -180) {
+                    gyroError = 360 + gyroError;
+                }
+                if (!movingForward) {
+                    gyroError = -gyroError;
+                }
+                rightDrive.setPower(Range.clip(speed + (gyroError * 0.2), -1.0, 1.0));
+                leftDrive.setPower(Range.clip(speed - (gyroError * 0.2), -1.0, 1.0));
+                if (lookingForFlag && (beaconColorSense.red() >= 1)) {
+                    rightDrive.setPower(0.0);
+                    leftDrive.setPower(0.0);
+                    currentMove = MoveState.MOVEDELAY;
+                }
+                if (lookingForFlag && (beaconColorSense.blue() >= 1)) {
+                    rightDrive.setPower(0.0);
+                    leftDrive.setPower(0.0);
+                    currentMove = MoveState.MOVEDELAY;
+                }
+                if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+                    currentMove = MoveState.MOVEDELAY;
+                }
+                break;
 
-             case TURNING:
-                 gyroError =  gyroSense.getHeading() - desiredHeading;
-                 if(gyroError > 180) {
-                     gyroError = 360 - gyroError;
-                 }
-                 if (gyroError < -180) {
-                     gyroError = 360 + gyroError;
-                 }
- //                moveTurn(gyroError, speed);
-                 if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
-                     currentMove = MoveState.MOVEDELAY;
-                 }
-                 break;
+            case STARTTURN:
+                if (leftDrive.isBusy() && rightDrive.isBusy()) {
+                    currentMove = MoveState.TURNING;
+                }
+                break;
 
-             case MOVEDELAY:
-                 now = new Date();
-                 delayUntil = now.getTime() + moveDelayTime;
-                 currentMove = MoveState.DELAY;
-                 break;
+            case TURNING:
+                gyroError = gyroSense.getHeading() - desiredHeading;
+                if (gyroError > 180) {
+                    gyroError = 360 - gyroError;
+                }
+                if (gyroError < -180) {
+                    gyroError = 360 + gyroError;
+                }
+                //                moveTurn(gyroError, speed);
+                if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+                    currentMove = MoveState.MOVEDELAY;
+                }
+                break;
 
-             case DELAY:
-                 if (leftDrive.isBusy() || rightDrive.isBusy()) {
-                     // If we aren't quite done moving, restart the delay
-                     currentMove = MoveState.MOVEDELAY;
-                 } else {
-                     now = new Date();
-                     if (now.getTime() >= delayUntil) {
-                         currentMove = nextMove;
-                     }
-                 }
-                 break;
+            case MOVEDELAY:
+                now = new Date();
+                delayUntil = now.getTime() + moveDelayTime;
+                currentMove = MoveState.DELAY;
+                break;
 
-             case FIRSTMOVE:
-                 moveStraight(60.0, fastSpeed);
-                 currentMove = MoveState.STARTMOVE;
-                 nextMove = MoveState.TURNDIAG;
-                 telemetryMove = MoveState.FIRSTMOVE;
-                 moveDelayTime = delay;
-                 break;
+            case DELAY:
+                if (leftDrive.isBusy() || rightDrive.isBusy()) {
+                    // If we aren't quite done moving, restart the delay
+                    currentMove = MoveState.MOVEDELAY;
+                } else {
+                    now = new Date();
+                    if (now.getTime() >= delayUntil) {
+                        currentMove = nextMove;
+                    }
+                }
+                break;
 
-             case TURNDIAG:
-                 if (redAlliance) {
-                     moveTurn(-45.0, turnSpeed);
-                 } else {
-                     moveTurn(45.0, turnSpeed);
-                 }
-                 currentMove = MoveState.STARTTURN;
-                 nextMove = MoveState.MOVEDIAG;
-                 telemetryMove = MoveState.TURNDIAG;
-                 moveDelayTime = delay;
-                 break;
+            case FIRSTMOVE:
+                moveStraight(60.0, fastSpeed);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.TURNDIAG;
+                telemetryMove = MoveState.FIRSTMOVE;
+                moveDelayTime = delay;
+                break;
 
-             case MOVEDIAG:
-                 moveStraight(209.0, fastSpeed);
-                 currentMove = MoveState.STARTMOVE;
-                 nextMove = MoveState.FINDWALL;
-                 telemetryMove = MoveState.MOVEDIAG;
-                 moveDelayTime = delay;
-                 break;
+            case TURNDIAG:
+                if (redAlliance) {
+                    moveTurn(-45.0, turnSpeed);
+                } else {
+                    moveTurn(45.0, turnSpeed);
+                }
+                currentMove = MoveState.STARTTURN;
+                nextMove = MoveState.MOVEDIAG;
+                telemetryMove = MoveState.TURNDIAG;
+                moveDelayTime = delay;
+                break;
 
-             case FINDWALL:
-                 distanceToWall = ultraSense.getUltrasonicLevel();
-                 if ((distanceToWall > 30.0) && (distanceToWall <= 80.0)) {
-                     if (redAlliance) {
-                         moveStraight((distanceToWall - 18.0) * 1.414, slowSpeed);
-                     } else {
-                         moveStraight((distanceToWall - 34.0) * 1.414, slowSpeed);
-                     }
-                     currentMove = MoveState.STARTMOVE;
-                     nextMove = MoveState.TURNALONGWALL;
-                     telemetryMove = MoveState.FINDWALL;
-                     moveDelayTime = delay;
-                 }
-                 break;
+            case MOVEDIAG:
+                moveStraight(209.0, fastSpeed);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.FINDWALL;
+                telemetryMove = MoveState.MOVEDIAG;
+                moveDelayTime = delay;
+                break;
 
-             case TURNALONGWALL:
-                 if (redAlliance) {
-                     moveTurn(45.0, turnSpeed); //original is -45
-                 } else {
-                     moveTurn(135.0, turnSpeed);
-                 }
-                 currentMove = MoveState.STARTTURN;
-                 nextMove = MoveState.FINDBEACON;
-                 telemetryMove = MoveState.TURNALONGWALL;
-                 moveDelayTime = delay;
-                 break;
+            case FINDWALL:
+                distanceToWall = ultraSense.getUltrasonicLevel();
+                if ((distanceToWall > 30.0) && (distanceToWall <= 80.0)) {
+                    if (redAlliance) {
+                        moveStraight((distanceToWall - 18.0) * 1.414, slowSpeed);
+                    } else {
+                        moveStraight((distanceToWall - 34.0) * 1.414, slowSpeed);
+                    }
+                    currentMove = MoveState.STARTMOVE;
+                    nextMove = MoveState.TURNALONGWALL;
+                    telemetryMove = MoveState.FINDWALL;
+                    moveDelayTime = delay;
+                }
+                break;
 
-             case DRIVETOBEACON:
-                 if (redAlliance) {
-                     moveStraight(-90.0, fastSpeed);
-                 } else {
-                     moveStraight(90.0, fastSpeed);
-                 }
+            case TURNALONGWALL:
+                if (redAlliance) {
+                    moveTurn(45.0, turnSpeed); //original is -45
+                } else {
+                    moveTurn(135.0, turnSpeed);
+                }
+                currentMove = MoveState.STARTTURN;
+//                nextMove = MoveState.FINDBEACON;
+                nextMove = MoveState.DRIVETOBEACON;
+                telemetryMove = MoveState.TURNALONGWALL;
+                moveDelayTime = delay;
+                break;
 
-             case FINDBEACON:
-                 if (redAlliance) {
-                     moveStraight(-90.0, slowSpeed);
-                 } else {
-                     moveStraight(90.0, slowSpeed);
-                 }
-                 currentMove = MoveState.STARTMOVE;
-                 nextMove = MoveState.CENTERBUCKET;
-                 telemetryMove = MoveState.FINDBEACON;
-                 moveDelayTime = delay;
-                 break;
+            case DRIVETOBEACON:
+                if (redAlliance) {
+                    moveStraight(-90.0, fastSpeed);
+                } else {
+                    moveStraight(90.0, fastSpeed);
+                }
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.CHOOSEFIRST;
+                telemetryMove = MoveState.DRIVETOBEACON;
+                moveDelayTime = delay;
+                break;
 
-             case GETVALUES:
-                 ifBlueOnBeacon = beaconColorSense.blue();
-                 ifRedOnBeacon = beaconColorSense.red();
-                 break;
+            case FINDBEACON:
+                if (redAlliance) {
+                    moveStraight(-90.0, slowSpeed);
+                } else {
+                    moveStraight(90.0, slowSpeed);
+                }
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.CENTERBUCKET;
+                telemetryMove = MoveState.FINDBEACON;
+                moveDelayTime = delay;
+                break;
 
-             case CHOOSEFIRST:
-                 if (redAlliance == true && ifRedOnBeacon >= 1.0) {
-                     currentMove = MoveState.PUSHBUTTON;
-                 } else if (redAlliance == false && ifBlueOnBeacon >= 1.0) {
-                     currentMove = MoveState.PUSHBUTTON;
-                 } else {
-                     currentMove = MoveState.ALIGNDUMPER;
-                 }
-                 break;
-                 
+            case GETVALUES:
+                ifBlueOnBeacon = beaconColorSense.blue();
+                ifRedOnBeacon = beaconColorSense.red();
+                break;
+
+            case CHOOSEFIRST:
+                if (redAlliance == true && ifRedOnBeacon >= 1.0) {
+                    currentMove = MoveState.PUSHBUTTON;
+                } else if (redAlliance == false && ifBlueOnBeacon >= 1.0) {
+                    currentMove = MoveState.PUSHBUTTON;
+                } else {
+                    currentMove = MoveState.ALIGNDUMPER;
+                }
+                break;
+
             //  case ALIGNPUSHER:
             //     if (dumpedClimbers == false) {
             //         currentMove = MoveState.PUSHBUTTON;
@@ -619,23 +628,33 @@ public class CCHS5256Autonomous extends OpMode {
             //         currentMove = MoveState.PUSHBUTTON;
             //     }    
 
-             case PUSHBUTTON:
-                 servoBeaconPusher.setPosition(0.7);
-                 servoBeaconPusher.setPosition(0.3);
-                 pushedButton = true;
-                 if (dumpedClimbers == true) {
-                     currentMove = MoveState.ROTATEFROMBEACON;
-                 } else if (dumpedClimbers == false) {
-                     currentMove = MoveState.ALIGNDUMPER;
-                 }
-                 break;
+            case PUSHBUTTON:
+                servoBeaconPusher.setPosition(0.7);
+                moveDelayTime = 1000; // mSec - time for the servo to move
+                currentMove = MoveState.MOVEDELAY;
+                nextMove = MoveState.UNPUSHBUTTON;
+                telemetryMove = MoveState.PUSHBUTTON;
+                break;
 
-             case ALIGNDUMPER:
-                 while (beaconColorSense.red()>= 1.0 && beaconColorSense.blue() >= 1.0) {
-                     servoBeaconPusher.setPosition(1.0);
-                 }
-                 currentMove = MoveState.DUMPCLIMBERS;
-                 
+            case UNPUSHBUTTON:
+                servoBeaconPusher.setPosition(0.3);
+                pushedButton = true;
+                if (dumpedClimbers == true) {
+                    currentMove = MoveState.ROTATEFROMBEACON;
+                } else if (dumpedClimbers == false) {
+                    currentMove = MoveState.ALIGNDUMPER;
+                }
+                telemetryMove = MoveState.UNPUSHBUTTON;
+                break;
+
+            case ALIGNDUMPER:
+                if (beaconColorSense.red() >= 1.0 || beaconColorSense.blue() >= 1.0) {
+                    servoBeaconPusher.setPosition(1.0);
+                } else {
+                    servoBeaconPusher.setPosition(0.5);
+                    currentMove = MoveState.DUMPCLIMBERS;
+                }
+                telemetryMove = MoveState.ALIGNDUMPER;
                 //  if (redAlliance) {
                 //      while (colorSense.red() >= 1.0 || colorSense.blue() >=1.0) {
                 //          servoBeaconPinion.setPosition(0.0);
@@ -643,31 +662,30 @@ public class CCHS5256Autonomous extends OpMode {
                 //  } else {
                 //      while (colorSense.red() >= 1.0 || colorSense.blue() >=1.0) {
                 //          servoBeaconPinion.setPosition(1.0);
-                //      }
-                 }
-                 break;
+                //
+                break;
 
-             case DUMPCLIMBERS:
-                 if (dumperCounter >= dumperCounterThresh) {
-             dumperPosition -= .04;
-            servoClimberDumper.setPosition(dumperPosition);
-            dumperCounter = 0;
+            case DUMPCLIMBERS:
+                if (dumperCounter >= dumperCounterThresh) {
+                    dumperPosition -= .04;
+                    servoClimberDumper.setPosition(dumperPosition);
+                    dumperCounter = 0;
 //             Target position reached; moving to next state
-            if (dumperPosition <= .25) {
-                nextMove = MoveState.ROTATEFROMBEACON;
-                currentMove = MoveState.MOVEDELAY;
-                telemetryMove = MoveState.DUMPTRUCK;
-                moveDelayTime = 1000;
-                dumpedClimbers = true;
-                if (pushedButton == true) {
-                    currentMove = MoveState.ROTATEFROMBEACON;
-                } else if (pushedButton == false) {
-                    currentMove = MoveState.PUSHBUTTON;
+                    if (dumperPosition <= .25) {
+                        nextMove = MoveState.ROTATEFROMBEACON;
+                        currentMove = MoveState.MOVEDELAY;
+                        telemetryMove = MoveState.DUMPTRUCK;
+                        moveDelayTime = delay;
+                        dumpedClimbers = true;
+                        if (pushedButton == true) {
+                            currentMove = MoveState.ROTATEFROMBEACON;
+                        } else if (pushedButton == false) {
+                            currentMove = MoveState.PUSHBUTTON;
+                        }
+                    }
                 }
-            }
-        }
-        dumperCounter++;
-        break;
+                dumperCounter++;
+                break;
 
 //             case CENTERBUCKET:
 //                 lookingForRedFlag = false;
@@ -704,84 +722,84 @@ public class CCHS5256Autonomous extends OpMode {
 //        dumperCounter++;
 //        break;
 
-             case ROTATEFROMBEACON:
-                 if (redAlliance) {
-                     moveTurn(-45.0, turnSpeed);
-                 } else {
-                     moveTurn(-135, turnSpeed);
-                 }
-                 servoClimberDumper.setPosition(1.0);
-                 currentMove = MoveState.STARTTURN;
-                 nextMove = MoveState.MOVETORAMP;
-                 telemetryMove = MoveState.ROTATEFROMBEACON;
-                 moveDelayTime = delay;
-                 break;
+            case ROTATEFROMBEACON:
+                if (redAlliance) {
+                    moveTurn(-45.0, turnSpeed);
+                } else {
+                    moveTurn(-135, turnSpeed);
+                }
+                servoClimberDumper.setPosition(1.0);
+                currentMove = MoveState.STARTTURN;
+                nextMove = MoveState.MOVETORAMP;
+                telemetryMove = MoveState.ROTATEFROMBEACON;
+                moveDelayTime = delay;
+                break;
 
-             case MOVETORAMP:
-                 if (redAlliance) {
-                     distance = -114.0;
-                 } else {
-                     distance = -96.0;
-                 }
-                 if (!nearMountainFlag) {
-                     distance -= 61.0;
-                 }
-                 moveStraight(distance, fastSpeed);
-                 currentMove = MoveState.STARTMOVE;
-                 nextMove = MoveState.TURNTORAMP;
-                 telemetryMove = MoveState.MOVETORAMP;
-                 moveDelayTime = delay;
-                 break;
+            case MOVETORAMP:
+                if (redAlliance) {
+                    distance = -114.0;
+                } else {
+                    distance = -96.0;
+                }
+                if (!nearMountainFlag) {
+                    distance -= 61.0;
+                }
+                moveStraight(distance, fastSpeed);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.TURNTORAMP;
+                telemetryMove = MoveState.MOVETORAMP;
+                moveDelayTime = delay;
+                break;
 
-             case TURNTORAMP:
-                 if (nearMountainFlag) {
-                     if (redAlliance) {
-                         moveTurn(-90.0, turnSpeed);
-                     } else {
-                         moveTurn(90.0, turnSpeed);
-                     }
-                 } else {
-                     if (redAlliance) {
-                         moveTurn(90.0, turnSpeed);
-                     } else {
-                         moveTurn(-90.0, turnSpeed);
-                     }
-                 }
-                 currentMove = MoveState.STARTTURN;
-                 nextMove = MoveState.STOPATRAMP;
-                 telemetryMove = MoveState.TURNTORAMP;
-                 moveDelayTime = delay;
-                 break;
+            case TURNTORAMP:
+                if (nearMountainFlag) {
+                    if (redAlliance) {
+                        moveTurn(-90.0, turnSpeed);
+                    } else {
+                        moveTurn(90.0, turnSpeed);
+                    }
+                } else {
+                    if (redAlliance) {
+                        moveTurn(90.0, turnSpeed);
+                    } else {
+                        moveTurn(-90.0, turnSpeed);
+                    }
+                }
+                currentMove = MoveState.STARTTURN;
+                nextMove = MoveState.STOPATRAMP;
+                telemetryMove = MoveState.TURNTORAMP;
+                moveDelayTime = delay;
+                break;
 
-             case STOPATRAMP:
-                 if (nearMountainFlag) {
-                     moveStraight(40.0, fastSpeed);
-                 } else {
-                     moveStraight(200.0, fastSpeed);
-                 }
-                 servoUltraSense.setPosition(0.5);
-                 currentMove = MoveState.STARTMOVE;
-                 nextMove = MoveState.UPRAMP;
-                 telemetryMove = MoveState.STOPATRAMP;
-                 break;
+            case STOPATRAMP:
+                if (nearMountainFlag) {
+                    moveStraight(40.0, fastSpeed);
+                } else {
+                    moveStraight(200.0, fastSpeed);
+                }
+                servoUltraSense.setPosition(0.5);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.UPRAMP;
+                telemetryMove = MoveState.STOPATRAMP;
+                break;
 
-             case UPRAMP:
-                 distanceToWall = ultraSense.getUltrasonicLevel();
-                 if ((distanceToWall > 30.0) && (distanceToWall <= 70.0)) {
-                     moveStraight(distanceToWall - 5.0, slowSpeed);
-                     //place code for extending omni wheels here
-                     currentMove = MoveState.STARTMOVE;
-                     nextMove = MoveState.DONE;
-                     telemetryMove = MoveState.UPRAMP;
-                 }
-                 break;
+            case UPRAMP:
+                distanceToWall = ultraSense.getUltrasonicLevel();
+                if ((distanceToWall > 30.0) && (distanceToWall <= 70.0)) {
+                    moveStraight(distanceToWall - 5.0, slowSpeed);
+                    //place code for extending omni wheels here
+                    currentMove = MoveState.STARTMOVE;
+                    nextMove = MoveState.DONE;
+                    telemetryMove = MoveState.UPRAMP;
+                }
+                break;
 
-             case DONE:
-                 leftDrive.setPower(0.0);
-                 rightDrive.setPower(0.0);
-                 telemetryMove = MoveState.DONE;
-                 break;
-         }
+            case DONE:
+                leftDrive.setPower(0.0);
+                rightDrive.setPower(0.0);
+                telemetryMove = MoveState.DONE;
+                break;
+        }
 //        switch (currentMove) {
 //
 //            case PRETURN:
