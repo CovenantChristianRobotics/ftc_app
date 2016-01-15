@@ -198,8 +198,8 @@ public class CCHS5256TeleOp extends OpMode {
         double left = gamepad1.left_stick_y;
         double right = gamepad1.right_stick_y;
         float beaconPinion = gamepad2.right_stick_y;
-        float rightStickPos = gamepad1.right_stick_y;
-        float rightStickNeg = gamepad1.right_stick_y;
+        float rightStickPos = -gamepad1.right_stick_y;
+        float rightStickNeg = -gamepad1.right_stick_y;
 
         left = Range.clip(left, -1, 1);
         right = Range.clip(right, -1, 1);
