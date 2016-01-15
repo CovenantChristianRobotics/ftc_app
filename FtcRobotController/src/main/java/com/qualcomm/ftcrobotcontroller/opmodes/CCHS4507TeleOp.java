@@ -100,19 +100,23 @@ public class CCHS4507TeleOp extends OpMode {
 
         if (gamepad2.left_bumper) {
             climberTriggerLeft.setPosition(0.0);
-        } else {
+        } else if (gamepad2.left_trigger > 0.5) {
             climberTriggerLeft.setPosition(1.0);
+        } else {
+            climberTriggerLeft.setPosition(0.5);
         }
 
         if (gamepad2.right_bumper) {
             climberTriggerRight.setPosition(0.0);
-        } else {
+        } else if (gamepad2.right_trigger > 0.5) {
             climberTriggerRight.setPosition(1.0);
+        } else {
+            climberTriggerRight.setPosition(0.5);
         }
 
-        telemetry.addData("trackLifter", (float)trackLifter.getCurrentPosition());
+        telemetry.addData("trackLifter", (float) trackLifter.getCurrentPosition());
         telemetry.addData("liftCheck", liftCheck.getLightDetected());
-        telemetry.addData("ENCLeft", (float)motorLeft.getCurrentPosition());
-        telemetry.addData("ENCRight", (float)motorRight.getCurrentPosition());
+        telemetry.addData("ENCLeft", (float) motorLeft.getCurrentPosition());
+        telemetry.addData("ENCRight", (float) motorRight.getCurrentPosition());
     }
 }
