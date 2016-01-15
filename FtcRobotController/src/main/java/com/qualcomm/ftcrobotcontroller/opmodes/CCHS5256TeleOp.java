@@ -212,10 +212,10 @@ public class CCHS5256TeleOp extends OpMode {
             left = (float) slow(left);
             right = (float) slow(right);
         } else {
-//            left = (float) medium(left);
-//            right = (float) medium(right);
-            left = (float) -0.05;
-            right = (float) +0.05;
+            left = (float) medium(left);
+            right = (float) medium(right);
+//            left = (float) -0.05;
+//            right = (float) -0.05;
         }
 
         if (rightStickPos < 0 ) {

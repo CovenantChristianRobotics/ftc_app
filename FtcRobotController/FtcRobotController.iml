@@ -101,5 +101,8 @@
     <orderEntry type="library" exported="" name="WirelessP2p-release-" level="project" />
     <orderEntry type="library" exported="" name="Hardware-release-" level="project" />
     <orderEntry type="library" exported="" name="RobotCore-release-" level="project" />
+    <orderEntry type="library" exported="" name="effects-Google Inc.:Google APIs:19" level="project" />
+    <orderEntry type="library" exported="" name="usb-Google Inc.:Google APIs:19" level="project" />
+    <orderEntry type="library" exported="" name="maps-Google Inc.:Google APIs:19" level="project" />
   </component>
 </module>
