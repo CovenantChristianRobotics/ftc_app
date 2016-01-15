@@ -28,6 +28,7 @@ public class CCHS4507Autonomous extends OpMode {
     Servo servoBeaconPusher;
     Servo servoClimberDumper;
     Servo servoDist;
+    Servo zipTieSweeper;
     ColorSensor ColorSense;
     ColorSensor colorGroundSense;
     TouchSensor touchSense;
@@ -169,6 +170,7 @@ public class CCHS4507Autonomous extends OpMode {
         servoBeaconPusher = hardwareMap.servo.get("beacon_pusher");
         servoClimberDumper = hardwareMap.servo.get("climber_dumper");
         servoDist = hardwareMap.servo.get("servoDist");
+        zipTieSweeper = hardwareMap.servo.get("zipTieSweeper");
         ColorSense = hardwareMap.colorSensor.get("color");
         colorGroundSense = hardwareMap.colorSensor.get("colorGround");
         nearMountainSwitch = hardwareMap.digitalChannel.get("nearMtnSw");
@@ -222,6 +224,7 @@ public class CCHS4507Autonomous extends OpMode {
         slowSpeed = 0.75;
         turnSpeed = 0.75;
         delay = 50;
+        zipTieSweeper.setPosition(.75);
         trackLifter.setPower(0.1);
         trackLifter.setTargetPosition(30);
         servoClimberDumper.setPosition(0.9);
