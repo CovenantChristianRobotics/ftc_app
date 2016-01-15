@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.Range;
-
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import java.util.Date;
 /**
  * Created by cchsrobochargers on 12/17/15.
@@ -30,6 +30,7 @@ public class CCHS4507Autonomous extends OpMode {
     Servo servoDist;
     ColorSensor ColorSense;
     ColorSensor colorGroundSense;
+    TouchSensor touchSense;
     MoveState currentMove;
     MoveState nextMove;
     MoveState telemetryMove;
@@ -70,7 +71,7 @@ public class CCHS4507Autonomous extends OpMode {
 
     // Analog Inputs
     AnalogInput delayPot;
-    OpticalDistanceSensor liftCheck;
+    TouchSensor liftCheck;
     int trackLifterUp = 0;
     boolean nearMountainFlag = false;
     boolean redAlliance = false;
@@ -84,7 +85,7 @@ public class CCHS4507Autonomous extends OpMode {
 
     int centimetersToCounts(double centimeters) {
         return (int)(centimeters * (countsPerMeter / 100.0));
-        //double wheelDiameter = 10.1;    // wheel diameter in cm
+        //double wheelDiameteliftCheckr = 10.1;    // wheel diameter in cm
         //double encoderCounts = 1120.0;  // encoder counts per revolution of the drive train motors
         // return (int) ((centimeters / (wheelDiameter * Math.PI)) * encoderCounts);
         // ^ Previous code to find the amount of counts for every wheel rotation
@@ -152,7 +153,7 @@ public class CCHS4507Autonomous extends OpMode {
         // tileSwitch = hardwareMap.digitalChannel.get("tSw")
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
         gyroSense = hardwareMap.gyroSensor.get("gyro");
-        liftCheck = hardwareMap.opticalDistanceSensor.get("liftCheck");
+        liftCheck =  hardwareMap.touchSensor.get("touchSense");
         delayPot = hardwareMap.analogInput.get("delayPot");
         moveDelayTime = (long)(delayPot.getValue() * (15000 / 1024));
         nearMountainFlag = nearMountainSwitch.getState();
@@ -168,11 +169,11 @@ public class CCHS4507Autonomous extends OpMode {
             servoDist.setPosition(0.25);
         }
 
-        if (liftCheck.getLightDetected() > 0.3) {
+        if (liftCheck.isPressed()) {
             trackLifterUp = trackLifter.getCurrentPosition();
             trackLifter.setTargetPosition(trackLifterUp);
         }
-        // tileFlag = tileSwitch.getState();
+        // tileFlag = tileliftCheckSwitch.getState();
         //if (tileSwitch.getState()) {
 
         // } else {
@@ -198,7 +199,7 @@ public class CCHS4507Autonomous extends OpMode {
         trackLifter.setTargetPosition(30);
         servoClimberDumper.setPosition(0.9);
         servoBeaconPusher.setPosition(0.0);
-        if (liftCheck.getLightDetected() > 0.3) {
+        if (liftCheck.isPressed()) {
             trackLifterUp = trackLifter.getCurrentPosition();
             trackLifter.setTargetPosition(trackLifterUp);
         }
@@ -413,21 +414,24 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case UPRAMP:
-                distanceToWall = ultraSense.getUltrasonicLevel();
-                if ((distanceToWall > 30.0) && (distanceToWall <= 70.0)) {
-                    moveStraight(distanceToWall - 5.0, slowSpeed);
+//                distanceToWall = ultraSense.getUltrasonicLevel();
+//                if ((distanceToWall > 30.0) && (distanceToWall <= 70.0)) {
+                    moveStraight(100.0, slowSpeed);
                     trackLifter.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
                     trackLifter.setPower(0.0);
                     trackLifter.setPowerFloat();
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.DONE;
                     telemetryMove = MoveState.UPRAMP;
-                }
+//                }
                 break;
 
             case DONE:
                 motorLeft.setPower(0.0);
                 motorRight.setPower(0.0);
+                trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+                trackLifter.setPower(0.1);
+                trackLifter.setTargetPosition(30);
                 telemetryMove = MoveState.DONE;
                 break;
         }
@@ -442,7 +446,7 @@ public class CCHS4507Autonomous extends OpMode {
         telemetry.addData("Color", (float)ColorSense.red());
         telemetry.addData("gyro", (float)gyroSense.getHeading());
         telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
-        telemetry.addData("liftCheck", liftCheck.getLightDetected());
+        telemetry.addData("liftCheck", liftCheck.isPressed());
         telemetry.addData("delayPot", delayPot.getValue());
     }
 
