@@ -195,8 +195,8 @@ public class CCHS5256TeleOp extends OpMode {
     @Override
     public void loop() {
 
-        float left = gamepad1.left_stick_y;
-        float right = gamepad1.right_stick_y;
+        double left = gamepad1.left_stick_y;
+        double right = gamepad1.right_stick_y;
         float beaconPinion = gamepad2.right_stick_y;
         float rightStickPos = gamepad1.right_stick_y;
         float rightStickNeg = gamepad1.right_stick_y;
@@ -205,18 +205,18 @@ public class CCHS5256TeleOp extends OpMode {
         right = Range.clip(right, -1, 1);
         beaconPinion = Range.clip(beaconPinion, -1, 1);
 
-        if (gamepad1.right_trigger > 0) {
-            left = (float) fast(left);
-            right = (float) fast(right);
-        } else if (gamepad1.left_trigger > 0) {
-            left = (float) slow(left);
-            right = (float) slow(right);
-        } else {
-            left = (float) medium(left);
-            right = (float) medium(right);
+//        if (gamepad1.right_trigger > 0) {
+//            left = (float) fast(left);
+//            right = (float) fast(right);
+//        } else if (gamepad1.left_trigger > 0) {
+//            left = (float) slow(left);
+//            right = (float) slow(right);
+//        } else {
+////            left = (float) medium(left);
+////            right = (float) medium(right);
 //            left = (float) -0.05;
-//            right = (float) -0.05;
-        }
+//            right = (float) +0.05;
+//        }
 
         if (rightStickPos < 0 ) {
             rightStickPos = 0;
@@ -231,14 +231,67 @@ public class CCHS5256TeleOp extends OpMode {
         }
 //
         if (gamepad1.dpad_up) {
-            // moveStraightWithGyro(rightStickPos);
-            leftDrive.setPower(rightStickPos);
-            rightDrive.setPower(rightStickPos);
+            left = -0.1;
+            right = -0.1;
         } else if (gamepad1.dpad_down) {
-            // moveStraightWithGyro(rightStickNeg);
-            leftDrive.setPower(rightStickNeg);
-            rightDrive.setPower(rightStickNeg);
+            left = 0.1;
+            right = 0.1;
+        } else if (gamepad1.dpad_right) {
+            left = -0.1;
+            right = 0.1;
+        } else if (gamepad1.dpad_left) {
+            left = 0.1;
+            right = -0.1;
         }
+        
+        // if (gamepad1.right_trigger > 0.5) {
+        //     left = (float) fast(left);
+        //     right = (float) fast(right);
+        // } else if (gamepad1.left_trigger > 0.5) {
+        //     left = (float) slow(left);
+        //     right = (float) slow(right);
+        // } else if (gamepad1.dpad_up) {
+        //     left = rightStickPos * -1;
+        //     right = rightStickPos * -1;
+        // } else if (gamepad1.dpad_down) {
+        //     left = rightStickNeg * -1;
+        //     right = rightStickNeg * -1;
+        // } else if (gamepad1.dpad_right) {
+        //     left = -0.1;
+        //     right = 0.1;
+        //     if(gamepad1.right_trigger > 0.5) {
+        //         left = (double) fast(left);
+        //         right = (double) fast(right);
+        //     } else if (gamepad1.left_trigger > 0.5) {
+        //         left = (float) slow(left);
+        //         right = (float) slow(right);
+        //     } else {
+        //         left = left;
+        //         right = right;
+        //     }
+        // } else if (gamepad1.dpad_left) {
+        //     left = 0.1;
+        //     right = -0.1;
+        //     if(gamepad1.right_trigger > 0.5) {
+        //         left = (double) fast(left);
+        //         right = (double) fast(right);
+        //     } else if (gamepad1.left_trigger > 0.5) {
+        //         left = (float) slow(left);
+        //         right = (float) slow(right);
+        //     } else {
+        //         left = left;
+        //         right = right;
+        //     }
+        // } else {
+        //     left = (float) medium(left);
+        //     right = (float) medium(right);
+        //     // left = (float) -0.05;   // for calibrating autonomous distances only
+        //     // right = (float) +0.05;   // for calibrating autonomous distances only
+        // }
+        
+        // if (endGameTime.time() >= 90 && gamepad1.y) {
+        //     chinUp.setPower(- gamepad1.left_stick_y)
+        // }
 
 //        if (gamepad2.dpad_up) {
 //            if (leftWheelStop.isPressed() == false && rightWheelStop.isPressed() == false) {
