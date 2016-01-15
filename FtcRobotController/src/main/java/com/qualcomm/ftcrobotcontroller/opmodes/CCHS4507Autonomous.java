@@ -17,8 +17,8 @@ import java.util.Date;
  */
 public class CCHS4507Autonomous extends OpMode {
     enum MoveState {
-        DELAY, STARTMOVE, MOVING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
-        FINDBEACON, DUMPTRUCK, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, UPRAMP, DONE
+        DELAY, STARTMOVE, MOVING, STARTTURN, TURNING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
+        FINDBEACON, CENTERBUCKET, DUMPTRUCK, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, ALIGNRAMP, UPRAMP, DONE
     }
 
     DcMotor motorRight;
@@ -39,8 +39,10 @@ public class CCHS4507Autonomous extends OpMode {
     boolean lookingForBlueFlag;
     boolean sawBlueFlag;
     boolean sawRedFlag;
+    boolean fourthTileFlag;
     long delayUntil;
     double speed;
+    boolean movingForward;
     double fastSpeed;
     double slowSpeed;
     double turnSpeed;
@@ -56,9 +58,9 @@ public class CCHS4507Autonomous extends OpMode {
     double dumperPosition = 0.9;
 
     // robot constants
-    double wheelDiameter = 6.75 / 2.0;  // wheel diameter in cm 2 to 1 gear ratio
-    double encoderCounts = 1120.0;      // encoder counts per revolution of the drive train motors
-    double wheelBase = 41.0;            // wheelbase of the primary drive wheels
+//    double wheelDiameter = 6.75 / 2.0;  // wheel diameter in cm 2 to 1 gear ratio
+//    double encoderCounts = 1120.0;      // encoder counts per revolution of the drive train motors
+//    double wheelBase = 41.0;            // wheelbase of the primary drive wheels
     double countsPerMeter = 10439.0;    // Found this experimentally: Measured one meter, drove distance, read counts
     int dumperCounterThresh = 8;       // Doesn't let the dumper counter get above a certain number
     double countsPerDonut = 14161.0;    // Encoder counts per 360 degrees
@@ -67,7 +69,7 @@ public class CCHS4507Autonomous extends OpMode {
     DigitalChannel nearMountainSwitch;
     DigitalChannel redBlueSwitch;
     // DigitalChannel delaySwitch;
-    // DigitalChannel tileSwitch;
+    DigitalChannel fourthTileSwitch;
 
     // Analog Inputs
     AnalogInput delayPot;
@@ -110,6 +112,11 @@ public class CCHS4507Autonomous extends OpMode {
         int leftTarget;
 
         speed = targetSpeed;
+        if (distanceCM > 0.0) {
+            movingForward = true;
+        } else {
+            movingForward = false;
+        }
         leftTarget = motorLeft.getCurrentPosition() + centimetersToCounts(distanceCM);
         motorLeft.setTargetPosition(leftTarget);
         rightTarget = motorRight.getCurrentPosition() + centimetersToCounts(distanceCM);
@@ -122,18 +129,35 @@ public class CCHS4507Autonomous extends OpMode {
      * if degree magnitude is negative, robot turns clockwise
      *
      * @param degrees
-     * @param fastSpeed
+     * @param targetSpeed
      */
-    void moveTurn(double degrees, double fastSpeed) {
+    void moveTurn(double degrees, double targetSpeed) {
         int rightTarget;
         int leftTarget;
 
-        leftTarget = motorLeft.getCurrentPosition() - degreesToCounts(degrees);
+        // Figure out how far off we are at the end of the previous move so we can correct
+        gyroError =  desiredHeading - gyroSense.getHeading();
+        if(gyroError > 180) {
+            gyroError = 360 - gyroError;
+        }
+        if (gyroError < -180) {
+            gyroError = 360 + gyroError;
+        }
+
+        desiredHeading = desiredHeading + (int)degrees;
+        if (desiredHeading >= 360) {
+            desiredHeading = desiredHeading - 360;
+        }
+        if (desiredHeading < 0) {
+            desiredHeading = desiredHeading + 360;
+        }
+        speed = targetSpeed;
+        leftTarget = motorLeft.getCurrentPosition() - degreesToCounts(degrees + gyroError);
         motorLeft.setTargetPosition(leftTarget);
-        rightTarget = motorRight.getCurrentPosition() + degreesToCounts(degrees);
+        rightTarget = motorRight.getCurrentPosition() + degreesToCounts(degrees + gyroError);
         motorRight.setTargetPosition(rightTarget);
-        motorLeft.setPower(fastSpeed);
-        motorRight.setPower(fastSpeed);
+        motorLeft.setPower(targetSpeed);
+        motorRight.setPower(targetSpeed);
     }
 
     @Override
@@ -150,13 +174,14 @@ public class CCHS4507Autonomous extends OpMode {
         nearMountainSwitch = hardwareMap.digitalChannel.get("nearMtnSw");
         redBlueSwitch = hardwareMap.digitalChannel.get("rbSw");
         // delaySwitch = hardwareMap.digitalChannel.get("dSw")
-        // tileSwitch = hardwareMap.digitalChannel.get("tSw")
+        fourthTileSwitch = hardwareMap.digitalChannel.get("fourthTileSw");
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
         gyroSense = hardwareMap.gyroSensor.get("gyro");
         liftCheck =  hardwareMap.touchSensor.get("touchSense");
         delayPot = hardwareMap.analogInput.get("delayPot");
         moveDelayTime = (long)(delayPot.getValue() * (15000 / 1024));
         nearMountainFlag = nearMountainSwitch.getState();
+        fourthTileFlag = fourthTileSwitch.getState();
         if (redBlueSwitch.getState()) { //This is for when we're going to blue
             redAlliance = false;
             lookingForRedFlag = false;
@@ -190,11 +215,13 @@ public class CCHS4507Autonomous extends OpMode {
         telemetryMove = MoveState.MOVEDELAY;
         sawRedFlag = false;
         sawBlueFlag = false;
+        desiredHeading = 0;
         speed = 0;
+        movingForward = true;
         fastSpeed = 0.95;
         slowSpeed = 0.75;
         turnSpeed = 0.75;
-        delay = 150;
+        delay = 50;
         trackLifter.setPower(0.1);
         trackLifter.setTargetPosition(30);
         servoClimberDumper.setPosition(0.9);
@@ -210,7 +237,9 @@ public class CCHS4507Autonomous extends OpMode {
 
     @Override
     public void loop() {
-        double distanceToWall;
+        double distanceToWall = 0.0;
+        double distance = 0.0;
+
         if (gyroSense.isCalibrating()) {
             return;
         }
@@ -224,13 +253,22 @@ public class CCHS4507Autonomous extends OpMode {
 
             case MOVING:
                 gyroError = desiredHeading - gyroSense.getHeading();
-                if(gyroError > 180) {
+                if (gyroError > 180) {
                     gyroError = 360 - gyroError;
+                }
+                if (gyroError < -180) {
+                    gyroError = 360 + gyroError;
+                }
+                if (!movingForward) {
+                    gyroError = -gyroError;
                 }
                 motorRight.setPower(Range.clip(speed + (gyroError * 0.2), -1.0, 1.0));
                 motorLeft.setPower(Range.clip(speed - (gyroError * 0.2), -1.0, 1.0));
                 if (ColorSense.blue() >= 1) {
                     sawBlueFlag = true;
+                }
+                if (ColorSense.red() >= 1) {
+                    sawRedFlag = true;
                 }
                 if (lookingForRedFlag && (ColorSense.red() >= 1))  {
                     motorRight.setPower(0.0);
@@ -247,6 +285,26 @@ public class CCHS4507Autonomous extends OpMode {
                 }
                 break;
 
+            case STARTTURN:
+                if (motorLeft.isBusy() && motorRight.isBusy()) {
+                    currentMove = MoveState.TURNING;
+                }
+                break;
+
+            case TURNING:
+                gyroError =  gyroSense.getHeading() - desiredHeading;
+                if(gyroError > 180) {
+                    gyroError = 360 - gyroError;
+                }
+                if (gyroError < -180) {
+                    gyroError = 360 + gyroError;
+                }
+//                moveTurn(gyroError, speed);
+                if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+                    currentMove = MoveState.MOVEDELAY;
+                }
+                break;
+
             case MOVEDELAY:
                 now = new Date();
                 delayUntil = now.getTime() + moveDelayTime;
@@ -254,15 +312,19 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case DELAY:
-                now = new Date();
-                if (now.getTime() >= delayUntil) {
-                    currentMove = nextMove;
+                if (motorLeft.isBusy() || motorRight.isBusy()) {
+                    // If we aren't quite done moving, restart the delay
+                    currentMove = MoveState.MOVEDELAY;
+                } else {
+                    now = new Date();
+                    if (now.getTime() >= delayUntil) {
+                        currentMove = nextMove;
+                    }
                 }
                 break;
 
             case FIRSTMOVE:
-                desiredHeading = 0;
-                moveStraight(60.0, fastSpeed);
+                moveStraight(60.0 + (fourthTileFlag ? 45.0 : 0.0), fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNDIAG;
                 telemetryMove = MoveState.FIRSTMOVE;
@@ -271,20 +333,18 @@ public class CCHS4507Autonomous extends OpMode {
 
             case TURNDIAG:
                 if (redAlliance) {
-                    desiredHeading = -45;
                     moveTurn(-45.0, turnSpeed);
                 } else {
-                    desiredHeading = 45;
                     moveTurn(45.0, turnSpeed);
                 }
-                currentMove = MoveState.STARTMOVE;
+                currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.MOVEDIAG;
                 telemetryMove = MoveState.TURNDIAG;
                 moveDelayTime = delay;
                 break;
 
             case MOVEDIAG:
-                moveStraight(209.0, fastSpeed);
+                moveStraight(209.0 - (fourthTileFlag ? 60.0 : 0.0), fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDWALL;
                 telemetryMove = MoveState.MOVEDIAG;
@@ -293,8 +353,12 @@ public class CCHS4507Autonomous extends OpMode {
 
             case FINDWALL:
                 distanceToWall = ultraSense.getUltrasonicLevel();
-                if ((distanceToWall > 30.0) && (distanceToWall <= 80.0)) {
-                    moveStraight((distanceToWall - 33.0) * 1.414, slowSpeed);
+                if ((distanceToWall > 20.0) && (distanceToWall <= 80.0)) {
+                    if (redAlliance) {
+                        moveStraight((distanceToWall - 26.0) * 1.414, slowSpeed);
+                    } else {
+                        moveStraight((distanceToWall - 30.0) * 1.414, slowSpeed);
+                    }
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.TURNALONGWALL;
                     telemetryMove = MoveState.FINDWALL;
@@ -304,13 +368,11 @@ public class CCHS4507Autonomous extends OpMode {
 
             case TURNALONGWALL:
                 if (redAlliance) {
-                    desiredHeading = 0;
-                    moveTurn(45.0, turnSpeed);
+                    moveTurn(45.0, turnSpeed); //origanal is -45
                 } else {
-                    desiredHeading = 180;
                     moveTurn(135.0, turnSpeed);
                 }
-                currentMove = MoveState.STARTMOVE;
+                currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.FINDBEACON;
                 telemetryMove = MoveState.TURNALONGWALL;
                 moveDelayTime = delay;
@@ -318,14 +380,32 @@ public class CCHS4507Autonomous extends OpMode {
 
             case FINDBEACON:
                 if (redAlliance) {
-                    moveStraight(-122.0, fastSpeed);
+                    moveStraight(-90.0, fastSpeed);
                 } else {
-                    moveStraight(122.0, fastSpeed);
+                    moveStraight(90.0, fastSpeed);
                 }
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DUMPTRUCK;
+                nextMove = MoveState.CENTERBUCKET;
                 telemetryMove = MoveState.FINDBEACON;
                 moveDelayTime = delay;
+                break;
+
+            case CENTERBUCKET:
+                lookingForRedFlag = false;
+                lookingForBlueFlag = false;
+                if ((redAlliance && !sawBlueFlag) || (!redAlliance && !sawRedFlag)) {
+                    if (redAlliance) {
+                        moveStraight(-10.0, fastSpeed);
+                    } else {
+                        moveStraight(10.0, fastSpeed);
+                    }
+                    currentMove = MoveState.STARTMOVE;
+                    nextMove = MoveState.DUMPTRUCK;
+                    telemetryMove = MoveState.CENTERBUCKET;
+                    moveDelayTime = delay;
+                } else {
+                    currentMove = MoveState.DUMPTRUCK;
+                }
                 break;
 
             case DUMPTRUCK:
@@ -347,28 +427,25 @@ public class CCHS4507Autonomous extends OpMode {
 
             case ROTATEFROMBEACON:
                 if (redAlliance) {
-                    desiredHeading = -50;
-                    moveTurn(-50.0, turnSpeed);
+                    moveTurn(-45.0, turnSpeed);
                 } else {
-                    desiredHeading = 50;
-                    moveTurn(-130, turnSpeed);
+                    moveTurn(-135, turnSpeed);
                 }
-                lookingForRedFlag = false;
-                lookingForBlueFlag = false;
                 servoClimberDumper.setPosition(1.0);
-                currentMove = MoveState.STARTMOVE;
+                currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.MOVETORAMP;
                 telemetryMove = MoveState.ROTATEFROMBEACON;
                 moveDelayTime = delay;
                 break;
 
             case MOVETORAMP:
-                double distance = -71.0;
-                if (!sawBlueFlag) {
-                    distance -= 30.0;
+                if (redAlliance) {      // red alliance
+                    distance = -108.0;
+                } else {                // blue alliance
+                    distance = -89.0;
                 }
                 if (!nearMountainFlag) {
-                    distance -= 67.0;
+                    distance -= 61.0;
                 }
                 moveStraight(distance, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
@@ -380,22 +457,18 @@ public class CCHS4507Autonomous extends OpMode {
             case TURNTORAMP:
                 if (nearMountainFlag) {
                     if (redAlliance) {
-                        desiredHeading = -140;
                         moveTurn(-90.0, turnSpeed);
                     } else {
-                        desiredHeading = 140;
                         moveTurn(90.0, turnSpeed);
                     }
                 } else {
                     if (redAlliance) {
-                        desiredHeading = 48;
-                        moveTurn(98.0, turnSpeed);
+                        moveTurn(90.0, turnSpeed);
                     } else {
-                        desiredHeading = -48;
-                        moveTurn(-98.0, turnSpeed);
+                        moveTurn(-90.0, turnSpeed);
                     }
                 }
-                currentMove = MoveState.STARTMOVE;
+                currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.STOPATRAMP;
                 telemetryMove = MoveState.TURNTORAMP;
                 moveDelayTime = delay;
@@ -409,8 +482,15 @@ public class CCHS4507Autonomous extends OpMode {
                 }
                 servoDist.setPosition(0.5);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.UPRAMP;
+                nextMove = MoveState.ALIGNRAMP;
                 telemetryMove = MoveState.STOPATRAMP;
+                break;
+
+            case ALIGNRAMP:
+                moveTurn(0.0, turnSpeed);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.UPRAMP;
+                telemetryMove = MoveState.ALIGNRAMP;
                 break;
 
             case UPRAMP:
@@ -439,11 +519,9 @@ public class CCHS4507Autonomous extends OpMode {
         if (gamepad1.start) {
             currentMove = MoveState.FIRSTMOVE;
         }
-
-        telemetry.addData("colorGround", (float)colorGroundSense.argb());
-        telemetry.addData("colorGround", (float)colorGroundSense.alpha());
         telemetry.addData("Current Move", telemetryMove.toString());
         telemetry.addData("Color", (float)ColorSense.red());
+        telemetry.addData("desiredHeading", (float)desiredHeading);
         telemetry.addData("gyro", (float)gyroSense.getHeading());
         telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
         telemetry.addData("liftCheck", liftCheck.isPressed());

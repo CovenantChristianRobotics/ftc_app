@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <Robot>
-    <DeviceInterfaceModule name="Device Interface Module 1" serialNumber="AL00VF0A">
+    <DeviceInterfaceModule name="Device Interface Module 1" serialNumber="AL02RIGD">
         <ColorSensor name="color" port="0" />
         <Gyro name="gyro" port="1" />
         <ColorSensor name="colorGround" port="2" />
@@ -11,19 +11,25 @@
         <DigitalDevice name="fourthTileSw" port="2" />
         <DigitalDevice name="floorParkSw" port="3" />
     </DeviceInterfaceModule>
-    <ServoController name="Servo Controller 1" serialNumber="AI02RMPE">
+    <ServoController name="Servo Controller 1" serialNumber="AL00VULO">
         <Servo name="servoDist" port="1" />
         <Servo name="beacon_pusher" port="2" />
         <Servo name="climber_dumper" port="3" />
+		<Servo name="trigLeft" port="4" />
+		<Servo name="trigRight" port="5" />
     </ServoController>
     <LegacyModuleController name="Legacy Module 1" serialNumber="AL00XPHJ">
         <UltrasonicSensor name="ultraSense" port="5" />
     </LegacyModuleController>
-    <MotorController name="Motor Drive" serialNumber="AL00XSY7">
+    <MotorController name="Motor Drive" serialNumber="AL00VKQS">
         <Motor name="motorR" port="1" />
         <Motor name="motorL" port="2" />
     </MotorController>
-    <MotorController name="Motor Lift" serialNumber="AL00VXRE">
-        <Motor name="trkLftr" port="1" />
-    </MotorController>
+    <MotorController name="Motor Lift" serialNumber="AL00VXQH">
+	    <Motor name="armPivot" port="1" />
+        <Motor name="trkLftr" port="2" />
+    </MotorController> 
+	<MotorController name="MotorController 3" serialNumber="AL00VXR8">
+	    <Motor name="armExtend" port="2" />
+    </MotorController> 
 </Robot>
