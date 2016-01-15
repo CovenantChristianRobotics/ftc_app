@@ -114,8 +114,8 @@ public class CCHS5256Autonomous extends OpMode {
     long delayUntil;
     long moveDelayTime;
     Date now;
-    double countsPerDonut = 14161.0;    // Encoder counts per 360 degrees
-    double countsPerMeter = 10439.0;    // Found this experimentally: Measured one meter, drove distance, read counts
+    double countsPerDonut = 6083.0;    // Encoder counts per 360 degrees
+    double countsPerMeter = 5076.0;    // Found this experimentally: Measured one meter, drove distance, read counts
     int dumperCounterThresh = 8;       // Doesn't let the dumper counter get above a certain number
 
     public CCHS5256Autonomous() {
