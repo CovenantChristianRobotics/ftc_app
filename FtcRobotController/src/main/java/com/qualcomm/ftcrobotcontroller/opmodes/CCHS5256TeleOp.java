@@ -232,8 +232,8 @@ public class CCHS5256TeleOp extends OpMode {
                 left = (double) fast(left);
                 right = (double) fast(right);
             } else if (gamepad1.left_trigger > 0.5) {
-                left = (float) slow(left);
-                right = (float) slow(right);
+                left = (double) slow(left);
+                right = (double) slow(right);
             } else {
                 left = left;
                 right = right;
