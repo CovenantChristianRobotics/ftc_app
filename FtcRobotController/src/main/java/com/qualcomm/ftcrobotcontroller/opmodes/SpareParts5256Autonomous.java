@@ -1,12 +1,16 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.GyroSensor;
-import com.qualcomm.robotcore.hardware.ServoController;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.Date;
 
@@ -15,26 +19,83 @@ import java.util.Date;
  */
 public class SpareParts5256Autonomous extends OpMode {
     enum MoveState {
-        DELAY, STARTMOVE, MOVING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, TURNTOWARDSWALL, FINDWALL,
-        BACKWARDFROMBEACON, TURNTORAMP, MOVETORAMP, DONE
+        STARTMOVE, MOVING, MOVEDELAY, DELAY, FIRSTMOVE, TURNDIAG, MOVEDIAGNEAR, MOVEDIAGFAR,
+        TURNTONEARMOUNTAIN, TURNTOFARMOUNTAIN, DRIVETOMOUNTAIN, CLIMBMOUNTAIN, DONE
     }
 
-    DcMotorController driveTrainController;
-    DcMotor motorRight;
-    DcMotor motorLeft;
-    ServoController servoCtlr;
-    ColorSensor ColorSense;
+    //dc motors
+    DcMotor leftDrive;
+    DcMotor rightDrive;
+    //    DcMotor chinUp;
+    //servos
+    Servo servoBeaconPinion;
+    Servo servoBeaconPusher;
+    Servo servoClimberDumper;
+    Servo servoUltraSense;
+    //    Servo leftOmniPinion;
+//    Servo rightOmniPinion;
+    //LED
+//    LED endGameLights;
+    //sensors
+    ColorSensor beaconColorSense;
+    //    ColorSensor floorColorSense;
+//    OpticalDistanceSensor leftWheelAlignment;
+//    OpticalDistanceSensor rightWheelAlignment;
+    GyroSensor gyroSense;
+    int preTurnHeading;
+    int gyroError;
+    int desiredHeading;
+    UltrasonicSensor ultraSense;
+    TouchSensor beaconPinionStop;
+    //    TouchSensor leftWheelStop;
+//    TouchSensor rightWheelStop;
+    TouchSensor beaconPinionIn;
+    TouchSensor beaconPinionOut;
+    //Statemachine options
     MoveState currentMove;
     MoveState nextMove;
-    long moveDelayTime;
-    boolean lookingForRedFlag;
-    boolean sawBlueFlag;
-    long delayUntil;
+    MoveState mountainTurn;
+    MoveState telemetryMove;
+    double ifRedOnBeacon;
+    double ifBlueOnBeacon;
+    boolean lookingForFlag;
+    boolean dumpedClimbers;
+    boolean pushedButton;
     double speed;
-    long delay;
+    boolean movingForward;
+    double fastSpeed = 0.75;
+    double slowSpeed = 0.25;
+    double turnSpeed = 0.6;
+    // Switches
+    DigitalChannel nearMtnSwitch;
+    DigitalChannel redBlueBeaconSwitch;
+    DigitalChannel delayPotSwitch;
+    //    DigitalChannel tileSwitch;
+    AnalogInput delayPotentiometer;
+    int nearMtn;
+    int redBlue;
+    double mountainDist;
+    int delay = 101;
+    long delayTime;
+    boolean redAlliance = false;
+    boolean lookingForRedFlag;
+    boolean lookingForBlueFlag;
+    boolean sawBlueFlag;
+    boolean sawRedFlag;
+    int dumperCounter = 0;
+    double dumperPosition = 0.9;
+    boolean nearMountainFlag = false;
+    //    int tile;
+    ElapsedTime matchTime;
+
+    //delay settings
+    long delayUntil;
+    long moveDelayTime;
     Date now;
-    GyroSensor gyroSense;
-    UltrasonicSensor ultraSense;
+    double countsPerDonut = 6083.0;    // Encoder counts per 360 degrees
+    double countsPerMeter = 5076.0;    // Found this experimentally: Measured one meter, drove distance, read counts
+    int dumperCounterThresh = 8;       // Doesn't let the dumper counter get above a certain number
+
 
     public SpareParts5256Autonomous() {
     }
@@ -61,12 +122,12 @@ public class SpareParts5256Autonomous extends OpMode {
         int rightTarget;
         int leftTarget;
 
-        leftTarget = motorLeft.getCurrentPosition() + centimetersToCounts(distanceCM);
-        motorLeft.setTargetPosition(leftTarget);
-        rightTarget = motorRight.getCurrentPosition() + centimetersToCounts(distanceCM);
-        motorRight.setTargetPosition(rightTarget);
-        motorLeft.setPower(speed);
-        motorRight.setPower(speed);
+        leftTarget = leftDrive.getCurrentPosition() + centimetersToCounts(distanceCM);
+        leftDrive.setTargetPosition(leftTarget);
+        rightTarget = rightDrive.getCurrentPosition() + centimetersToCounts(distanceCM);
+        rightDrive.setTargetPosition(rightTarget);
+        leftDrive.setPower(speed);
+        rightDrive.setPower(speed);
     }
 
     /**
@@ -79,34 +140,111 @@ public class SpareParts5256Autonomous extends OpMode {
         int rightTarget;
         int leftTarget;
 
-        leftTarget = motorLeft.getCurrentPosition() - degreesToCounts(degrees);
-        motorLeft.setTargetPosition(leftTarget);
-        rightTarget = motorRight.getCurrentPosition() + degreesToCounts(degrees);
-        motorRight.setTargetPosition(rightTarget);
-        motorLeft.setPower(speed);
-        motorRight.setPower(speed);
+        leftTarget = leftDrive.getCurrentPosition() - degreesToCounts(degrees);
+        leftDrive.setTargetPosition(leftTarget);
+        rightTarget = rightDrive.getCurrentPosition() + degreesToCounts(degrees);
+        rightDrive.setTargetPosition(rightTarget);
+        leftDrive.setPower(speed);
+        rightDrive.setPower(speed);
     }
 
     @Override
     public void init() {
-        driveTrainController = hardwareMap.dcMotorController.get("dtCtlr");
-        motorRight = hardwareMap.dcMotor.get("motorR");
-        motorLeft = hardwareMap.dcMotor.get("motorL");
-        servoCtlr = hardwareMap.servoController.get("servoCtlr");
-        servoCtlr.setServoPosition(1, 0.5);
-        ColorSense = hardwareMap.colorSensor.get("color");
-        ColorSense.enableLed(true);
-        motorRight.setDirection(DcMotor.Direction.REVERSE);
-        motorRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        motorLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        currentMove = MoveState.FIRSTMOVE;
-        lookingForRedFlag = false;
-        sawBlueFlag = false;
-        speed = 1.0;
-        delay = 200;
-        ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
-        gyroSense = hardwareMap.gyroSensor.get("gyro");
+        //dc Motors
+        leftDrive = hardwareMap.dcMotor.get("motorL");
+        rightDrive = hardwareMap.dcMotor.get("motorR");
+//        chinUp = hardwareMap.dcMotor.get("chinUp");
+        //servos
+        servoBeaconPinion = hardwareMap.servo.get("beaconPinion");
+        servoBeaconPusher = hardwareMap.servo.get("beaconPusher");
+        servoClimberDumper = hardwareMap.servo.get("climber_dumper");
+        servoUltraSense = hardwareMap.servo.get("servoUltra");
+//        leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
+//        rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
+        //LED
+//        endGameLights = hardwareMap.led.get("endGameLights");
+//        endGameLights.enable(false);
+        //sensors
+        beaconColorSense = hardwareMap.colorSensor.get("bColorSense");
+        beaconColorSense.enableLed(false);
+//        floorColorSense = hardwareMap.colorSensor.get("fColorSense");
+//        floorColorSense.enableLed(true);
+        gyroSense = hardwareMap.gyroSensor.get("gyroSense");
         gyroSense.calibrate();
+        ultraSense = hardwareMap.ultrasonicSensor.get("fUltraSense");
+//        beaconPinionStop = hardwareMap.touchSensor.get("bPStop");
+//        leftWheelStop = hardwareMap.touchSensor.get("lWStop");
+//        rightWheelStop = hardwareMap.touchSensor.get("rWStop");
+        beaconPinionIn = hardwareMap.touchSensor.get("bPIn");
+        beaconPinionOut = hardwareMap.touchSensor.get("bPOut");
+        //motor configurations
+        leftDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+        rightDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+        //statemachine settings
+        currentMove = MoveState.FIRSTMOVE;
+        nextMove = MoveState.TURNDIAG;
+        telemetryMove = MoveState.FIRSTMOVE;
+        lookingForFlag = false;
+        // switches
+        nearMtnSwitch = hardwareMap.digitalChannel.get("nMtnSw");
+        redBlueBeaconSwitch = hardwareMap.digitalChannel.get("rBSw");
+//        delayPotSwitch = hardwareMap.digitalChannel.get("dSw");
+        delayPotentiometer = hardwareMap.analogInput.get("dP");
+        delayTime = (long) (delayPotentiometer.getValue() * (10000 / 1024));
+        matchTime = new ElapsedTime();
+        //servo positions
+        servoBeaconPinion.setPosition(0.0);
+        servoClimberDumper.setPosition(1.0);
+        servoBeaconPusher.setPosition(0.3);
+        servoUltraSense.setPosition(0.75);
+        moveDelayTime = delayTime;
+        dumpedClimbers = false;
+        pushedButton = false;
+        if (redBlueBeaconSwitch.getState()) { //red alliance
+            redBlue = 1;
+            servoUltraSense.setPosition(0.25);
+        } else { // blue alliance
+            redBlue = -1;
+            servoUltraSense.setPosition(0.75);
+        }
+        if (redBlueBeaconSwitch.getState()) { //This is for when we're going to blue
+            redAlliance = false;
+            lookingForRedFlag = false;
+            lookingForBlueFlag = true;
+            servoUltraSense.setPosition(0.25);
+        } else { //This is for red
+            redAlliance = true;
+            lookingForRedFlag = true;
+            lookingForBlueFlag = false;
+            servoUltraSense.setPosition(0.75);
+        }
+
+        if (nearMtnSwitch.getState()) {
+            mountainTurn = MoveState.MOVEDIAGNEAR;
+            mountainDist = 100.0;
+        } else {
+            mountainTurn = MoveState.MOVEDIAGFAR;
+            mountainDist = 200.0;
+        }
+
+
+        // align color sensor
+//        while (beaconPinionIn.isPressed() == false) {
+//            servoBeaconPinion.setPosition(1.0);
+//        }
+//        servoBeaconPinion.setPosition(0.5);
+//
+        //  while (!beaconPinionStop.isPressed()) {
+        //      servoBeaconPinion.setPosition(0.5);
+        //  }
+        // // align omniwheels
+        // while (!leftWheelStop.isPressed()) {
+        //     moveLeftOmnipinion(0.5);
+        // }
+        // while (!rightWheelStop.isPressed()) {
+        //     moveRightOmnipinion(0.5);
+        // }
         while (gyroSense.isCalibrating()) {
         }
     }
@@ -119,23 +257,19 @@ public class SpareParts5256Autonomous extends OpMode {
             return;
         }
         switch (currentMove) {
-
             case STARTMOVE:
-                if (motorLeft.isBusy() && motorRight.isBusy()) {
+                if (leftDrive.isBusy() && rightDrive.isBusy()) {
                     currentMove = MoveState.MOVING;
                 }
                 break;
 
             case MOVING:
-                if (ColorSense.blue() >= 1) {
-                    sawBlueFlag = true;
-                }
-                if (lookingForRedFlag && (ColorSense.red() >= 1))  {
-                    motorRight.setPower(0.0);
-                    motorLeft.setPower(0.0);
+                if (lookingForFlag && ((beaconColorSense.red() >= 1) || (beaconColorSense.blue() >= 1))) {
+                    leftDrive.setPower(0.0);
+                    rightDrive.setPower(0.0);
                     currentMove = MoveState.MOVEDELAY;
                 }
-                if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+                if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
                     currentMove = MoveState.MOVEDELAY;
                 }
                 break;
@@ -144,6 +278,8 @@ public class SpareParts5256Autonomous extends OpMode {
                 now = new Date();
                 delayUntil = now.getTime() + moveDelayTime;
                 currentMove = MoveState.DELAY;
+                leftDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+                rightDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
                 break;
 
             case DELAY:
@@ -154,78 +290,76 @@ public class SpareParts5256Autonomous extends OpMode {
                 break;
 
             case FIRSTMOVE:
-                moveStraight(73.0, speed);
+                moveStraight(30.48, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNDIAG;
+                telemetryMove = MoveState.FIRSTMOVE;
                 moveDelayTime = delay;
                 break;
 
             case TURNDIAG:
-                moveTurn(45.0, 0.5);
+                moveTurn(-45.0 * redBlue, turnSpeed);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.MOVEDIAG;
-                moveDelayTime = 100;
-                break;
-
-            case MOVEDIAG:
-                moveStraight(140.0, speed);
-                currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.TURNTOWARDSWALL;
+                nextMove = mountainTurn;
+                telemetryMove = MoveState.TURNDIAG;
                 moveDelayTime = delay;
                 break;
 
-            case TURNTOWARDSWALL:
-                moveTurn(45.0, 0.5);
+            case MOVEDIAGNEAR:
+                moveStraight(57.11, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.FINDWALL;
-                moveDelayTime = 1000;
-                break;
-
-            case FINDWALL:
-                distanceToWall = ultraSense.getUltrasonicLevel();
-                if ((distanceToWall > 80.0) && (distanceToWall <= 120.0)) {
-                    moveStraight((distanceToWall - 15.0), speed);
-                    currentMove = MoveState.STARTMOVE;
-                    nextMove = MoveState.BACKWARDFROMBEACON;
-                    moveDelayTime = 1000;
-                }
-                break;
-
-            case BACKWARDFROMBEACON:
-                moveStraight(-157.0, speed);
-                lookingForRedFlag = false;
-                currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.TURNTORAMP;
+                nextMove = MoveState.TURNTONEARMOUNTAIN;
+                telemetryMove = MoveState.MOVEDIAGNEAR;
                 moveDelayTime = delay;
                 break;
 
-            case TURNTORAMP:
-                moveTurn(45.0, 0.5);
+            case MOVEDIAGFAR:
+                moveStraight(14, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.MOVETORAMP;
-                moveDelayTime = 100;
+                nextMove = MoveState.TURNTOFARMOUNTAIN;
+                telemetryMove = MoveState.MOVEDIAGFAR;
+                moveDelayTime = delay;
                 break;
 
-            case MOVETORAMP:
-                moveStraight(135.0, speed);
+            case TURNTONEARMOUNTAIN:
+                moveTurn(-90.0 * redBlue, turnSpeed);
                 currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DRIVETOMOUNTAIN;
+                telemetryMove = MoveState.TURNTONEARMOUNTAIN;
+                moveDelayTime = delay;
+                break;
+
+            case TURNTOFARMOUNTAIN:
+                moveTurn(-90.0 * redBlue, turnSpeed);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DRIVETOMOUNTAIN;
+                telemetryMove = MoveState.TURNTOFARMOUNTAIN;
+                moveDelayTime = delay;
+                break;
+
+            case DRIVETOMOUNTAIN:
+                moveStraight(81.28, fastSpeed);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.CLIMBMOUNTAIN;
+                telemetryMove = MoveState.DRIVETOMOUNTAIN;
+                moveDelayTime = delay;
+                break;
+
+            case CLIMBMOUNTAIN:
                 nextMove = MoveState.DONE;
-                moveDelayTime = delay;
+                telemetryMove = MoveState.CLIMBMOUNTAIN;
                 break;
 
             case DONE:
-                motorLeft.setPower(0.0);
-                motorRight.setPower(0.0);
+                leftDrive.setPower(0.0);
+                rightDrive.setPower(0.0);
+                telemetryMove = MoveState.DONE;
                 break;
-        }
-
-        if (gamepad1.start) {
-            currentMove = MoveState.FIRSTMOVE;
         }
 
         telemetry.addData("Text", "*** Robot Data***");
         telemetry.addData("Text", "Look for Red");
-        telemetry.addData("Color", (float) ColorSense.red());
+        telemetry.addData("Color", (float) beaconColorSense.red());
         telemetry.addData("gyro", (float) gyroSense.getHeading());
         telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
     }
