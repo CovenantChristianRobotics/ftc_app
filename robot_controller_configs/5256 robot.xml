@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <Robot>
-    <ServoController name="OmniPinionCtlr" serialNumber="AL00VUK4">
+    <ServoController name="OmniPinionCtlr" serialNumber="AL00VTK3">
         <Servo name="servoUltra" port="1" />
         <Servo name="beaconPinion" port="2" />
         <Servo name="beaconPusher" port="3" />
@@ -12,7 +12,7 @@
         <TouchSensor name="bPOut" port="0" />
         <UltrasonicSensor name="fUltraSense" port="5" />
     </LegacyModuleController>
-    <ServoController name="Servo Controller 2" serialNumber="AL00VTK3">
+    <ServoController name="Servo Controller 2" serialNumber="AL00VUK4">
     </ServoController>
     <DeviceInterfaceModule name="Device Interface Module" serialNumber="AI02RHQD">
         <ColorSensor name="bColorSense" port="0" />

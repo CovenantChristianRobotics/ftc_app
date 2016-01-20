@@ -54,8 +54,8 @@ public class CCHS5256Autonomous extends OpMode {
     Servo servoBeaconPusher;
     Servo servoClimberDumper;
     Servo servoUltraSense;
-    //    Servo leftOmniPinion;
-//    Servo rightOmniPinion;
+    Servo leftOmniPinion;
+    Servo rightOmniPinion;
     //LED
 //    LED endGameLights;
     //sensors
@@ -350,8 +350,10 @@ public class CCHS5256Autonomous extends OpMode {
         servoBeaconPusher = hardwareMap.servo.get("beaconPusher");
         servoClimberDumper = hardwareMap.servo.get("climber_dumper");
         servoUltraSense = hardwareMap.servo.get("servoUltra");
-//        leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
-//        rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
+        leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
+        rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
+        leftOmniPinion.setPosition(0.5);
+        rightOmniPinion.setPosition(0.5);
         //LED
 //        endGameLights = hardwareMap.led.get("endGameLights");
 //        endGameLights.enable(false);
