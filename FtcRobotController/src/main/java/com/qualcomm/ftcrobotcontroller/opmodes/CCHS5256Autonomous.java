@@ -29,6 +29,11 @@ public class CCHS5256Autonomous extends OpMode {
     Servo rightOmniPinion;
     // Sensors
     GyroSensor gyroSense;
+    // State Machine Settings
+    MoveState currentMove;
+    MoveState nextMove;
+    MoveState telemetryMove;
+    // Elapsed Time
 
     @Override
     public void init() {
@@ -41,6 +46,8 @@ public class CCHS5256Autonomous extends OpMode {
         leftDrive.setDirection(DcMotor.Direction.REVERSE);
         leftDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         rightDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+        endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
+        endGameLights.setPower(1.0);
         // Servos
         beaconPinion = hardwareMap.servo.get("beaconPinion");
         beaconPusher = hardwareMap.servo.get("beaconPusher");
@@ -58,10 +65,34 @@ public class CCHS5256Autonomous extends OpMode {
         }
 
 
+
     }
 
     @Override
     public void loop() {
+        if (gyroSense.isCalibrating()) {
+            return;
+        }
+
+        endGameLights.setPower(1.0);
+
+        switch (currentMove) {
+            case STARTMOVE:
+                break;
+
+            case MOVING:
+                break;
+
+            case DELAYSETTINGS:
+                break;
+
+            case DELAY:
+                break;
+        }
+
+        telemetry.addData("left encoder", leftDrive.getCurrentPosition());
+        telemetry.addData("right encoder", rightDrive.getCurrentPosition());
+        telemetry.addData("current move", telemetryMove.toString());
 
     }
 
