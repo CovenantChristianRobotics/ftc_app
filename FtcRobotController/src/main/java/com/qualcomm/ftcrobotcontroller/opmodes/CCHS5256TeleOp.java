@@ -47,11 +47,13 @@ public class CCHS5256TeleOp extends OpMode {
     Servo servoBeaconPinion;
     Servo servoBeaconPusher;
     Servo servoUltraSense;
-    Servo sweeper;
+//    Servo sweeper;
 //    boolean sweepOn;
-//    Servo servoClimberDumper;
+    Servo servoClimberDumper;
      Servo leftOmniPinion;
      Servo rightOmniPinion;
+//    Servo leftPlow;
+//    Servo rightPlow;
     //sensors
 //    ColorSensor beaconColorSense;
 //    ColorSensor floorColorSense;
@@ -153,11 +155,17 @@ public class CCHS5256TeleOp extends OpMode {
 //        alignmentController = hardwareMap.servoController.get("alignCtlr");
         // Servos
         servoBeaconPinion = hardwareMap.servo.get("beaconPinion");
+        servoBeaconPinion.setPosition(0.5);
         servoBeaconPusher = hardwareMap.servo.get("beaconPusher");
-//        servoClimberDumper = hardwareMap.servo.get("climberDumper");
+        servoClimberDumper = hardwareMap.servo.get("climber_dumper");
         servoUltraSense = hardwareMap.servo.get("servoUltra");
         leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
         rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
+        rightOmniPinion.setDirection(Servo.Direction.REVERSE);
+        leftOmniPinion.setPosition(0.5);
+        rightOmniPinion.setPosition(0.5);
+//        leftPlow = hardwareMap.servo.get("lP");
+//        rightPlow = hardwareMap.servo.get("rP");
         // Sensors
 //        beaconColorSense = hardwareMap.colorSensor.get("bColorSense");
 //        beaconColorSense.enableLed(false);
@@ -179,7 +187,7 @@ public class CCHS5256TeleOp extends OpMode {
         // state machine settings
         currentControl = ledControl.PREMATCH;
         // servo positions
-//        beaconPusherPosition = 0.5;
+        servoBeaconPusher.setPosition(0.5);
         endGameTime = new ElapsedTime();
         endGameLights.setPower(0.0);
 //        goStraightWithGyro = true;
@@ -193,13 +201,15 @@ public class CCHS5256TeleOp extends OpMode {
 
         double left = gamepad1.left_stick_y;
         double right = gamepad1.right_stick_y;
-        float beaconPinion = gamepad2.right_stick_y;
+        float beaconPinion = gamepad2.left_stick_y;
+        float omniWheels = gamepad2.left_stick_y;
         float rightStickPos = -gamepad1.right_stick_y;
         float rightStickNeg = -gamepad1.right_stick_y;
 
         left = Range.clip(left, -1, 1);
         right = Range.clip(right, -1, 1);
         beaconPinion = Range.clip(beaconPinion, -1, 1);
+        omniWheels = Range.clip(omniWheels, -1, 1);
 
         if (rightStickPos < 0 ) {
             rightStickPos = 0;
@@ -255,27 +265,54 @@ public class CCHS5256TeleOp extends OpMode {
              // right = (float) +0.05;   // for calibrating autonomous distances only
         }
         
-        if (endGameTime.time() >= 90 && gamepad1.y) {
+        if (gamepad1.y) {
             chinUp.setPower(-gamepad1.left_stick_x);
         } else {
             chinUp.setPower(0.0);
         }
 
-        if (gamepad2.dpad_up) {
-            leftOmniPinion.setPosition(0.75);
-            rightOmniPinion.setPosition(0.25);
-        } else if (gamepad2.dpad_down) {
-            leftOmniPinion.setPosition(0.25);
-            rightOmniPinion.setPosition(0.75);
-        } else {
-            leftOmniPinion.setPosition(0.5);
-            rightOmniPinion.setPosition(0.5);
+        if (gamepad1.x) {
+            leftDrive.setPower(0.05);
+            rightDrive.setPower(0.05);
         }
+
+        if (gamepad2.x) {
+            rightOmniPinion.setPosition(0.5);
+            leftOmniPinion.setPosition(0.5);
+        }
+
+
+//        if (gamepad2.dpad_up) {
+//            leftOmniPinion.setPosition(0.75);
+//            rightOmniPinion.setPosition(0.25);
+//        } else if (gamepad2.dpad_down) {
+//            leftOmniPinion.setPosition(0.25);
+//            rightOmniPinion.setPosition(0.75);
+//        } else {
+//            leftOmniPinion.setPosition(0.5);
+//            rightOmniPinion.setPosition(0.5);
+//        }
 
         leftDrive.setPower(left);
         rightDrive.setPower(right);
         servoBeaconPinion.setPosition(((beaconPinion / 2) + 0.5));
+
+        if (gamepad2.dpad_left) {
+            leftOmniPinion.setPosition((gamepad2.right_stick_y / 2) + 0.5);
+        } else if (gamepad2.dpad_right) {
+            rightOmniPinion.setPosition((gamepad2.right_stick_y / 2) + 0.5);
+        } else {
+            rightOmniPinion.setPosition((gamepad2.right_stick_y / 2) + 0.5);
+            leftOmniPinion.setPosition(((gamepad2.right_stick_y / 2) + 0.5));
+        }
 //
+//        if (gamepad2.y) {
+//            leftPlow.setPosition(0.5);
+//            rightPlow.setPosition(0.5);
+//        } else if (gamepad2.a) {
+//            leftPlow.setPosition(0.67);
+//            rightPlow.setPosition(0.33);
+//        }
 //        if (gamepad1.a) {
 //           if (bUltraSense.getUltrasonicLevel() <= lowDist) {
 //              moveStraightWithGyro(0.5);
@@ -346,14 +383,14 @@ public class CCHS5256TeleOp extends OpMode {
 
             case BlINKON:
                 endGameLights.setPower(1.0);
-                moveDelayTime = 500;
+                moveDelayTime = 325;
                 currentControl = ledControl.DELAYSETTINGS;
                 nextControl = ledControl.BLINKOFF;
                 break;
 
             case BLINKOFF:
                 endGameLights.setPower(0.0);
-                moveDelayTime = 500;
+                moveDelayTime = 200;
                 currentControl = ledControl.DELAYSETTINGS;
                 nextControl = ledControl.BlINKON;
                 break;
@@ -361,6 +398,8 @@ public class CCHS5256TeleOp extends OpMode {
 
         telemetry.addData("LED", currentControl.toString());
         telemetry.addData("Elapsed Time", endGameTime.time());
+//        telemetry.addData("l plow", leftPlow.getPosition());
+//        telemetry.addData("r plow", rightPlow.getPosition());
         telemetry.addData("enc right", rightDrive.getCurrentPosition());
         telemetry.addData("enc left", leftDrive.getCurrentPosition());
     }
