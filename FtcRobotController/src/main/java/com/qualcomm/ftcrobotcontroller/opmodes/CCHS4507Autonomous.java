@@ -342,10 +342,8 @@ public class CCHS4507Autonomous extends OpMode {
 //                    if (now.getTime() >= delayUntil) {
                     if (System.currentTimeMillis() >= delayUntil) {
                         currentMove = nextMove;
-//                    }
-                    Log.i("DELAY: time", Long.toString(System.currentTimeMillis()));
-                    Log.i("DELAY: delayUntil", Long.toString(delayUntil));
-                }
+                    }
+//                }
                 break;
 
             case FIRSTMOVE:
@@ -553,7 +551,7 @@ public class CCHS4507Autonomous extends OpMode {
         telemetry.addData("liftCheck", liftCheck.isPressed());
         telemetry.addData("delayPot", delayPot.getValue());
 
-        Log.i("Current Move", telemetryMove.toString());
+        Log.i("Current Move", currentMove.toString());
         Log.i("desiredHeading", Integer.toString(desiredHeading));
         Log.i("gyro", Integer.toString(gyroSense.getHeading()));
         Log.i("time", Long.toString(System.currentTimeMillis()));
