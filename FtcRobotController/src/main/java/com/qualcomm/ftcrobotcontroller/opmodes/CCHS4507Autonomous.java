@@ -1,4 +1,6 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
+import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -6,12 +8,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.GyroSensor;
-import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-import java.util.Date;
+//import java.util.Date;
 /**
  * Created by cchsrobochargers on 12/17/15.
  */
@@ -50,8 +51,8 @@ public class CCHS4507Autonomous extends OpMode {
     double fastSpeed;
     double slowSpeed;
     double turnSpeed;
-    long delay;
-    Date now;
+    long delayMillisec;
+    long now;
     GyroSensor gyroSense;
     int gyroError;
     int desiredHeading;
@@ -65,7 +66,7 @@ public class CCHS4507Autonomous extends OpMode {
 //    double wheelDiameter = 6.75 / 2.0;  // wheel diameter in cm 2 to 1 gear ratio
 //    double encoderCounts = 1120.0;      // encoder counts per revolution of the drive train motors
 //    double wheelBase = 41.0;            // wheelbase of the primary drive wheels
-    double countsPerMeter = 10439;    // Found this experimentally: Measured one meter, drove distance, read counts
+    double countsPerMeter = 5429.0; // 10439;    // Found this experimentally: Measured one meter, drove distance, read counts
     int dumperCounterThresh = 8;       // Doesn't let the dumper counter get above a certain number
     double countsPerDonut = 14161;    // Encoder counts per 360 degrees
 
@@ -228,10 +229,10 @@ public class CCHS4507Autonomous extends OpMode {
         desiredHeading = 0;
         speed = 0;
         movingForward = true;
-        fastSpeed = 0.95;
-        slowSpeed = 0.75;
-        turnSpeed = 0.75;
-        delay = 1000;
+        fastSpeed = 0.50;
+        slowSpeed = 0.35;
+        turnSpeed = 0.35;
+        delayMillisec = 1000;
         //zipTieSweeper.setPosition(.75);
         trackLifter.setPower(0.1);
         trackLifter.setTargetPosition(30);
@@ -320,20 +321,30 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case MOVEDELAY:
-                now = new Date();
-                delayUntil = now.getTime() + moveDelayTime;
+//                now = new Date();
+//                delayUntil = now.getTime() + moveDelayTime;
+                now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
                 currentMove = MoveState.DELAY;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: moveDelayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+
                 break;
 
             case DELAY:
-                if (motorLeft.isBusy() || motorRight.isBusy()) {
-                    // If we aren't quite done moving, restart the delay
-                    currentMove = MoveState.MOVEDELAY;
-                } else {
-                    now = new Date();
-                    if (now.getTime() >= delayUntil) {
+//                if (motorLeft.isBusy() || motorRight.isBusy()) {
+//                    // If we aren't quite done moving, restart the delayMillisec
+//                    currentMove = MoveState.MOVEDELAY;
+//                } else {
+//                    now = new Date();
+//                    if (now.getTime() >= delayUntil) {
+                    if (System.currentTimeMillis() >= delayUntil) {
                         currentMove = nextMove;
-                    }
+//                    }
+                    Log.i("DELAY: time", Long.toString(System.currentTimeMillis()));
+                    Log.i("DELAY: delayUntil", Long.toString(delayUntil));
                 }
                 break;
 
@@ -342,7 +353,7 @@ public class CCHS4507Autonomous extends OpMode {
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNDIAG;
                 telemetryMove = MoveState.FIRSTMOVE;
-                moveDelayTime = delay;
+                moveDelayTime = delayMillisec;
                 break;
 
             case TURNDIAG:
@@ -354,7 +365,7 @@ public class CCHS4507Autonomous extends OpMode {
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.MOVEDIAG;
                 telemetryMove = MoveState.TURNDIAG;
-                moveDelayTime = delay;
+                moveDelayTime = delayMillisec;
                 break;
 
             case MOVEDIAG:
@@ -362,7 +373,7 @@ public class CCHS4507Autonomous extends OpMode {
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDWALL;
                 telemetryMove = MoveState.MOVEDIAG;
-                moveDelayTime = delay;
+                moveDelayTime = delayMillisec;
                 break;
 
             case FINDWALL:
@@ -376,7 +387,7 @@ public class CCHS4507Autonomous extends OpMode {
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.TURNALONGWALL;
                     telemetryMove = MoveState.FINDWALL;
-                    moveDelayTime = delay;
+                    moveDelayTime = delayMillisec;
                 }
                 break;
 
@@ -389,7 +400,7 @@ public class CCHS4507Autonomous extends OpMode {
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.FINDBEACON;
                 telemetryMove = MoveState.TURNALONGWALL;
-                moveDelayTime = delay;
+                moveDelayTime = delayMillisec;
                 break;
 
             case FINDBEACON:
@@ -401,7 +412,7 @@ public class CCHS4507Autonomous extends OpMode {
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.CENTERBUCKET;
                 telemetryMove = MoveState.FINDBEACON;
-                moveDelayTime = delay;
+                moveDelayTime = delayMillisec;
                 break;
 
             case CENTERBUCKET:
@@ -416,7 +427,7 @@ public class CCHS4507Autonomous extends OpMode {
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.DUMPTRUCK;
                     telemetryMove = MoveState.CENTERBUCKET;
-                    moveDelayTime = delay;
+                    moveDelayTime = delayMillisec;
                 } else {
                     currentMove = MoveState.DUMPTRUCK;
                 }
@@ -449,7 +460,7 @@ public class CCHS4507Autonomous extends OpMode {
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.MOVETORAMP;
                 telemetryMove = MoveState.ROTATEFROMBEACON;
-                moveDelayTime = delay;
+                moveDelayTime = delayMillisec;
                 break;
 
             case MOVETORAMP:
@@ -465,7 +476,7 @@ public class CCHS4507Autonomous extends OpMode {
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNTORAMP;
                 telemetryMove = MoveState.MOVETORAMP;
-                moveDelayTime = delay;
+                moveDelayTime = delayMillisec;
                 break;
 
             case TURNTORAMP:
@@ -485,7 +496,7 @@ public class CCHS4507Autonomous extends OpMode {
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.STOPATRAMP;
                 telemetryMove = MoveState.TURNTORAMP;
-                moveDelayTime = delay;
+                moveDelayTime = delayMillisec;
                 break;
 
             case STOPATRAMP:
@@ -534,12 +545,19 @@ public class CCHS4507Autonomous extends OpMode {
             currentMove = MoveState.FIRSTMOVE;
         }
         telemetry.addData("Current Move", telemetryMove.toString());
-        telemetry.addData("Color", (float)ColorSense.red());
         telemetry.addData("desiredHeading", (float)desiredHeading);
         telemetry.addData("gyro", (float)gyroSense.getHeading());
+        telemetry.addData("time", (float)System.currentTimeMillis());
+        telemetry.addData("delayUntil", (float)delayUntil);
         telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
         telemetry.addData("liftCheck", liftCheck.isPressed());
         telemetry.addData("delayPot", delayPot.getValue());
+
+        Log.i("Current Move", telemetryMove.toString());
+        Log.i("desiredHeading", Integer.toString(desiredHeading));
+        Log.i("gyro", Integer.toString(gyroSense.getHeading()));
+        Log.i("time", Long.toString(System.currentTimeMillis()));
+        Log.i("delayUntil", Long.toString(delayUntil));
     }
 
     @Override

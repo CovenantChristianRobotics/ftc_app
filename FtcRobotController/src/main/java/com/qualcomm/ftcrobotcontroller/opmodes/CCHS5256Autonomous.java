@@ -109,7 +109,7 @@ public class CCHS5256Autonomous extends OpMode {
     //    int tile;
     ElapsedTime matchTime;
 
-    //delay settings
+    //delayMillisec settings
     long delayUntil;
     long moveDelayTime;
     Date now;
@@ -502,7 +502,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case DELAY:
                 if (leftDrive.isBusy() || rightDrive.isBusy()) {
-                    // If we aren't quite done moving, restart the delay
+                    // If we aren't quite done moving, restart the delayMillisec
                     currentMove = MoveState.MOVEDELAY;
                 } else {
                     now = new Date();
@@ -715,7 +715,7 @@ public class CCHS5256Autonomous extends OpMode {
 //                     currentMove = MoveState.STARTMOVE;
 //                     nextMove = MoveState.DUMPTRUCK;
 //                     telemetryMove = MoveState.CENTERBUCKET;
-//                     moveDelayTime = delay;
+//                     moveDelayTime = delayMillisec;
 //                 } else {
 //                     currentMove = MoveState.DUMPTRUCK;
 //                 }
@@ -1051,7 +1051,7 @@ public class CCHS5256Autonomous extends OpMode {
         telemetry.addData("ENCLeft", (float) leftDrive.getCurrentPosition());
         telemetry.addData("ENCRight", (float) rightDrive.getCurrentPosition());
         telemetry.addData("Gyro Heading", gyroSense.getHeading());
-        telemetry.addData("delay pot", delayTime);
+        telemetry.addData("delayMillisec pot", delayTime);
         telemetry.addData("elapsed time", matchTime.time());
     }
 

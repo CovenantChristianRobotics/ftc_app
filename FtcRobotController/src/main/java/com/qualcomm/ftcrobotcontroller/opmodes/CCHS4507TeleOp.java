@@ -68,8 +68,8 @@ public class CCHS4507TeleOp extends OpMode {
         //WHATEVER WE ARE GOING TO CALL THIS THING = hardwareMap.opticalDistanceSensor.get("STUFFANDTHINGS");
         nearMountainFlag = nearMountainSwitch.getState();
         //set up motors
-        motorLeft.setDirection(DcMotor.Direction.REVERSE);
-        motorRight.setDirection(DcMotor.Direction.FORWARD);
+        motorLeft.setDirection(DcMotor.Direction.FORWARD);
+        motorRight.setDirection(DcMotor.Direction.REVERSE);
         trackLifter.setDirection(DcMotor.Direction.REVERSE);
         motorRight.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         motorLeft.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
@@ -82,8 +82,8 @@ public class CCHS4507TeleOp extends OpMode {
 
     @Override
     public void loop() {
-        motorRight.setPower(gamepad1.left_stick_y);
-        motorLeft.setPower(gamepad1.right_stick_y);
+        motorRight.setPower(-gamepad1.right_stick_y);
+        motorLeft.setPower(-gamepad1.left_stick_y);
 
         if (gamepad1.right_bumper) { // up
             if (liftCheck.isPressed()) {
