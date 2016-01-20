@@ -24,10 +24,13 @@ public class CCHS4507Autonomous extends OpMode {
     DcMotor motorRight;
     DcMotor motorLeft;
     DcMotor trackLifter;
+    DcMotor armPivot;
     //servos
-    Servo servoBeaconPusher;
+    //Servo servoBeaconPusher;
     Servo servoClimberDumper;
     Servo servoDist;
+    Servo climberTriggerLeft;
+    Servo climberTriggerRight;
     //Servo zipTieSweeper;
     ColorSensor ColorSense;
     ColorSensor colorGroundSense;
@@ -56,15 +59,15 @@ public class CCHS4507Autonomous extends OpMode {
 
     //Global State Variables
     int dumperCounter = 0;
-    double dumperPosition = 0.9;
+    double dumperPosition = 1.0;
 
     // robot constants
 //    double wheelDiameter = 6.75 / 2.0;  // wheel diameter in cm 2 to 1 gear ratio
 //    double encoderCounts = 1120.0;      // encoder counts per revolution of the drive train motors
 //    double wheelBase = 41.0;            // wheelbase of the primary drive wheels
-    double countsPerMeter = 10439.0;    // Found this experimentally: Measured one meter, drove distance, read counts
+    double countsPerMeter = 10439;    // Found this experimentally: Measured one meter, drove distance, read counts
     int dumperCounterThresh = 8;       // Doesn't let the dumper counter get above a certain number
-    double countsPerDonut = 14161.0;    // Encoder counts per 360 degrees
+    double countsPerDonut = 14161;    // Encoder counts per 360 degrees
 
     // Switches
     DigitalChannel nearMountainSwitch;
@@ -166,10 +169,13 @@ public class CCHS4507Autonomous extends OpMode {
         motorRight = hardwareMap.dcMotor.get("motorR");
         motorLeft = hardwareMap.dcMotor.get("motorL");
         trackLifter = hardwareMap.dcMotor.get("trkLftr");
+        armPivot = hardwareMap.dcMotor.get("armPivot");
         //servos
-        servoBeaconPusher = hardwareMap.servo.get("beacon_pusher");
+        //servoBeaconPusher = hardwareMap.servo.get("beacon_pusher");
         servoClimberDumper = hardwareMap.servo.get("climber_dumper");
         servoDist = hardwareMap.servo.get("servoDist");
+        climberTriggerLeft = hardwareMap.servo.get("trigLeft");
+        climberTriggerRight = hardwareMap.servo.get("trigRight");
         //zipTieSweeper = hardwareMap.servo.get("zipTieSweeper");
         ColorSense = hardwareMap.colorSensor.get("color");
         colorGroundSense = hardwareMap.colorSensor.get("colorGround");
@@ -207,11 +213,13 @@ public class CCHS4507Autonomous extends OpMode {
 
         // }
         ColorSense.enableLed(true);
+        motorLeft.setDirection(DcMotor.Direction.FORWARD);
         motorRight.setDirection(DcMotor.Direction.REVERSE);
         trackLifter.setDirection(DcMotor.Direction.REVERSE);
         motorRight.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+        armPivot.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         nextMove = MoveState.FIRSTMOVE;
         currentMove = MoveState.MOVEDELAY;
         telemetryMove = MoveState.MOVEDELAY;
@@ -223,12 +231,15 @@ public class CCHS4507Autonomous extends OpMode {
         fastSpeed = 0.95;
         slowSpeed = 0.75;
         turnSpeed = 0.75;
-        delay = 50;
+        delay = 1000;
         //zipTieSweeper.setPosition(.75);
         trackLifter.setPower(0.1);
         trackLifter.setTargetPosition(30);
-        servoClimberDumper.setPosition(0.9);
-        servoBeaconPusher.setPosition(0.0);
+        servoClimberDumper.setPosition(1.0);
+        climberTriggerLeft.setPosition(0.5);
+        climberTriggerRight.setPosition(0.5);
+        armPivot.setPower(0.0);
+        //servoBeaconPusher.setPosition(0.0);
         if (liftCheck.isPressed()) {
             trackLifterUp = trackLifter.getCurrentPosition();
             trackLifter.setTargetPosition(trackLifterUp);
@@ -295,13 +306,13 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case TURNING:
-                gyroError =  gyroSense.getHeading() - desiredHeading;
-                if(gyroError > 180) {
-                    gyroError = 360 - gyroError;
-                }
-                if (gyroError < -180) {
-                    gyroError = 360 + gyroError;
-                }
+//                gyroError =  gyroSense.getHeading() - desiredHeading;
+//                if(gyroError > 180) {
+//                    gyroError = 360 - gyroError;
+//                }
+//                if (gyroError < -180) {
+//                    gyroError = 360 + gyroError;
+//                }
 //                moveTurn(gyroError, speed);
                 if (!motorLeft.isBusy() && !motorRight.isBusy()) {
                     currentMove = MoveState.MOVEDELAY;

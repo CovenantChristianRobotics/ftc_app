@@ -141,8 +141,10 @@ public class CCHS4507TeleOp extends OpMode {
             climberTriggerRight.setPosition(0.5);
         }
 
-        if (gamepad2.x) {
-            //zipTieSweeper.setPosition(0.0);
+        if (gamepad2.a) {
+            servoClimberDumper.setPosition(.25);
+        } else {
+           servoClimberDumper.setPosition(1.0);
         }
         if (gamepad2.y) {
             //zipTieSweeper.setPosition(.75);
