@@ -19,6 +19,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * Created by Robotics on 1/19/2016.
+ * Covenant Christian High School
+ * 5256 SpareParts Autonomous
+ * FIRST ResQ
  */
 public class CCHS5256Autonomous extends OpMode {
 
@@ -78,6 +81,111 @@ public class CCHS5256Autonomous extends OpMode {
     double turnSpeed;
     // Elapsed Time
     ElapsedTime currentTime;
+    // Method Variables
+    // centimetersToCounts
+    double countsPerMeter = 5076.0;
+    // degreesToCounts
+    double countsPerDonut = 6083.0;
+    // moveStraight
+    double speed;
+    boolean movingForward;
+    // moveTurn
+    int gyroError;
+    int desiredHeading;
+
+    // Methods that are called in the loop
+
+    /**
+     *
+     * @param centimeters is the input centimeters number
+     * @return returns a counts number for a certain number of centimeters
+     */
+
+    int centimetersToCounts(double centimeters) {
+        return (int)(centimeters * (countsPerMeter / 100.0));
+
+        //double wheelDiameteliftCheckr = 10.1;    // wheel diameter in cm
+        //double encoderCounts = 1120.0;  // encoder counts per revolution of the drive train motors
+        // return (int) ((centimeters / (wheelDiameter * Math.PI)) * encoderCounts);
+        // ^ Previous code to find the amount of counts for every wheel rotation
+    }
+
+    /**
+     *
+     * @param degrees is the input degrees number
+     * @return returns a counts number for a certain number of degrees
+     */
+
+    int degreesToCounts(double degrees) {
+        return (int)(degrees * (countsPerDonut / 360.0));
+
+        //double wheelBase = 40.3225; // wheelbase of the primary drive wheels
+        //double oneDegree = ((wheelBase * Math.PI) / 360);   // calculates the distance of one degree
+        //return centimetersToCounts(oneDegree * degrees);
+        // ^ Previous code to find the degrees per count using the diameter of the wheels
+    }
+
+    /**
+     *
+     * @param distanceCM is how far forward we want to go
+     * @param robotSpeed is the speed we want the robot to go
+     */
+
+    void moveStraight(double distanceCM, double robotSpeed) {
+        int rightTarget;
+        int leftTarget;
+
+        speed = robotSpeed;
+        if (distanceCM > 0.0) {
+            movingForward = true;
+        } else {
+            movingForward = false;
+        }
+        leftTarget = leftDrive.getCurrentPosition() + centimetersToCounts(distanceCM);
+        leftDrive.setTargetPosition(leftTarget);
+        rightTarget = rightDrive.getCurrentPosition() + centimetersToCounts(distanceCM);
+        rightDrive.setTargetPosition(rightTarget);
+        leftDrive.setPower(robotSpeed);
+        rightDrive.setPower(robotSpeed);
+    }
+
+
+    /**
+     * if degree magnitude is negative, robot turns clockwise
+     *
+     * @param degrees is number of degrees we want to turn
+     *                negative is clockwise
+     *                positive is counterclockwise
+     * @param robotSpeed is the speed we want the wheels
+     */
+    void moveTurn(double degrees, double robotSpeed) {
+        int rightTarget;
+        int leftTarget;
+
+        // Figure out how far off we are at the end of the previous move so we can correct
+        gyroError =  desiredHeading - gyroSense.getHeading();
+        if(gyroError > 180) {
+            gyroError = 360 - gyroError;
+        }
+        if (gyroError < -180) {
+            gyroError = 360 + gyroError;
+        }
+
+        desiredHeading = desiredHeading + (int)degrees;
+        if (desiredHeading >= 360) {
+            desiredHeading = desiredHeading - 360;
+        }
+        if (desiredHeading < 0) {
+            desiredHeading = desiredHeading + 360;
+        }
+        speed = robotSpeed;
+        leftTarget = leftDrive.getCurrentPosition() - degreesToCounts(degrees + gyroError);
+        leftDrive.setTargetPosition(leftTarget);
+        rightTarget = rightDrive.getCurrentPosition() + degreesToCounts(degrees + gyroError);
+        rightDrive.setTargetPosition(rightTarget);
+        leftDrive.setPower(robotSpeed);
+        rightDrive.setPower(robotSpeed);
+    }
 
     @Override
     public void init() {
