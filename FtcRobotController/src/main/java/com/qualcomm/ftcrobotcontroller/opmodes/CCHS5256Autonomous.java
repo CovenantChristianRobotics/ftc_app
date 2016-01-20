@@ -1,4 +1,10 @@
+// CCHS 5256 Autonomous Software
+// Run in Autonomous Mode of FTC CHallenge 2015-2016
+// Autonomous for FIRST ResQ challenge
+
 package com.qualcomm.ftcrobotcontroller.opmodes;
+
+import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -18,7 +24,10 @@ public class CCHS5256Autonomous extends OpMode {
 
     enum MoveState {
         STARTMOVE, MOVINGSTRAIGHT, STARTTURN, MOVINGTURN, DELAYSETTINGS, DELAY,
-        INITIALIZEROBOT
+        INITIALIZEROBOT, CHOOSEMOVE, FIRSTMOVE, TURNDIAG, MOVEDIAG, TURNONCOLOREDLINE, FOLLOWLINE,
+        TURNTOBEACON, DRIVETOBEACON, READBEACON, PUSHBUTTON, UNPUSHBUTTON, BACKUP,
+        DUMPCLIMBERS,BACKUPFARTHER, TURNALONGLINE, DRIVEALONGLINE, TURNTOMOUNTAIN,
+        DRIVETOMOUNTAIN, GOUPMOUNTAIN, PREPTELEOP, DONE
     }
 
     // DC Motors
@@ -41,17 +50,22 @@ public class CCHS5256Autonomous extends OpMode {
     DigitalChannel nearMtnSwitch;
     DigitalChannel redBlueBeaconSwitch;
     DigitalChannel delayPotSwitch;
+    DigitalChannel thirdTileSwitch;
     AnalogInput delayPotentiometer;
     double diagMtnDist;
     double turnMtnDist;
     double toMtnDist;
     double redBlue;
-    double delaySw;
+    double firstMoveDist;
+    double turnDiagDegrees;
+    double moveDiagDist;
     double delay;
     boolean nearMountain;
     boolean farMountain;
     boolean redAlliance;
     boolean blueAlliance;
+    boolean thirdTile;
+    boolean fourthTile;
     boolean delayRobot;
     // State Machine Settings
     MoveState currentMove;
@@ -100,6 +114,7 @@ public class CCHS5256Autonomous extends OpMode {
         nearMtnSwitch = hardwareMap.digitalChannel.get("nMtnSw");
         redBlueBeaconSwitch = hardwareMap.digitalChannel.get("rBSw");
         delayPotSwitch = hardwareMap.digitalChannel.get("dPotSw");
+        thirdTileSwitch = hardwareMap.digitalChannel.get("tileSw");
         delayPotentiometer = hardwareMap.analogInput.get("delPot");
         // Set Switch Flags
         if (redBlueBeaconSwitch.getState()) {   // WE ARE RED
@@ -124,8 +139,8 @@ public class CCHS5256Autonomous extends OpMode {
             diagMtnDist = 50.0;
             turnMtnDist = 90.0;
             toMtnDist = 200.0;
-            nearMountain = true;
-            farMountain = false;
+            nearMountain = false;
+            farMountain = true;
         }
 
         if (delayPotSwitch.getState()) {        // WE DELAY
@@ -136,6 +151,20 @@ public class CCHS5256Autonomous extends OpMode {
             delayRobot = false;
         }
 
+        if (thirdTileSwitch.getState()) {       // WE ARE ON THE THIRD TILE FROM THE MOUNTAIN CORNER
+            firstMoveDist = 30.38;
+            turnDiagDegrees = 45.0;
+            moveDiagDist = 0.0;
+            thirdTile = true;
+            fourthTile = false;
+        } else {                                // WE ARE ON THE FOURTH TILE FROM THE MOUNTAIN CORNER
+            firstMoveDist = 0.0;
+            turnDiagDegrees = 0.0;
+            moveDiagDist = 30.38;
+            thirdTile = false;
+            fourthTile = true;
+        }
+
         // State Machine Settings
         fastSpeed = 0.8;
         mediumSpeed = 0.5;
@@ -143,6 +172,8 @@ public class CCHS5256Autonomous extends OpMode {
         turnSpeed = 0.6;
         // Elapsed Time
         currentTime = new ElapsedTime();
+        // log switch positions
+        Log.i("delay", Double.toString(delay));
         // Calibrate Gyro
         gyroSense.calibrate();
         while (gyroSense.isCalibrating()) {
@@ -188,6 +219,7 @@ public class CCHS5256Autonomous extends OpMode {
                 currentTime.reset();
                 moveDelayTime = (long)delay;
                 currentMove = MoveState.DELAYSETTINGS;
+
         }
 
         telemetry.addData("left encoder", leftDrive.getCurrentPosition());
