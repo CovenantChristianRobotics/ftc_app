@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * Created by Robotics on 1/19/2016.
@@ -16,7 +17,8 @@ import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 public class CCHS5256Autonomous extends OpMode {
 
     enum MoveState {
-        STARTMOVE, MOVING, DELAYSETTINGS, DELAY
+        STARTMOVE, MOVINGSTRAIGHT, STARTTURN, MOVINGTURN, DELAYSETTINGS, DELAY,
+        INITIALIZEROBOT
     }
 
     // DC Motors
@@ -55,7 +57,13 @@ public class CCHS5256Autonomous extends OpMode {
     MoveState currentMove;
     MoveState nextMove;
     MoveState telemetryMove;
+    long moveDelayTime;
+    double fastSpeed;
+    double mediumSpeed;
+    double slowSpeed;
+    double turnSpeed;
     // Elapsed Time
+    ElapsedTime currentTime;
 
     @Override
     public void init() {
@@ -105,6 +113,7 @@ public class CCHS5256Autonomous extends OpMode {
             redAlliance = false;
             blueAlliance = true;
         }
+
         if (nearMtnSwitch.getState()) {         // WE GO TO NEAR MOUNTAIN
             diagMtnDist = 0.0;
             turnMtnDist = -90.0;
@@ -118,6 +127,22 @@ public class CCHS5256Autonomous extends OpMode {
             nearMountain = true;
             farMountain = false;
         }
+
+        if (delayPotSwitch.getState()) {        // WE DELAY
+            delay = (delayPotentiometer.getValue() * (10000 / 1024));
+            delayRobot = true;
+        } else {                                // WE DON'T DELAY
+            delay = 0.0;
+            delayRobot = false;
+        }
+
+        // State Machine Settings
+        fastSpeed = 0.8;
+        mediumSpeed = 0.5;
+        slowSpeed = 0.2;
+        turnSpeed = 0.6;
+        // Elapsed Time
+        currentTime = new ElapsedTime();
         // Calibrate Gyro
         gyroSense.calibrate();
         while (gyroSense.isCalibrating()) {
@@ -133,22 +158,42 @@ public class CCHS5256Autonomous extends OpMode {
         endGameLights.setPower(1.0);
 
         switch (currentMove) {
+            //  WE USE THESE IN ALL MOVES
             case STARTMOVE:
+                currentMove = MoveState.MOVINGSTRAIGHT;
                 break;
 
-            case MOVING:
+            case MOVINGSTRAIGHT:
+                currentMove = MoveState.DELAYSETTINGS;
+                break;
+
+            case STARTTURN:
+                currentMove = MoveState.MOVINGTURN;
+                break;
+
+            case MOVINGTURN:
+                currentMove = MoveState.DELAYSETTINGS;
                 break;
 
             case DELAYSETTINGS:
+                currentMove = MoveState.DELAY;
                 break;
 
             case DELAY:
+                currentMove = nextMove;
                 break;
+
+            // MOVES WE USE ONCE, IN A SEQUENCE
+            case INITIALIZEROBOT:
+                currentTime.reset();
+                moveDelayTime = (long)delay;
+                currentMove = MoveState.DELAYSETTINGS;
         }
 
         telemetry.addData("left encoder", leftDrive.getCurrentPosition());
         telemetry.addData("right encoder", rightDrive.getCurrentPosition());
         telemetry.addData("current move", telemetryMove.toString());
+        telemetry.addData("Elapsed Time", currentTime.time());
 
     }
 
