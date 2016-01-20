@@ -219,7 +219,132 @@ public class CCHS5256Autonomous extends OpMode {
                 currentTime.reset();
                 moveDelayTime = (long)delay;
                 currentMove = MoveState.DELAYSETTINGS;
+                nextMove = MoveState.CHOOSEMOVE;
+                telemetryMove = MoveState.INITIALIZEROBOT;
+                break;
 
+            case CHOOSEMOVE:
+                if (thirdTile) {
+                    currentMove = MoveState.FIRSTMOVE;
+                } else if (fourthTile){
+                    currentMove = MoveState.MOVEDIAG;
+                }
+                telemetryMove = MoveState.CHOOSEMOVE;
+                break;
+
+            case FIRSTMOVE:
+                // Move Straight firstMoveDist
+                nextMove = MoveState.TURNDIAG;
+                telemetryMove = MoveState.FIRSTMOVE;
+                break;
+
+            case TURNDIAG:
+                // Move Turn turnDiagDegrees
+                nextMove = MoveState.MOVEDIAG;
+                telemetryMove = MoveState.TURNDIAG;
+                break;
+
+            case MOVEDIAG:
+                // Move straight 70 + moveDiagDist to red
+                nextMove = MoveState.TURNONCOLOREDLINE;
+                telemetryMove = MoveState.MOVEDIAG;
+                break;
+
+            case TURNONCOLOREDLINE:
+                // Move Turn -45 degrees
+                nextMove = MoveState.FOLLOWLINE;
+                telemetryMove = MoveState.TURNONCOLOREDLINE;
+                break;
+
+            case FOLLOWLINE:
+                // Move Straight to white line
+                nextMove = MoveState.TURNTOBEACON;
+                telemetryMove = MoveState.FOLLOWLINE;
+                break;
+
+            case TURNTOBEACON:
+                // Move Turn 90 degrees to the beacon
+                nextMove = MoveState.DRIVETOBEACON;
+                telemetryMove = MoveState.TURNTOBEACON;
+                break;
+
+            case DRIVETOBEACON:
+                // Move Straight to beacon with ultrasonic sensor
+                nextMove = MoveState.PUSHBUTTON;
+                telemetryMove = MoveState.DRIVETOBEACON;
+                break;
+
+            case PUSHBUTTON:
+                // push the button
+                nextMove = MoveState.UNPUSHBUTTON;
+                telemetryMove = MoveState.PUSHBUTTON;
+                break;
+
+            case UNPUSHBUTTON:
+                // unpush the button
+                nextMove = MoveState.BACKUP;
+                telemetryMove = MoveState.UNPUSHBUTTON;
+                break;
+
+            case BACKUP:
+                // Move Straight till can dump climbers
+                nextMove = MoveState.DUMPCLIMBERS;
+                telemetryMove = MoveState.BACKUP;
+                break;
+
+            case DUMPCLIMBERS:
+                // Dump climbers
+                nextMove = MoveState.BACKUPFARTHER;
+                telemetryMove = MoveState.DUMPCLIMBERS;
+                break;
+
+            case  BACKUPFARTHER:
+                // Move Straight 15 so we can drive to mountain
+                nextMove = MoveState.TURNALONGLINE;
+                telemetryMove = MoveState.BACKUPFARTHER;
+                break;
+
+            case TURNALONGLINE:
+                // Turn so we can position ourselves to go up the mountain
+                nextMove = MoveState.DRIVEALONGLINE;
+                telemetryMove = MoveState.TURNALONGLINE;
+                break;
+
+            case DRIVEALONGLINE:
+                // Move Straight 25 + diagMtnDist
+                nextMove = MoveState.TURNTOMOUNTAIN;
+                telemetryMove = MoveState.DRIVEALONGLINE;
+                break;
+
+            case TURNTOMOUNTAIN:
+                // Move Turn turnMtnDegrees
+                nextMove = MoveState.DRIVETOMOUNTAIN;
+                telemetryMove = MoveState.TURNTOMOUNTAIN;
+                break;
+
+            case DRIVETOMOUNTAIN:
+                // Move Straight toMtnDist
+                nextMove = MoveState.GOUPMOUNTAIN;
+                telemetryMove = MoveState.DRIVETOMOUNTAIN;
+                break;
+
+            case  GOUPMOUNTAIN:
+                // Move Straight up mountain
+                nextMove = MoveState.PREPTELEOP;
+                telemetryMove = MoveState.GOUPMOUNTAIN;
+                break;
+
+            case PREPTELEOP:
+                // get robot ready for TeleOp
+                nextMove = MoveState.DONE;
+                telemetryMove = MoveState.PREPTELEOP;
+                break;
+
+            case  DONE:
+                leftDrive.setPower(0.0);
+                rightDrive.setPower(0.0);
+                endGameLights.setPower(0.5);
+                break;
         }
 
         telemetry.addData("left encoder", leftDrive.getCurrentPosition());
