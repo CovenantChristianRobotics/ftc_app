@@ -40,6 +40,7 @@ public class CCHS4507TeleOp extends OpMode {
     boolean nearMountainFlag = false;
     boolean redAllianceFlag = false;
     int trackLifterUp = 0;
+    int trackLifterDown = -1170;
 
 
     @Override
@@ -107,39 +108,14 @@ public class CCHS4507TeleOp extends OpMode {
             if (liftCheck.isPressed()) {
                 trackLifter.setPower(0.0);
             } else {
-                trackLifter.setPower(0.5);
+                trackLifter.setPower(0.2);
             }
         } else if (gamepad1.right_trigger > 0.5) { // down
-            trackLifter.setPower(-0.5);
+            trackLifter.setPower(-0.2);
         } else {
             trackLifter.setPower(-0.0);
         }
-//        if (gamepad1.y) {
-//            trackLifter.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-//            trackLifter.setPower(0.0);
-//            trackLifter.setPowerFloat();
-//        } else if (gamepad1.right_bumper) {
-//            if (liftCheck.isPressed()) {
-//                trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
-//                trackLifterUp = trackLifter.getCurrentPosition();
-//                trackLifter.setTargetPosition(trackLifterUp);
-//                trackLifter.setPower(0.5);
-//            } else {
-//                trackLifter.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-//                trackLifter.setPower(0.5);
-//            }
-//        } else if (gamepad1.right_trigger > 0.5) {
-//            trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
-//            trackLifter.setTargetPosition(trackLifterUp + 1220 / 4);
-//            trackLifter.setPower(0.5);
-//        } else if (liftCheck.isPressed()) {
-//            trackLifterUp = trackLifter.getCurrentPosition();
-//        }
-//        if(gamepad1.left_bumper) {
-//            trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
-//            trackLifter.setTargetPosition((trackLifterUp + 1220 / 4) - 30);
-//            trackLifter.setPower(1.0);
-//        }
+
         armPivot.setPower(gamepad2.right_stick_x / 4.0);
         armExtend.setPower(-gamepad2.left_stick_y);
 
@@ -168,9 +144,9 @@ public class CCHS4507TeleOp extends OpMode {
             //zipTieSweeper.setPosition(.75);
         }
 
-        telemetry.addData("trackLifter", (float) trackLifter.getCurrentPosition());
+        telemetry.addData("trackLifter", Integer.toString(trackLifter.getCurrentPosition()));
         telemetry.addData("liftCheck", liftCheck.isPressed());
-        telemetry.addData("ENCLeft", (float) motorLeft.getCurrentPosition());
-        telemetry.addData("ENCRight", (float) motorRight.getCurrentPosition());
+        telemetry.addData("ENCLeft", Integer.toString(motorLeft.getCurrentPosition()));
+        telemetry.addData("ENCRight", Integer.toString(motorRight.getCurrentPosition()));
     }
 }
