@@ -1,6 +1,6 @@
 // CCHS 5256 Autonomous Software
-// Run in Autonomous Mode of FTC CHallenge 2015-2016
-// Autonomous for FIRST ResQ challenge
+// Run in Autonomous Mode of FTC Challenge 2015-2016
+// Autonomous for FIRST ResQ challenge;'
 
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
@@ -16,6 +16,9 @@ import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+
+import java.util.Date;
 
 /**
  * Created by Robotics on 1/19/2016.
@@ -48,6 +51,8 @@ public class CCHS5256Autonomous extends OpMode {
     // Sensors
     GyroSensor gyroSense;
     ColorSensor colorSense;
+//    ColorSensor lFColorSense;
+//    ColorSensor rFColorSense;
     UltrasonicSensor ultraSense;
     // Switches
     DigitalChannel nearMtnSwitch;
@@ -74,11 +79,16 @@ public class CCHS5256Autonomous extends OpMode {
     MoveState currentMove;
     MoveState nextMove;
     MoveState telemetryMove;
+    long delayUntil;
     long moveDelayTime;
+    long commonDelayTime;
+    long now;
     double fastSpeed;
     double mediumSpeed;
     double slowSpeed;
     double turnSpeed;
+    boolean lookingForRedFlag;
+    boolean lookingForBlueFlag;
     // Elapsed Time
     ElapsedTime currentTime;
     // Method Variables
@@ -217,6 +227,8 @@ public class CCHS5256Autonomous extends OpMode {
         // Sensors
         gyroSense = hardwareMap.gyroSensor.get("gyroSense");
         colorSense = hardwareMap.colorSensor.get("bColorSense");
+//        lFColorSense = hardwareMap.colorSensor.get("lFCS");
+//        rFColorSense = hardwareMap.colorSensor.get("rFCS");
         ultraSense = hardwareMap.ultrasonicSensor.get("fUltraSense");
         // Switches
         nearMtnSwitch = hardwareMap.digitalChannel.get("nMtnSw");
@@ -278,6 +290,7 @@ public class CCHS5256Autonomous extends OpMode {
         mediumSpeed = 0.5;
         slowSpeed = 0.2;
         turnSpeed = 0.6;
+        commonDelayTime = 150;
         // Elapsed Time
         currentTime = new ElapsedTime();
         // log switch positions
@@ -299,27 +312,79 @@ public class CCHS5256Autonomous extends OpMode {
         switch (currentMove) {
             //  WE USE THESE IN ALL MOVES
             case STARTMOVE:
-                currentMove = MoveState.MOVINGSTRAIGHT;
+                if (leftDrive.isBusy() && rightDrive.isBusy()) {
+                    currentMove = MoveState.MOVINGSTRAIGHT;
+                }
                 break;
 
             case MOVINGSTRAIGHT:
-                currentMove = MoveState.DELAYSETTINGS;
+                gyroError = desiredHeading - gyroSense.getHeading();
+                if (gyroError > 180) {
+                    gyroError = 360 - gyroError;
+                }
+                if (gyroError < -180) {
+                    gyroError = 360 + gyroError;
+                }
+                if (!movingForward) {
+                    gyroError = -gyroError;
+                }
+                rightDrive.setPower(Range.clip(speed + (gyroError * 0.2), -1.0, 1.0));
+                leftDrive.setPower(Range.clip(speed - (gyroError * 0.2), -1.0, 1.0));
+                if (colorSense.blue() >= 1) {
+//                    sawBlueFlag = true;
+                }
+                if (colorSense.red() >= 1) {
+//                    sawRedFlag = true;
+                }
+                if (lookingForRedFlag && (colorSense.red() >= 1))  {
+                    rightDrive.setPower(0.0);
+                    leftDrive.setPower(0.0);
+                    currentMove = MoveState.DELAYSETTINGS;
+                }
+                if (lookingForBlueFlag && (colorSense.blue() >= 1))  {
+                    rightDrive.setPower(0.0);
+                    leftDrive.setPower(0.0);
+                    currentMove = MoveState.DELAYSETTINGS;
+                }
+                if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+                    currentMove = MoveState.DELAYSETTINGS;
+                }
                 break;
 
             case STARTTURN:
-                currentMove = MoveState.MOVINGTURN;
+                if (leftDrive.isBusy() && rightDrive.isBusy()) {
+                    currentMove = MoveState.MOVINGTURN;
+                }
                 break;
 
             case MOVINGTURN:
-                currentMove = MoveState.DELAYSETTINGS;
+                gyroError = gyroSense.getHeading() - desiredHeading;
+                if (gyroError > 180) {
+                    gyroError = 360 - gyroError;
+                }
+                if (gyroError < -180) {
+                    gyroError = 360 + gyroError;
+                }
+                //                moveTurn(gyroError, speed);
+                if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+                    currentMove = MoveState.DELAYSETTINGS;
+                }
                 break;
 
             case DELAYSETTINGS:
+                now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
                 currentMove = MoveState.DELAY;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
                 break;
 
             case DELAY:
-                currentMove = nextMove;
+                if (System.currentTimeMillis() >= delayUntil) {
+                    currentMove = nextMove;
+                }
                 break;
 
             // MOVES WE USE ONCE, IN A SEQUENCE
@@ -329,6 +394,7 @@ public class CCHS5256Autonomous extends OpMode {
                 currentMove = MoveState.DELAYSETTINGS;
                 nextMove = MoveState.CHOOSEMOVE;
                 telemetryMove = MoveState.INITIALIZEROBOT;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case CHOOSEMOVE:
@@ -338,117 +404,156 @@ public class CCHS5256Autonomous extends OpMode {
                     currentMove = MoveState.MOVEDIAG;
                 }
                 telemetryMove = MoveState.CHOOSEMOVE;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case FIRSTMOVE:
                 // Move Straight firstMoveDist
+                moveStraight(firstMoveDist, fastSpeed);
+                currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNDIAG;
                 telemetryMove = MoveState.FIRSTMOVE;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case TURNDIAG:
                 // Move Turn turnDiagDegrees
+                moveTurn(turnDiagDegrees, turnSpeed);
+                currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.MOVEDIAG;
                 telemetryMove = MoveState.TURNDIAG;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case MOVEDIAG:
                 // Move straight 70 + moveDiagDist to red
+                moveStraight(70 + moveDiagDist, fastSpeed);
+                currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNONCOLOREDLINE;
                 telemetryMove = MoveState.MOVEDIAG;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case TURNONCOLOREDLINE:
                 // Move Turn -45 degrees
+                moveTurn(-45.0, turnSpeed);
+                currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.FOLLOWLINE;
                 telemetryMove = MoveState.TURNONCOLOREDLINE;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case FOLLOWLINE:
                 // Move Straight to white line
                 nextMove = MoveState.TURNTOBEACON;
                 telemetryMove = MoveState.FOLLOWLINE;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case TURNTOBEACON:
                 // Move Turn 90 degrees to the beacon
+                moveTurn(90.0, turnSpeed);
+                currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.DRIVETOBEACON;
                 telemetryMove = MoveState.TURNTOBEACON;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case DRIVETOBEACON:
                 // Move Straight to beacon with ultrasonic sensor
                 nextMove = MoveState.PUSHBUTTON;
                 telemetryMove = MoveState.DRIVETOBEACON;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case PUSHBUTTON:
                 // push the button
                 nextMove = MoveState.UNPUSHBUTTON;
                 telemetryMove = MoveState.PUSHBUTTON;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case UNPUSHBUTTON:
                 // unpush the button
                 nextMove = MoveState.BACKUP;
                 telemetryMove = MoveState.UNPUSHBUTTON;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case BACKUP:
                 // Move Straight till can dump climbers
                 nextMove = MoveState.DUMPCLIMBERS;
                 telemetryMove = MoveState.BACKUP;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case DUMPCLIMBERS:
                 // Dump climbers
                 nextMove = MoveState.BACKUPFARTHER;
                 telemetryMove = MoveState.DUMPCLIMBERS;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case  BACKUPFARTHER:
                 // Move Straight 15 so we can drive to mountain
+                moveStraight(15.0, fastSpeed);
+                currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNALONGLINE;
                 telemetryMove = MoveState.BACKUPFARTHER;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case TURNALONGLINE:
                 // Turn so we can position ourselves to go up the mountain
                 nextMove = MoveState.DRIVEALONGLINE;
                 telemetryMove = MoveState.TURNALONGLINE;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case DRIVEALONGLINE:
                 // Move Straight 25 + diagMtnDist
+                moveStraight(25 + diagMtnDist, fastSpeed);
+                currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNTOMOUNTAIN;
                 telemetryMove = MoveState.DRIVEALONGLINE;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case TURNTOMOUNTAIN:
                 // Move Turn turnMtnDegrees
+                moveTurn(turnMtnDist, turnSpeed);
+                currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.DRIVETOMOUNTAIN;
                 telemetryMove = MoveState.TURNTOMOUNTAIN;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case DRIVETOMOUNTAIN:
                 // Move Straight toMtnDist
+                moveStraight(toMtnDist, fastSpeed);
+                currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.GOUPMOUNTAIN;
                 telemetryMove = MoveState.DRIVETOMOUNTAIN;
+                moveDelayTime = commonDelayTime;
                 break;
 
-            case  GOUPMOUNTAIN:
+            case GOUPMOUNTAIN:
                 // Move Straight up mountain
+                moveStraight(100.0, fastSpeed);
+                currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.PREPTELEOP;
                 telemetryMove = MoveState.GOUPMOUNTAIN;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case PREPTELEOP:
                 // get robot ready for TeleOp
-                nextMove = MoveState.DONE;
+                currentMove = MoveState.DONE;
                 telemetryMove = MoveState.PREPTELEOP;
+                moveDelayTime = commonDelayTime;
                 break;
 
-            case  DONE:
+            case DONE:
                 leftDrive.setPower(0.0);
                 rightDrive.setPower(0.0);
                 endGameLights.setPower(0.5);
