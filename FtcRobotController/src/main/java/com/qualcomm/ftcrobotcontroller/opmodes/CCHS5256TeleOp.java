@@ -52,6 +52,7 @@ public class CCHS5256TeleOp extends OpMode {
     Servo servoClimberDumper;
      Servo leftOmniPinion;
      Servo rightOmniPinion;
+    Servo armLock;
 //    Servo leftPlow;
 //    Servo rightPlow;
     //sensors
@@ -164,6 +165,7 @@ public class CCHS5256TeleOp extends OpMode {
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
+        armLock = hardwareMap.servo.get("armLock");
 //        leftPlow = hardwareMap.servo.get("lP");
 //        rightPlow = hardwareMap.servo.get("rP");
         // Sensors
@@ -184,6 +186,7 @@ public class CCHS5256TeleOp extends OpMode {
         leftDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         rightDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
+        chinUp.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         // state machine settings
         currentControl = ledControl.PREMATCH;
         // servo positions
@@ -201,14 +204,14 @@ public class CCHS5256TeleOp extends OpMode {
 
         double left = gamepad1.left_stick_y;
         double right = gamepad1.right_stick_y;
-        float beaconPinion = gamepad2.left_stick_y;
+        double hang = gamepad1.left_stick_x;
         float omniWheels = gamepad2.left_stick_y;
         float rightStickPos = -gamepad1.right_stick_y;
         float rightStickNeg = -gamepad1.right_stick_y;
 
         left = Range.clip(left, -1, 1);
         right = Range.clip(right, -1, 1);
-        beaconPinion = Range.clip(beaconPinion, -1, 1);
+        hang = Range.clip(hang, -1, 1);
         omniWheels = Range.clip(omniWheels, -1, 1);
 
         if (rightStickPos < 0 ) {
@@ -266,7 +269,7 @@ public class CCHS5256TeleOp extends OpMode {
         }
         
         if (gamepad1.y) {
-            chinUp.setPower(-gamepad1.left_stick_x);
+            chinUp.setPower(hang);
         } else {
             chinUp.setPower(0.0);
         }
@@ -276,9 +279,10 @@ public class CCHS5256TeleOp extends OpMode {
             rightDrive.setPower(0.05);
         }
 
-        if (gamepad2.x) {
-            rightOmniPinion.setPosition(0.5);
-            leftOmniPinion.setPosition(0.5);
+        if (gamepad2.a) {
+            armLock.setPosition(1.0);
+        } else if (gamepad2.b) {
+            armLock.setPosition(0.0);
         }
 
 
@@ -295,7 +299,6 @@ public class CCHS5256TeleOp extends OpMode {
 
         leftDrive.setPower(left);
         rightDrive.setPower(right);
-        servoBeaconPinion.setPosition(((beaconPinion / 2) + 0.5));
 
         if (gamepad2.dpad_left) {
             leftOmniPinion.setPosition((gamepad2.right_stick_y / 2) + 0.5);
