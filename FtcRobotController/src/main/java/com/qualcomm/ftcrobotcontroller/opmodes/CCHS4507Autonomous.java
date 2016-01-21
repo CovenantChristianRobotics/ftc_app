@@ -84,7 +84,6 @@ public class CCHS4507Autonomous extends OpMode {
     boolean nearMountainFlag = false;
     boolean redAlliance = false;
    // long delayTimeFlag = 10;
-   // double tileFlag = 1.0;
 
 
     public CCHS4507Autonomous() {
@@ -165,6 +164,13 @@ public class CCHS4507Autonomous extends OpMode {
         motorLeft.setPower(targetSpeed);
         motorRight.setPower(targetSpeed);
     }
+    void moveLifter (double degrees) {
+        if(degrees == 0) {
+
+        }
+
+
+    }
 
     @Override
     public void init() {
@@ -207,6 +213,8 @@ public class CCHS4507Autonomous extends OpMode {
         if (liftCheck.isPressed()) {
             trackLifterUp = trackLifter.getCurrentPosition();
             trackLifter.setTargetPosition(trackLifterUp);
+        } else if(!liftCheck.isPressed()) {
+            trackLifter.setPower(0.2);
         }
         // tileFlag = tileliftCheckSwitch.getState();
         //if (tileSwitch.getState()) {
@@ -539,10 +547,10 @@ public class CCHS4507Autonomous extends OpMode {
             currentMove = MoveState.FIRSTMOVE;
         }
         telemetry.addData("Current Move", telemetryMove.toString());
-        telemetry.addData("desiredHeading", (float)desiredHeading);
-        telemetry.addData("gyro", (float)gyroSense.getHeading());
-        telemetry.addData("time", (float)System.currentTimeMillis());
-        telemetry.addData("delayUntil", (float)delayUntil);
+        telemetry.addData("desiredHeading", Integer.toString(desiredHeading));
+        telemetry.addData("gyro", Integer.toString(gyroSense.getHeading()));
+        telemetry.addData("time", Long.toString(System.currentTimeMillis()));//This was a float also and would not work to change it to a integer
+        telemetry.addData("delayUntil", Long.toString(delayUntil)); // This was a float did not work to change it to a integer
         telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
         telemetry.addData("liftCheck", liftCheck.isPressed());
         telemetry.addData("delayPot", delayPot.getValue());

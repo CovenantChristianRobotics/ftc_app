@@ -216,7 +216,7 @@ public class CCHS5256TeleOp extends OpMode {
 
             case ON:
                 if (endGameTime.time() > 90.0) {
-                    currentControl = ledControl.ENDGAME
+                    currentControl = ledControl.ENDGAME;
                 } else {
                     currentControl = ledControl.ON;
                 }
