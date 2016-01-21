@@ -53,8 +53,8 @@ public class CCHS5256TeleOp extends OpMode {
      Servo leftOmniPinion;
      Servo rightOmniPinion;
     Servo armLock;
-//    Servo leftPlow;
-//    Servo rightPlow;
+    Servo leftPlow;
+    Servo rightPlow;
     //sensors
 //    ColorSensor beaconColorSense;
 //    ColorSensor floorColorSense;
@@ -165,8 +165,9 @@ public class CCHS5256TeleOp extends OpMode {
         rightOmniPinion.setPosition(0.5);
         armLock = hardwareMap.servo.get("armLock");
         armLock.setPosition(0.5);
-//        leftPlow = hardwareMap.servo.get("lP");
-//        rightPlow = hardwareMap.servo.get("rP");
+        leftPlow = hardwareMap.servo.get("lP");
+        rightPlow = hardwareMap.servo.get("rP");
+        rightPlow.setDirection(Servo.Direction.REVERSE);
         // Sensors
 //        beaconColorSense = hardwareMap.colorSensor.get("bColorSense");
 //        beaconColorSense.enableLed(false);
@@ -307,14 +308,14 @@ public class CCHS5256TeleOp extends OpMode {
             rightOmniPinion.setPosition((gamepad2.right_stick_y / 2) + 0.5);
             leftOmniPinion.setPosition(((gamepad2.right_stick_y / 2) + 0.5));
         }
-//
-//        if (gamepad2.y) {
-//            leftPlow.setPosition(0.5);
-//            rightPlow.setPosition(0.5);
-//        } else if (gamepad2.a) {
-//            leftPlow.setPosition(0.67);
-//            rightPlow.setPosition(0.33);
-//        }
+
+        if (gamepad2.y) {
+            leftPlow.setPosition(Range.clip((leftPlow.getPosition() + 0.01), 0.0, 1.0));
+            rightPlow.setPosition(Range.clip((rightPlow.getPosition() + 0.01), 0.0, 1.0));
+        } else if (gamepad2.x) {
+            leftPlow.setPosition(Range.clip((leftPlow.getPosition() - 0.01), 0.0, 1.0));
+            rightPlow.setPosition(Range.clip((rightPlow.getPosition() - 0.01), 0.0, 1.0));
+        }
 //        if (gamepad1.a) {
 //           if (bUltraSense.getUltrasonicLevel() <= lowDist) {
 //              moveStraightWithGyro(0.5);
@@ -400,8 +401,8 @@ public class CCHS5256TeleOp extends OpMode {
 
         telemetry.addData("LED", currentControl.toString());
         telemetry.addData("Elapsed Time", endGameTime.time());
-//        telemetry.addData("l plow", leftPlow.getPosition());
-//        telemetry.addData("r plow", rightPlow.getPosition());
+        telemetry.addData("l plow", leftPlow.getPosition());
+        telemetry.addData("r plow", rightPlow.getPosition());
         telemetry.addData("enc right", rightDrive.getCurrentPosition());
         telemetry.addData("enc left", leftDrive.getCurrentPosition());
         telemetry.addData("arm lock", armLock.getPosition());
