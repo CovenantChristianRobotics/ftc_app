@@ -564,6 +564,7 @@ public class CCHS5256Autonomous extends OpMode {
         telemetry.addData("right encoder", rightDrive.getCurrentPosition());
         telemetry.addData("current move", telemetryMove.toString());
         telemetry.addData("Elapsed Time", currentTime.time());
+        telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
 
     }
 
