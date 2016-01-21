@@ -571,5 +571,4 @@ public class CCHS5256Autonomous extends OpMode {
     public void stop () {
     }
 
-
 }
