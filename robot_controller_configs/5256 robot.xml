@@ -1,26 +1,15 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <Robot>
     <ServoController name="OmniPinionCtlr" serialNumber="AL00VTK3">
-        <Servo name="servoUltra" port="1" />
-        <Servo name="beaconPinion" port="2" />
-        <Servo name="beaconPusher" port="3" />
-        <Servo name="climber_dumper" port="4" />
+        <Servo name="armLock" port="2" />
         <Servo name="rOmniPinion" port="5" />
         <Servo name="lOmniPinion" port="6" />
     </ServoController>
     <LegacyModuleController name="Legacy Module 1" serialNumber="AL00XU3L">
-        <TouchSensor name="bPOut" port="0" />
-        <UltrasonicSensor name="fUltraSense" port="5" />
     </LegacyModuleController>
     <ServoController name="Servo Controller 2" serialNumber="AL00VUK4">
     </ServoController>
     <DeviceInterfaceModule name="Device Interface Module" serialNumber="AI02RHQD">
-        <ColorSensor name="bColorSense" port="0" />
-        <Gyro name="gyroSense" port="1" />
-        <AnalogInput name="dP" port="0" />
-        <DigitalDevice name="nMtnSw" port="0" />
-        <DigitalDevice name="rBSw" port="1" />
-		<TouchSensor name="bPIn" port="7" />
     </DeviceInterfaceModule>
     <MotorController name="dTCtlr" serialNumber="AL00VSFZ">
         <Motor name="motorR" port="1" />

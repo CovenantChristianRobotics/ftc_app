@@ -44,12 +44,12 @@ public class CCHS5256TeleOp extends OpMode {
 //    ServoController beaconController;
    //  ServoController alignmentController;
     // Servos
-    Servo servoBeaconPinion;
-    Servo servoBeaconPusher;
+//    Servo servoBeaconPinion;
+//    Servo servoBeaconPusher;
     Servo servoUltraSense;
 //    Servo sweeper;
 //    boolean sweepOn;
-    Servo servoClimberDumper;
+//    Servo servoClimberDumper;
      Servo leftOmniPinion;
      Servo rightOmniPinion;
     Servo armLock;
@@ -155,17 +155,16 @@ public class CCHS5256TeleOp extends OpMode {
 //        beaconController = hardwareMap.servoController.get("beaconCtlr");
 //        alignmentController = hardwareMap.servoController.get("alignCtlr");
         // Servos
-        servoBeaconPinion = hardwareMap.servo.get("beaconPinion");
-        servoBeaconPinion.setPosition(0.5);
-        servoBeaconPusher = hardwareMap.servo.get("beaconPusher");
-        servoClimberDumper = hardwareMap.servo.get("climber_dumper");
-        servoUltraSense = hardwareMap.servo.get("servoUltra");
+//        servoBeaconPusher = hardwareMap.servo.get("beaconPusher");
+//        servoClimberDumper = hardwareMap.servo.get("climber_dumper");
+//        servoUltraSense = hardwareMap.servo.get("servoUltra");
         leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
         rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
         armLock = hardwareMap.servo.get("armLock");
+        armLock.setPosition(0.5);
 //        leftPlow = hardwareMap.servo.get("lP");
 //        rightPlow = hardwareMap.servo.get("rP");
         // Sensors
@@ -174,7 +173,7 @@ public class CCHS5256TeleOp extends OpMode {
 //        floorColorSense = hardwareMap.colorSensor.get("fColorSense");
 //        floorColorSense.enableLed(true);
 //        wheelAlignment = hardwareMap.opticalDistanceSensor.get("wAlign");
-        gyroSense = hardwareMap.gyroSensor.get("gyroSense");
+//        gyroSense = hardwareMap.gyroSensor.get("gyroSense");
 //        fUltraSense = hardwareMap.ultrasonicSensor.get("fUltraSense");
 //        bUltraSense = hardwareMap.ultrasonicSensor.get("bUltraSense");
       //  beaconPinionAlignment = hardwareMap.touchSensor.get("bPALign");
@@ -190,7 +189,7 @@ public class CCHS5256TeleOp extends OpMode {
         // state machine settings
         currentControl = ledControl.PREMATCH;
         // servo positions
-        servoBeaconPusher.setPosition(0.5);
+//        servoBeaconPusher.setPosition(0.5);
         endGameTime = new ElapsedTime();
         endGameLights.setPower(0.0);
 //        goStraightWithGyro = true;
@@ -280,9 +279,9 @@ public class CCHS5256TeleOp extends OpMode {
         }
 
         if (gamepad2.a) {
-            armLock.setPosition(1.0);
+            armLock.setPosition(0.2292121569);
         } else if (gamepad2.b) {
-            armLock.setPosition(0.0);
+            armLock.setPosition(0.5);
         }
 
 
@@ -405,6 +404,7 @@ public class CCHS5256TeleOp extends OpMode {
 //        telemetry.addData("r plow", rightPlow.getPosition());
         telemetry.addData("enc right", rightDrive.getCurrentPosition());
         telemetry.addData("enc left", leftDrive.getCurrentPosition());
+        telemetry.addData("arm lock", armLock.getPosition());
     }
 
     @Override
