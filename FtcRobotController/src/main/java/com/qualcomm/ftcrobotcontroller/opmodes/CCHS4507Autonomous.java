@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 public class CCHS4507Autonomous extends OpMode {
     enum MoveState {
         DELAY, STARTMOVE, MOVING, STARTTURN, TURNING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
-        FINDBEACON, CENTERBUCKET, DUMPTRUCK, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, ALIGNRAMP, UPRAMP, DONE
+        FINDBEACON, CENTERBUCKET, DUMPTRUCK, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, ALIGNRAMP, DOWNTRACK, UPRAMP, DONE
     }
 
     DcMotor motorRight;
@@ -69,6 +69,7 @@ public class CCHS4507Autonomous extends OpMode {
     double countsPerMeter = 5361.0; // 10439;    // Found this experimentally: Measured one meter, drove distance, read counts
     int dumperCounterThresh = 8;       // Doesn't let the dumper counter get above a certain number
     double countsPerDonut = 7661.0; // 14161;    // Encoder counts per 360 degrees
+    int trackLifterDown = -1170;    // Counts when down, assuming up is 0 counts
 
     // Switches
     DigitalChannel nearMountainSwitch;
@@ -157,9 +158,9 @@ public class CCHS4507Autonomous extends OpMode {
             desiredHeading = desiredHeading + 360;
         }
         speed = targetSpeed;
-        leftTarget = motorLeft.getCurrentPosition() - degreesToCounts(degrees + gyroError);
+        leftTarget = motorLeft.getCurrentPosition() + degreesToCounts(degrees + gyroError);
         motorLeft.setTargetPosition(leftTarget);
-        rightTarget = motorRight.getCurrentPosition() + degreesToCounts(degrees + gyroError);
+        rightTarget = motorRight.getCurrentPosition() - degreesToCounts(degrees + gyroError);
         motorRight.setTargetPosition(rightTarget);
         motorLeft.setPower(targetSpeed);
         motorRight.setPower(targetSpeed);
@@ -195,12 +196,12 @@ public class CCHS4507Autonomous extends OpMode {
             redAlliance = false;
             lookingForRedFlag = false;
             lookingForBlueFlag = true;
-            servoDist.setPosition(0.25);
+            servoDist.setPosition(0.75);
         } else { //This is for red
             redAlliance = true;
             lookingForRedFlag = true;
             lookingForBlueFlag = false;
-            servoDist.setPosition(0.75);
+            servoDist.setPosition(0.25);
         }
 
         if (liftCheck.isPressed()) {
@@ -232,7 +233,7 @@ public class CCHS4507Autonomous extends OpMode {
         fastSpeed = 0.50;
         slowSpeed = 0.35;
         turnSpeed = 0.35;
-        delayMillisec = 1000;
+        delayMillisec = 100;
         //zipTieSweeper.setPosition(.75);
         trackLifter.setPower(0.1);
         trackLifter.setTargetPosition(30);
@@ -277,8 +278,8 @@ public class CCHS4507Autonomous extends OpMode {
                 if (!movingForward) {
                     gyroError = -gyroError;
                 }
-//                motorRight.setPower(Range.clip(speed + (gyroError * 0.05), -1.0, 1.0));
-//                motorLeft.setPower(Range.clip(speed - (gyroError * 0.05), -1.0, 1.0));
+                motorRight.setPower(Range.clip(speed - (gyroError * 0.05), -1.0, 1.0));
+                motorLeft.setPower(Range.clip(speed + (gyroError * 0.05), -1.0, 1.0));
                 if (ColorSense.blue() >= 1) {
                     sawBlueFlag = true;
                 }
@@ -295,7 +296,9 @@ public class CCHS4507Autonomous extends OpMode {
                     motorLeft.setPower(0.0);
                     currentMove = MoveState.MOVEDELAY;
                 }
-                if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+                if (!motorLeft.isBusy() || !motorRight.isBusy()) {
+                    motorRight.setPower(0.0);
+                    motorLeft.setPower(0.0);
                     currentMove = MoveState.MOVEDELAY;
                 }
                 break;
@@ -379,7 +382,7 @@ public class CCHS4507Autonomous extends OpMode {
 
             case TURNALONGWALL:
                 if (redAlliance) {
-                    moveTurn(45.0, turnSpeed); //origanal is -45
+                    moveTurn(45.0, turnSpeed);
                 } else {
                     moveTurn(135.0, turnSpeed);
                 }
@@ -500,8 +503,16 @@ public class CCHS4507Autonomous extends OpMode {
             case ALIGNRAMP:
                 moveTurn(0.0, turnSpeed);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.UPRAMP;
+                nextMove = MoveState.DONE;  // TODO: This is DOWNTRACK
                 telemetryMove = MoveState.ALIGNRAMP;
+                break;
+
+            case DOWNTRACK:
+                trackLifter.setTargetPosition(trackLifterDown);
+                moveDelayTime = 500;
+                currentMove = MoveState.MOVEDELAY;
+                nextMove = MoveState.UPRAMP;
+                telemetryMove = MoveState.DOWNTRACK;
                 break;
 
             case UPRAMP:
