@@ -66,9 +66,9 @@ public class CCHS4507Autonomous extends OpMode {
 //    double wheelDiameter = 6.75 / 2.0;  // wheel diameter in cm 2 to 1 gear ratio
 //    double encoderCounts = 1120.0;      // encoder counts per revolution of the drive train motors
 //    double wheelBase = 41.0;            // wheelbase of the primary drive wheels
-    double countsPerMeter = 5429.0; // 10439;    // Found this experimentally: Measured one meter, drove distance, read counts
+    double countsPerMeter = 5361.0; // 10439;    // Found this experimentally: Measured one meter, drove distance, read counts
     int dumperCounterThresh = 8;       // Doesn't let the dumper counter get above a certain number
-    double countsPerDonut = 14161;    // Encoder counts per 360 degrees
+    double countsPerDonut = 7661.0; // 14161;    // Encoder counts per 360 degrees
 
     // Switches
     DigitalChannel nearMountainSwitch;
@@ -195,12 +195,12 @@ public class CCHS4507Autonomous extends OpMode {
             redAlliance = false;
             lookingForRedFlag = false;
             lookingForBlueFlag = true;
-            servoDist.setPosition(0.75);
+            servoDist.setPosition(0.25);
         } else { //This is for red
             redAlliance = true;
             lookingForRedFlag = true;
             lookingForBlueFlag = false;
-            servoDist.setPosition(0.25);
+            servoDist.setPosition(0.75);
         }
 
         if (liftCheck.isPressed()) {
@@ -277,8 +277,8 @@ public class CCHS4507Autonomous extends OpMode {
                 if (!movingForward) {
                     gyroError = -gyroError;
                 }
-                motorRight.setPower(Range.clip(speed + (gyroError * 0.2), -1.0, 1.0));
-                motorLeft.setPower(Range.clip(speed - (gyroError * 0.2), -1.0, 1.0));
+//                motorRight.setPower(Range.clip(speed + (gyroError * 0.05), -1.0, 1.0));
+//                motorLeft.setPower(Range.clip(speed - (gyroError * 0.05), -1.0, 1.0));
                 if (ColorSense.blue() >= 1) {
                     sawBlueFlag = true;
                 }
@@ -307,22 +307,12 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case TURNING:
-//                gyroError =  gyroSense.getHeading() - desiredHeading;
-//                if(gyroError > 180) {
-//                    gyroError = 360 - gyroError;
-//                }
-//                if (gyroError < -180) {
-//                    gyroError = 360 + gyroError;
-//                }
-//                moveTurn(gyroError, speed);
                 if (!motorLeft.isBusy() && !motorRight.isBusy()) {
                     currentMove = MoveState.MOVEDELAY;
                 }
                 break;
 
             case MOVEDELAY:
-//                now = new Date();
-//                delayUntil = now.getTime() + moveDelayTime;
                 now = System.currentTimeMillis();
                 delayUntil = now + moveDelayTime;
                 currentMove = MoveState.DELAY;
@@ -334,16 +324,14 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case DELAY:
-//                if (motorLeft.isBusy() || motorRight.isBusy()) {
-//                    // If we aren't quite done moving, restart the delayMillisec
-//                    currentMove = MoveState.MOVEDELAY;
-//                } else {
-//                    now = new Date();
-//                    if (now.getTime() >= delayUntil) {
+                if (motorLeft.isBusy() || motorRight.isBusy()) {
+                    // If we aren't quite done moving, restart the delayMillisec
+                    currentMove = MoveState.MOVEDELAY;
+                } else {
                     if (System.currentTimeMillis() >= delayUntil) {
                         currentMove = nextMove;
                     }
-//                }
+               }
                 break;
 
             case FIRSTMOVE:
@@ -517,16 +505,13 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case UPRAMP:
-//                distanceToWall = ultraSense.getUltrasonicLevel();
-//                if ((distanceToWall > 30.0) && (distanceToWall <= 70.0)) {
-                    moveStraight(100.0, slowSpeed);
-                    trackLifter.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-                    trackLifter.setPower(0.0);
-                    trackLifter.setPowerFloat();
-                    currentMove = MoveState.STARTMOVE;
-                    nextMove = MoveState.DONE;
-                    telemetryMove = MoveState.UPRAMP;
-//                }
+                moveStraight(100.0, slowSpeed);
+                trackLifter.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
+                trackLifter.setPower(0.0);
+                trackLifter.setPowerFloat();
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DONE;
+                telemetryMove = MoveState.UPRAMP;
                 break;
 
             case DONE:

@@ -82,8 +82,26 @@ public class CCHS4507TeleOp extends OpMode {
 
     @Override
     public void loop() {
-        motorRight.setPower(-gamepad1.right_stick_y);
-        motorLeft.setPower(-gamepad1.left_stick_y);
+        double rightDrive;
+        double leftDrive;
+
+        rightDrive = -gamepad1.right_stick_y;
+        leftDrive = -gamepad1.left_stick_y;
+        if (gamepad1.dpad_up) {
+            rightDrive = 0.1;
+            leftDrive = 0.1;
+        } else if (gamepad1.dpad_down) {
+            rightDrive = -0.1;
+            leftDrive = -0.1;
+        } else if (gamepad1.dpad_right) {
+            rightDrive = -0.1;
+            leftDrive = 0.1;
+        } else if (gamepad1.dpad_left) {
+            rightDrive = 0.1;
+            leftDrive = -0.1;
+        }
+        motorRight.setPower(rightDrive);
+        motorLeft.setPower(leftDrive);
 
         if (gamepad1.right_bumper) { // up
             if (liftCheck.isPressed()) {
