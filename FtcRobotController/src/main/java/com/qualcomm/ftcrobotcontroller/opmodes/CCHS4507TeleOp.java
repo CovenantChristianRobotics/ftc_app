@@ -110,8 +110,8 @@ public class CCHS4507TeleOp extends OpMode {
             } else {
                 trackLifter.setPower(0.2);
             }
-        } else if (gamepad1.right_trigger > 0.5) { // down
-            trackLifter.setPower(-0.2);
+        } else if (gamepad1.right_trigger > 0.1) { // down
+            trackLifter.setPower(-0.5 * gamepad1.right_trigger);
         } else {
             trackLifter.setPower(-0.0);
         }
@@ -148,5 +148,6 @@ public class CCHS4507TeleOp extends OpMode {
         telemetry.addData("liftCheck", liftCheck.isPressed());
         telemetry.addData("ENCLeft", Integer.toString(motorLeft.getCurrentPosition()));
         telemetry.addData("ENCRight", Integer.toString(motorRight.getCurrentPosition()));
+        telemetry.addData("trigger", gamepad1.right_trigger);
     }
 }

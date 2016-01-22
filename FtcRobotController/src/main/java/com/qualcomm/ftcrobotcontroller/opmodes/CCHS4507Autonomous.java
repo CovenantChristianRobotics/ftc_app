@@ -19,7 +19,8 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 public class CCHS4507Autonomous extends OpMode {
     enum MoveState {
         DELAY, STARTMOVE, MOVING, STARTTURN, TURNING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
-        FINDBEACON, CENTERBUCKET, DUMPTRUCK, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, ALIGNRAMP, DOWNTRACK, UPRAMP, DONE
+        FINDBEACON, CENTERBUCKET, DUMPTRUCK, OPENDOOR, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, ALIGNRAMP,
+        DOWNTRACK, UPRAMP, DONE
     }
 
     DcMotor motorRight;
@@ -32,6 +33,7 @@ public class CCHS4507Autonomous extends OpMode {
     Servo servoDist;
     Servo climberTriggerLeft;
     Servo climberTriggerRight;
+    Servo climberDoor;
     //Servo zipTieSweeper;
     ColorSensor ColorSense;
     ColorSensor colorGroundSense;
@@ -69,7 +71,7 @@ public class CCHS4507Autonomous extends OpMode {
     double countsPerMeter = 5361.0; // 10439;    // Found this experimentally: Measured one meter, drove distance, read counts
     int dumperCounterThresh = 8;       // Doesn't let the dumper counter get above a certain number
     double countsPerDonut = 7661.0; // 14161;    // Encoder counts per 360 degrees
-    int trackLifterDown = -1170;    // Counts when down, assuming up is 0 counts
+    double trackLifterCountsPerDegree = -1170.0 / 90.0;
 
     // Switches
     DigitalChannel nearMountainSwitch;
@@ -165,11 +167,7 @@ public class CCHS4507Autonomous extends OpMode {
         motorRight.setPower(targetSpeed);
     }
     void moveLifter (double degrees) {
-        if(degrees == 0) {
-
-        }
-
-
+        trackLifter.setTargetPosition(trackLifterUp + (int)(degrees * trackLifterCountsPerDegree));
     }
 
     @Override
@@ -184,6 +182,7 @@ public class CCHS4507Autonomous extends OpMode {
         servoDist = hardwareMap.servo.get("servoDist");
         climberTriggerLeft = hardwareMap.servo.get("trigLeft");
         climberTriggerRight = hardwareMap.servo.get("trigRight");
+        climberDoor = hardwareMap.servo.get("climberDoor");
         //zipTieSweeper = hardwareMap.servo.get("zipTieSweeper");
         ColorSense = hardwareMap.colorSensor.get("color");
         colorGroundSense = hardwareMap.colorSensor.get("colorGround");
@@ -213,8 +212,6 @@ public class CCHS4507Autonomous extends OpMode {
         if (liftCheck.isPressed()) {
             trackLifterUp = trackLifter.getCurrentPosition();
             trackLifter.setTargetPosition(trackLifterUp);
-        } else if(!liftCheck.isPressed()) {
-            trackLifter.setPower(0.2);
         }
         // tileFlag = tileliftCheckSwitch.getState();
         //if (tileSwitch.getState()) {
@@ -249,6 +246,7 @@ public class CCHS4507Autonomous extends OpMode {
         climberTriggerLeft.setPosition(0.5);
         climberTriggerRight.setPosition(0.5);
         armPivot.setPower(0.0);
+        climberDoor.setPosition(0.0);
         //servoBeaconPusher.setPosition(0.0);
         if (liftCheck.isPressed()) {
             trackLifterUp = trackLifter.getCurrentPosition();
@@ -438,13 +436,19 @@ public class CCHS4507Autonomous extends OpMode {
                     dumperCounter = 0;
                     // Target position reached; moving to next state
                     if (dumperPosition <= .25) {
-                        nextMove = MoveState.ROTATEFROMBEACON;
-                        currentMove = MoveState.MOVEDELAY;
+                        currentMove = MoveState.OPENDOOR;
                         telemetryMove = MoveState.DUMPTRUCK;
-                        moveDelayTime = 1000;
                     }
                 }
                 dumperCounter++;
+                break;
+
+            case OPENDOOR:
+                climberDoor.setPosition(0.25);
+                nextMove = MoveState.ROTATEFROMBEACON;
+                currentMove = MoveState.MOVEDELAY;
+                telemetryMove = MoveState.OPENDOOR;
+                moveDelayTime = 500;
                 break;
 
             case ROTATEFROMBEACON:
@@ -516,7 +520,7 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case DOWNTRACK:
-                trackLifter.setTargetPosition(trackLifterDown);
+                moveLifter(90.0);
                 moveDelayTime = 500;
                 currentMove = MoveState.MOVEDELAY;
                 nextMove = MoveState.UPRAMP;
