@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <Robot>
     <ServoController name="OmniPinionCtlr" serialNumber="AL00VTK3">
+		<Servo name="climber_dumper" port="3" />
         <Servo name="armLock" port="2" />
         <Servo name="rOmniPinion" port="5" />
         <Servo name="lOmniPinion" port="6" />

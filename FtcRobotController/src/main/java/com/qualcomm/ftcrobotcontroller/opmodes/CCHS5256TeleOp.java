@@ -1,4 +1,6 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
+import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
@@ -28,6 +30,8 @@ public class CCHS5256TeleOp extends OpMode {
     Servo rightOmniPinion;
     Servo armLock;
     Servo climberDumper;
+    double pre;
+    double post;
     //    Servo leftPlow;
 //    Servo rightPlow;
     //sensors
@@ -48,18 +52,21 @@ public class CCHS5256TeleOp extends OpMode {
 
     @Override
     public void init() {
+//        Log.i("pre message", Double.toString(climberDumper.getPosition()));
+
         //DcMotors
         leftDrive = hardwareMap.dcMotor.get("motorL");
         rightDrive = hardwareMap.dcMotor.get("motorR");
         endGameLights = hardwareMap.dcMotor.get("endGameLights");
         chinUp = hardwareMap.dcMotor.get("chinUp");
         //Servos
-        servoUltraSense = hardwareMap.servo.get("servoUltra");
+//        servoUltraSense = hardwareMap.servo.get("servoUltra");
         leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
         rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
+        pre = climberDumper.getPosition();
 //        leftPlow = hardwareMap.servo.get("lP");
 //        rightPlow = hardwareMap.servo.get("rP");
 //        rightPlow.setDirection(Servo.Direction.REVERSE);
@@ -77,7 +84,11 @@ public class CCHS5256TeleOp extends OpMode {
         rightOmniPinion.setPosition(0.5);
         armLock.setPosition(0.5);
         endGameTime = new ElapsedTime();
-        endGameLights.setPower(0.0);
+        endGameLights.setPower(0.5);
+        climberDumper.setDirection(Servo.Direction.FORWARD);
+        climberDumper.setPosition(0.55);
+        post = climberDumper.getPosition();
+//        Log.i("post message", Double.toString(climberDumper.getPosition()));
     }
 
     @Override
@@ -185,9 +196,9 @@ public class CCHS5256TeleOp extends OpMode {
 //        }
 
         if (gamepad2.y) {
-            climberDumper.setPosition(Range.clip((climberDumper.getPosition() + 0.01), 0.0, 1.0));
+            climberDumper.setPosition(0.55);
         } else if (gamepad2.x) {
-            climberDumper.setPosition(Range.clip((climberDumper.getPosition() - 0.01), 0.0, 1.0));
+            climberDumper.setPosition(1.0);
         }
 
         switch (currentControl) {
@@ -216,7 +227,7 @@ public class CCHS5256TeleOp extends OpMode {
 
             case ON:
                 if (endGameTime.time() > 90.0) {
-                    currentControl = ledControl.ENDGAME
+                    currentControl = ledControl.ENDGAME;
                 } else {
                     currentControl = ledControl.ON;
                 }
@@ -249,6 +260,9 @@ public class CCHS5256TeleOp extends OpMode {
         telemetry.addData("enc left", leftDrive.getCurrentPosition());
         telemetry.addData("enc right", rightDrive.getCurrentPosition());
         telemetry.addData("arm lock", armLock.getPosition());
+        telemetry.addData("climber dumper", climberDumper.getPosition());
+        telemetry.addData("pre", pre);
+        telemetry.addData("post", post);
 
     }
     @Override
