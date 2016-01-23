@@ -37,7 +37,6 @@ public class CCHS4507Autonomous extends OpMode {
     //Servo zipTieSweeper;
     ColorSensor ColorSense;
     ColorSensor colorGroundSense;
-    TouchSensor touchSense;
     MoveState currentMove;
     MoveState nextMove;
     MoveState telemetryMove;
@@ -52,9 +51,13 @@ public class CCHS4507Autonomous extends OpMode {
     boolean movingForward;
     boolean takeADump;
     boolean stowLifter;
+    boolean noSquiggle;
     double fastSpeed;
     double slowSpeed;
     double turnSpeed;
+    double xHeading;
+    double yHeading;
+    long gyroReadLast;
     long delayMillisec;
     long now;
     GyroSensor gyroSense;
@@ -120,6 +123,11 @@ public class CCHS4507Autonomous extends OpMode {
         int rightTarget;
         int leftTarget;
 
+        if (distanceCM > 150.0) {
+            noSquiggle = false;
+        } else {
+            noSquiggle = true;
+        }
         speed = targetSpeed;
         if (distanceCM > 0.0) {
             movingForward = true;
@@ -249,6 +257,9 @@ public class CCHS4507Autonomous extends OpMode {
         slowSpeed = 0.35;
         turnSpeed = 0.35;
         delayMillisec = 100;
+        xHeading = 0;
+        yHeading = 0;
+        gyroReadLast = System.currentTimeMillis();
         //zipTieSweeper.setPosition(.75);
         trackLifter.setPower(0.1);
         trackLifter.setTargetPosition(30);
@@ -262,7 +273,6 @@ public class CCHS4507Autonomous extends OpMode {
             trackLifterUp = trackLifter.getCurrentPosition();
             trackLifter.setTargetPosition(trackLifterUp);
         }
-
     }
 
     @Override
@@ -273,8 +283,11 @@ public class CCHS4507Autonomous extends OpMode {
         if (gyroSense.isCalibrating()) {
             return;
         }
-        switch (currentMove) {
+        now = System.currentTimeMillis();
+        xHeading = xHeading + ((double)(now - gyroReadLast) / 1000.0) * (double)gyroSense.rawX();
+        gyroReadLast = now;
 
+        switch (currentMove) {
             case STARTMOVE:
                 if (motorLeft.isBusy() && motorRight.isBusy()) {
                     currentMove = MoveState.MOVING;
@@ -311,10 +324,18 @@ public class CCHS4507Autonomous extends OpMode {
                     motorLeft.setPower(0.0);
                     currentMove = MoveState.MOVEDELAY;
                 }
-                if (!motorLeft.isBusy() || !motorRight.isBusy()) {
-                    motorRight.setPower(0.0);
-                    motorLeft.setPower(0.0);
-                    currentMove = MoveState.MOVEDELAY;
+                if (noSquiggle) {
+                     if (!motorLeft.isBusy() || !motorRight.isBusy()) {
+                         motorRight.setPower(0.0);
+                         motorLeft.setPower(0.0);
+                         currentMove = MoveState.MOVEDELAY;
+                     }
+                } else {
+                    if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+                        motorRight.setPower(0.0);
+                        motorLeft.setPower(0.0);
+                        currentMove = MoveState.MOVEDELAY;
+                    }
                 }
                 break;
 
@@ -522,9 +543,9 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case ALIGNRAMP:
-                moveTurn(0.0, turnSpeed);
+                moveTurn(180.0, turnSpeed);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DONE;  // TODO: This is DOWNTRACK
+                nextMove = MoveState.DOWNTRACK;
                 telemetryMove = MoveState.ALIGNRAMP;
                 break;
 
@@ -537,7 +558,7 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case UPRAMP:
-                moveStraight(100.0, slowSpeed);
+                moveStraight(-100.0, slowSpeed);
                 trackLifter.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
                 trackLifter.setPower(0.0);
                 trackLifter.setPowerFloat();
@@ -564,11 +585,8 @@ public class CCHS4507Autonomous extends OpMode {
         telemetry.addData("Current Move", telemetryMove.toString());
         telemetry.addData("desiredHeading", Integer.toString(desiredHeading));
         telemetry.addData("gyro", Integer.toString(gyroSense.getHeading()));
-        telemetry.addData("time", Long.toString(System.currentTimeMillis()));//This was a float also and would not work to change it to a integer
-        telemetry.addData("delayUntil", Long.toString(delayUntil)); // This was a float did not work to change it to a integer
-        telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
+        telemetry.addData("gyro", Integer.toString(gyroSense.rawX()));
         telemetry.addData("liftCheck", liftCheck.isPressed());
-        telemetry.addData("delayPot", delayPot.getValue());
 
         Log.i("Current Move", currentMove.toString());
         Log.i("desiredHeading", Integer.toString(desiredHeading));
