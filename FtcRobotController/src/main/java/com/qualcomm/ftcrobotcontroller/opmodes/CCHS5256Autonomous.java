@@ -7,18 +7,14 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-
-import java.util.Date;
 
 /**
  * Created by Robotics on 1/19/2016.
@@ -30,7 +26,7 @@ public class CCHS5256Autonomous extends OpMode {
 
     enum MoveState {
         STARTMOVE, MOVINGSTRAIGHT, STARTTURN, MOVINGTURN, DELAYSETTINGS, DELAY,
-        INITIALIZEROBOT, CHOOSEMOVE, FIRSTMOVE, TURNDIAG, MOVEDIAG, TURNONCOLOREDLINE, FOLLOWLINE,
+        INITIALIZEROBOT, CHOOSEMOVE, FIRSTMOVE, TURNDIAG, MOVEDIAG, TURNONCOLOREDLINE, GOTOWHITELINE,
         TURNTOBEACON, DRIVETOBEACON, READBEACON, PUSHBUTTON, UNPUSHBUTTON, BACKUP,
         DUMPCLIMBERS,BACKUPFARTHER, TURNALONGLINE, DRIVEALONGLINE, TURNTOMOUNTAIN,
         DRIVETOMOUNTAIN, GOUPMOUNTAIN, PREPTELEOP, DONE
@@ -48,18 +44,19 @@ public class CCHS5256Autonomous extends OpMode {
     Servo ultraSenseServo;
     Servo leftOmniPinion;
     Servo rightOmniPinion;
+//    Servo leftPlow;
+//    Servo rightPlow;
     // Sensors
     GyroSensor gyroSense;
-    ColorSensor colorSense;
-//    ColorSensor lFColorSense;
-//    ColorSensor rFColorSense;
+//    ColorSensor colorSense;
+    ColorSensor fColorSense;
     UltrasonicSensor ultraSense;
     // Switches
-    DigitalChannel nearMtnSwitch;
-    DigitalChannel redBlueBeaconSwitch;
-    DigitalChannel delayPotSwitch;
-    DigitalChannel thirdTileSwitch;
-    AnalogInput delayPotentiometer;
+//    DigitalChannel nearMtnSwitch;
+//    DigitalChannel redBlueBeaconSwitch;
+//    DigitalChannel delayPotSwitch;
+//    DigitalChannel thirdTileSwitch;
+//    AnalogInput delayPotentiometer;
     double diagMtnDist;
     double turnMtnDist;
     double toMtnDist;
@@ -89,6 +86,7 @@ public class CCHS5256Autonomous extends OpMode {
     double turnSpeed;
     boolean lookingForRedFlag;
     boolean lookingForBlueFlag;
+    boolean lookingForWhiteLine;
     // Elapsed Time
     ElapsedTime currentTime;
     // Method Variables
@@ -217,6 +215,8 @@ public class CCHS5256Autonomous extends OpMode {
         ultraSenseServo = hardwareMap.servo.get("servoUltra");
         leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
         rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
+//        leftPlow = hardwareMap.servo.get("lP");
+//        rightPlow = hardwareMap.servo.get("rP");
         // Servo Settings
         beaconPinion.setPosition(0.5);
         beaconPusher.setPosition(0.3);
@@ -224,66 +224,83 @@ public class CCHS5256Autonomous extends OpMode {
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
+//        leftPlow.setPosition(0.5);
+//        rightPlow.setPosition(0.5);
         // Sensors
         gyroSense = hardwareMap.gyroSensor.get("gyroSense");
-        colorSense = hardwareMap.colorSensor.get("bColorSense");
-//        lFColorSense = hardwareMap.colorSensor.get("lFCS");
-//        rFColorSense = hardwareMap.colorSensor.get("rFCS");
+//        colorSense = hardwareMap.colorSensor.get("bColorSense");
+        fColorSense = hardwareMap.colorSensor.get("fCS");
         ultraSense = hardwareMap.ultrasonicSensor.get("fUltraSense");
         // Switches
-        nearMtnSwitch = hardwareMap.digitalChannel.get("nMtnSw");
-        redBlueBeaconSwitch = hardwareMap.digitalChannel.get("rBSw");
-        delayPotSwitch = hardwareMap.digitalChannel.get("dPotSw");
-        thirdTileSwitch = hardwareMap.digitalChannel.get("tileSw");
-        delayPotentiometer = hardwareMap.analogInput.get("delPot");
+//        nearMtnSwitch = hardwareMap.digitalChannel.get("nMtnSw");
+//        redBlueBeaconSwitch = hardwareMap.digitalChannel.get("rBSw");
+//        delayPotSwitch = hardwareMap.digitalChannel.get("dPotSw");
+//        thirdTileSwitch = hardwareMap.digitalChannel.get("tileSw");
+//        delayPotentiometer = hardwareMap.analogInput.get("delPot");
         // Set Switch Flags
-        if (redBlueBeaconSwitch.getState()) {   // WE ARE RED
-            redBlue = 1.0;
+//        if (redBlueBeaconSwitch.getState()) {   // WE ARE RED
+//            redBlue = 1.0;
+//            ultraSenseServo.setPosition(0.25);
+//            redAlliance = true;
+//            blueAlliance = false;
+//        } else {                                // WE ARE BLUE
+//            redBlue = -1.0;
+//            ultraSenseServo.setPosition(0.75);
+//            redAlliance = false;
+//            blueAlliance = true;
+//        }
+        redBlue = 1.0;
             ultraSenseServo.setPosition(0.25);
             redAlliance = true;
             blueAlliance = false;
-        } else {                                // WE ARE BLUE
-            redBlue = -1.0;
-            ultraSenseServo.setPosition(0.75);
-            redAlliance = false;
-            blueAlliance = true;
-        }
-
-        if (nearMtnSwitch.getState()) {         // WE GO TO NEAR MOUNTAIN
-            diagMtnDist = 0.0;
+//
+//        if (nearMtnSwitch.getState()) {         // WE GO TO NEAR MOUNTAIN
+//            diagMtnDist = 0.0;
+//            turnMtnDist = -90.0;
+//            toMtnDist = 100.0;
+//            nearMountain = true;
+//            farMountain = false;
+//        } else {                                // WE GO TO FAR MOUNTAIN
+//            diagMtnDist = 50.0;
+//            turnMtnDist = 90.0;
+//            toMtnDist = 200.0;
+//            nearMountain = false;
+//            farMountain = true;
+//        }
+        diagMtnDist = 0.0;
             turnMtnDist = -90.0;
             toMtnDist = 100.0;
             nearMountain = true;
             farMountain = false;
-        } else {                                // WE GO TO FAR MOUNTAIN
-            diagMtnDist = 50.0;
-            turnMtnDist = 90.0;
-            toMtnDist = 200.0;
-            nearMountain = false;
-            farMountain = true;
-        }
-
-        if (delayPotSwitch.getState()) {        // WE DELAY
-            delay = (delayPotentiometer.getValue() * (10000 / 1024));
-            delayRobot = true;
-        } else {                                // WE DON'T DELAY
-            delay = 0.0;
+//
+//        if (delayPotSwitch.getState()) {        // WE DELAY
+//            delay = (delayPotentiometer.getValue() * (10000 / 1024));
+//            delayRobot = true;
+//        } else {                                // WE DON'T DELAY
+//            delay = 0.0;
+//            delayRobot = false;
+//        }
+        delay = 0.0;
             delayRobot = false;
-        }
-
-        if (thirdTileSwitch.getState()) {       // WE ARE ON THE THIRD TILE FROM THE MOUNTAIN CORNER
+//
+//        if (thirdTileSwitch.getState()) {       // WE ARE ON THE THIRD TILE FROM THE MOUNTAIN CORNER
+//            firstMoveDist = 30.38;
+//            turnDiagDegrees = 45.0;
+//            moveDiagDist = 0.0;
+//            thirdTile = true;
+//            fourthTile = false;
+//        } else {                                // WE ARE ON THE FOURTH TILE FROM THE MOUNTAIN CORNER
+//            firstMoveDist = 0.0;
+//            turnDiagDegrees = 0.0;
+//            moveDiagDist = 30.38;
+//            thirdTile = false;
+//            fourthTile = true;
+//        }
             firstMoveDist = 30.38;
             turnDiagDegrees = 45.0;
             moveDiagDist = 0.0;
             thirdTile = true;
             fourthTile = false;
-        } else {                                // WE ARE ON THE FOURTH TILE FROM THE MOUNTAIN CORNER
-            firstMoveDist = 0.0;
-            turnDiagDegrees = 0.0;
-            moveDiagDist = 30.38;
-            thirdTile = false;
-            fourthTile = true;
-        }
 
         // State Machine Settings
         fastSpeed = 0.8;
@@ -291,10 +308,11 @@ public class CCHS5256Autonomous extends OpMode {
         slowSpeed = 0.2;
         turnSpeed = 0.6;
         commonDelayTime = 150;
+        lookingForWhiteLine = false;
         // Elapsed Time
         currentTime = new ElapsedTime();
         // log switch positions
-        Log.i("delay", Double.toString(delay));
+//        Log.i("delay", Double.toString(delay));
         // Calibrate Gyro
         gyroSense.calibrate();
         while (gyroSense.isCalibrating()) {
@@ -318,6 +336,13 @@ public class CCHS5256Autonomous extends OpMode {
                 break;
 
             case MOVINGSTRAIGHT:
+                if (lookingForWhiteLine) {
+                    if (fColorSense.red() >= 4.0 && fColorSense.blue() >= 4.0 && fColorSense.green() >= 4.0) {
+                        leftDrive.setPower(0.0);
+                        rightDrive.setPower(0.0);
+                        currentMove = MoveState.DELAYSETTINGS;
+                    }
+                }
                 gyroError = desiredHeading - gyroSense.getHeading();
                 if (gyroError > 180) {
                     gyroError = 360 - gyroError;
@@ -330,22 +355,22 @@ public class CCHS5256Autonomous extends OpMode {
                 }
                 rightDrive.setPower(Range.clip(speed + (gyroError * 0.2), -1.0, 1.0));
                 leftDrive.setPower(Range.clip(speed - (gyroError * 0.2), -1.0, 1.0));
-                if (colorSense.blue() >= 1) {
+//                if (colorSense.blue() >= 1) {
 //                    sawBlueFlag = true;
-                }
-                if (colorSense.red() >= 1) {
+//                }
+//                if (colorSense.red() >= 1) {
 //                    sawRedFlag = true;
-                }
-                if (lookingForRedFlag && (colorSense.red() >= 1))  {
-                    rightDrive.setPower(0.0);
-                    leftDrive.setPower(0.0);
-                    currentMove = MoveState.DELAYSETTINGS;
-                }
-                if (lookingForBlueFlag && (colorSense.blue() >= 1))  {
-                    rightDrive.setPower(0.0);
-                    leftDrive.setPower(0.0);
-                    currentMove = MoveState.DELAYSETTINGS;
-                }
+//                }
+//                if (lookingForRedFlag && (colorSense.red() >= 1))  {
+//                    rightDrive.setPower(0.0);
+//                    leftDrive.setPower(0.0);
+//                    currentMove = MoveState.DELAYSETTINGS;
+//                }
+//                if (lookingForBlueFlag && (colorSense.blue() >= 1))  {
+//                    rightDrive.setPower(0.0);
+//                    leftDrive.setPower(0.0);
+//                    currentMove = MoveState.DELAYSETTINGS;
+//                }
                 if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
                     currentMove = MoveState.DELAYSETTINGS;
                 }
@@ -427,9 +452,11 @@ public class CCHS5256Autonomous extends OpMode {
 
             case MOVEDIAG:
                 // Move straight 70 + moveDiagDist to red
-                moveStraight(70 + moveDiagDist, fastSpeed);
+                lookingForWhiteLine = true;
+                moveStraight(180 + moveDiagDist, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.TURNONCOLOREDLINE;
+//                nextMove = MoveState.TURNONCOLOREDLINE;
+                nextMove = MoveState.DONE;
                 telemetryMove = MoveState.MOVEDIAG;
                 moveDelayTime = commonDelayTime;
                 break;
@@ -438,15 +465,16 @@ public class CCHS5256Autonomous extends OpMode {
                 // Move Turn -45 degrees
                 moveTurn(-45.0, turnSpeed);
                 currentMove = MoveState.STARTTURN;
-                nextMove = MoveState.FOLLOWLINE;
+                nextMove = MoveState.GOTOWHITELINE;
                 telemetryMove = MoveState.TURNONCOLOREDLINE;
                 moveDelayTime = commonDelayTime;
                 break;
 
-            case FOLLOWLINE:
+            case GOTOWHITELINE:
                 // Move Straight to white line
+                lookingForWhiteLine = true;
                 nextMove = MoveState.TURNTOBEACON;
-                telemetryMove = MoveState.FOLLOWLINE;
+                telemetryMove = MoveState.GOTOWHITELINE;
                 moveDelayTime = commonDelayTime;
                 break;
 

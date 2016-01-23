@@ -29,11 +29,12 @@ public class CCHS5256TeleOp extends OpMode {
     Servo rightOmniPinion;
     Servo armLock;
     Servo climberDumper;
-    double pre;
-    double post;
     //    Servo leftPlow;
 //    Servo rightPlow;
     //sensors
+    // Speed functions
+    boolean speedUp;
+    boolean slowDown;
     //StateMachine Options
     ledControl currentControl;
     ledControl nextControl;
@@ -51,25 +52,25 @@ public class CCHS5256TeleOp extends OpMode {
 
     @Override
     public void init() {
-//        Log.i("pre message", Double.toString(climberDumper.getPosition()));
-
         //DcMotors
         leftDrive = hardwareMap.dcMotor.get("motorL");
         rightDrive = hardwareMap.dcMotor.get("motorR");
         endGameLights = hardwareMap.dcMotor.get("endGameLights");
         chinUp = hardwareMap.dcMotor.get("chinUp");
         //Servos
-//        servoUltraSense = hardwareMap.servo.get("servoUltra");
+        servoUltraSense = hardwareMap.servo.get("servoUltra");
         leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
         rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
-        pre = climberDumper.getPosition();
 //        leftPlow = hardwareMap.servo.get("lP");
 //        rightPlow = hardwareMap.servo.get("rP");
 //        rightPlow.setDirection(Servo.Direction.REVERSE);
         //sensors
+        // speed functions
+        speedUp = false;
+        slowDown = false;
         //motor configurations
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
         leftDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
@@ -86,8 +87,6 @@ public class CCHS5256TeleOp extends OpMode {
         endGameLights.setPower(0.5);
         climberDumper.setDirection(Servo.Direction.FORWARD);
         climberDumper.setPosition(0.55);
-        post = climberDumper.getPosition();
-//        Log.i("post message", Double.toString(climberDumper.getPosition()));
     }
 
     @Override
@@ -95,7 +94,7 @@ public class CCHS5256TeleOp extends OpMode {
 
         double left = gamepad1.left_stick_y;
         double right = gamepad1.right_stick_y;
-        double hang = gamepad1.left_stick_x;
+        double hang = gamepad2.left_stick_y;
         float omniWheels = gamepad2.left_stick_y;
         float rightStickPos = -gamepad1.right_stick_y;
         float rightStickNeg = -gamepad1.right_stick_y;
@@ -117,10 +116,20 @@ public class CCHS5256TeleOp extends OpMode {
             rightStickNeg = gamepad1.right_stick_y;
         }
 
-        if (gamepad1.right_trigger > 0.5) {
+        if (gamepad1.left_bumper && !slowDown) {
+            slowDown = true;
+        } else if (gamepad1.right_bumper && !speedUp) {
+            speedUp = true;
+        } else if (gamepad1.left_bumper && slowDown) {
+            slowDown = false;
+        } else if (gamepad1.right_bumper && speedUp) {
+            speedUp = true;
+        }
+
+        if (speedUp) {
             left = (float) fast(left);
             right = (float) fast(right);
-        } else if (gamepad1.left_trigger > 0.5) {
+        } else if (slowDown) {
             left = (float) slow(left);
             right = (float) slow(right);
         } else if (gamepad1.dpad_up) {
@@ -132,10 +141,10 @@ public class CCHS5256TeleOp extends OpMode {
         } else if (gamepad1.dpad_right) {
             left = -0.1;
             right = 0.1;
-            if (gamepad1.right_trigger > 0.5) {
+            if (speedUp) {
                 left = (double) fast(left);
                 right = (double) fast(right);
-            } else if (gamepad1.left_trigger > 0.5) {
+            } else if (slowDown) {
                 left = (double) slow(left);
                 right = (double) slow(right);
             } else {
@@ -145,10 +154,10 @@ public class CCHS5256TeleOp extends OpMode {
         } else if (gamepad1.dpad_left) {
             left = 0.1;
             right = -0.1;
-            if (gamepad1.right_trigger > 0.5) {
+            if (speedUp) {
                 left = (double) fast(left);
                 right = (double) fast(right);
-            } else if (gamepad1.left_trigger > 0.5) {
+            } else if (slowDown) {
                 left = (float) slow(left);
                 right = (float) slow(right);
             }
@@ -157,15 +166,10 @@ public class CCHS5256TeleOp extends OpMode {
             right = (float) medium(right);
         }
 
-        if (gamepad1.y) {
+        if (gamepad2.right_bumper) {
             chinUp.setPower(hang);
         } else {
             chinUp.setPower(0.0);
-        }
-
-        if (gamepad1.x) {
-            leftDrive.setPower(0.05);
-            rightDrive.setPower(0.05);
         }
 
         if (gamepad2.a) {
@@ -186,10 +190,10 @@ public class CCHS5256TeleOp extends OpMode {
             rightOmniPinion.setPosition((gamepad2.right_stick_y / 2) + 0.5);
         }
 
-//        if (gamepad2.y) {
+//        if (gamepad1.b) {
 //            leftPlow.setPosition(Range.clip((leftPlow.getPosition() + 0.01), 0.0, 1.0));
 //            rightPlow.setPosition(Range.clip((rightPlow.getPosition() + 0.01), 0.0, 1.0));
-//        } else if (gamepad2.x) {
+//        } else if (gamepad1.a) {
 //            leftPlow.setPosition(Range.clip((leftPlow.getPosition() - 0.01), 0.0, 1.0));
 //            rightPlow.setPosition(Range.clip((rightPlow.getPosition() - 0.01), 0.0, 1.0));
 //        }
@@ -260,8 +264,8 @@ public class CCHS5256TeleOp extends OpMode {
         telemetry.addData("enc right", rightDrive.getCurrentPosition());
         telemetry.addData("arm lock", armLock.getPosition());
         telemetry.addData("climber dumper", climberDumper.getPosition());
-        telemetry.addData("pre", pre);
-        telemetry.addData("post", post);
+        telemetry.addData("slow down", slowDown);
+        telemetry.addData("speed up", speedUp);
 
     }
     @Override
