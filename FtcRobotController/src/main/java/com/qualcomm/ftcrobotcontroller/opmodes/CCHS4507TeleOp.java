@@ -29,6 +29,7 @@ public class CCHS4507TeleOp extends OpMode {
     Servo climberTriggerLeft;
     Servo climberTriggerRight;
     Servo climberDoor;
+    Servo cowCatcher;
     //Servo zipTieSweeper;
 
     //Sensors
@@ -42,6 +43,7 @@ public class CCHS4507TeleOp extends OpMode {
     DigitalChannel redBlueSwitch;
     boolean nearMountainFlag = false;
     boolean redAllianceFlag = false;
+    boolean cowCatcherUp = false;
     int trackLifterUp = 0;
     int trackLifterDown = -1170;
 
@@ -62,6 +64,7 @@ public class CCHS4507TeleOp extends OpMode {
         servoDist = hardwareMap.servo.get("servoDist");
         climberTriggerLeft = hardwareMap.servo.get("trigLeft");
         climberTriggerRight = hardwareMap.servo.get("trigRight");
+        cowCatcher = hardwareMap.servo.get("cowCatcher");
         //zipTieSweeper = hardwareMap.servo.get("zipTieSweeper");
         ColorSense = hardwareMap.colorSensor.get("color");
         nearMountainSwitch = hardwareMap.digitalChannel.get("nearMtnSw");
@@ -119,6 +122,15 @@ public class CCHS4507TeleOp extends OpMode {
         } else {
             trackLifter.setPower(-0.0);
         }
+        if (gamepad1.left_bumper) {
+            cowCatcher.setPosition(0.75);
+//            cowCatcherUp = true;
+        } else if (gamepad1.left_trigger > 0.5) {
+//            cowCatcherUp = false;
+            cowCatcher.setPosition(0.3);
+//        } else if (!cowCatcherUp) {
+//            cowCatcher.setPosition(0.2);
+        }
 
         armPivot.setPower(gamepad2.right_stick_x / 4.0);
         armExtend.setPower(-gamepad2.left_stick_y);
@@ -140,14 +152,14 @@ public class CCHS4507TeleOp extends OpMode {
         }
 
         if (gamepad2.a) {
-            servoClimberDumper.setPosition(0.25);
+            servoClimberDumper.setPosition(0.1);
         } else {
            servoClimberDumper.setPosition(1.0);
         }
         if (gamepad2.b) {
             climberDoor.setPosition(0.5);
         } else {
-            climberDoor.setPosition(0.0);
+            climberDoor.setPosition(0.2);
         }
         if (gamepad2.y) {
             //zipTieSweeper.setPosition(.75);
