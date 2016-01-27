@@ -89,7 +89,7 @@ public class SpareParts5256Autonomous extends OpMode {
     //    int tile;
     ElapsedTime matchTime;
 
-    //delay settings
+    //delayMillisec settings
     long delayUntil;
     long moveDelayTime;
     Date now;

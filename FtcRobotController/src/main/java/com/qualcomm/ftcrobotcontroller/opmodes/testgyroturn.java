@@ -98,7 +98,7 @@ public class testgyroturn extends OpMode {
     //    int tile;
     ElapsedTime matchTime;
 
-    //delay settings
+    //delayMillisec settings
     long delayUntil;
     long moveDelayTime;
     Date now;
@@ -410,7 +410,7 @@ public class testgyroturn extends OpMode {
         telemetry.addData("ENCLeft", (float) leftDrive.getCurrentPosition());
         telemetry.addData("ENCRight", (float) rightDrive.getCurrentPosition());
         telemetry.addData("Gyro Heading", gyroSense.getHeading());
-        telemetry.addData("delay pot", delayTime);
+        telemetry.addData("delayMillisec pot", delayTime);
         telemetry.addData("elapsed time", matchTime.time());
     }
 
