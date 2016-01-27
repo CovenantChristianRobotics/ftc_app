@@ -20,7 +20,7 @@ public class CCHS4507Autonomous extends OpMode {
     enum MoveState {
         DELAY, STARTMOVE, MOVING, STARTTURN, TURNING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
         FINDBEACON, CENTERBUCKET, DUMPTRUCK, OPENDOOR, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, ALIGNRAMP,
-        DOWNTRACK, UPRAMP, DONE
+        DOWNTRACK, UPRAMP, STRAIGHTTORAMP, STRAIGHTTORAMPTURN, DONE
     }
 
     DcMotor motorRight;
@@ -46,6 +46,7 @@ public class CCHS4507Autonomous extends OpMode {
     boolean sawBlueFlag;
     boolean sawRedFlag;
     boolean fourthTileFlag;
+    boolean toMountainFlag;
     long delayUntil;
     double speed;
     boolean movingForward;
@@ -81,7 +82,7 @@ public class CCHS4507Autonomous extends OpMode {
     // Switches
     DigitalChannel nearMountainSwitch;
     DigitalChannel redBlueSwitch;
-    // DigitalChannel delaySwitch;
+    DigitalChannel toMountainSwitch;
     DigitalChannel fourthTileSwitch;
 
     // Analog Inputs
@@ -90,7 +91,6 @@ public class CCHS4507Autonomous extends OpMode {
     int trackLifterUp = 0;
     boolean nearMountainFlag = false;
     boolean redAlliance = false;
-   // long delayTimeFlag = 10;
 
 
     public CCHS4507Autonomous() {
@@ -203,7 +203,7 @@ public class CCHS4507Autonomous extends OpMode {
         colorGroundSense = hardwareMap.colorSensor.get("colorGround");
         nearMountainSwitch = hardwareMap.digitalChannel.get("nearMtnSw");
         redBlueSwitch = hardwareMap.digitalChannel.get("rbSw");
-        // delaySwitch = hardwareMap.digitalChannel.get("dSw")
+        toMountainSwitch = hardwareMap.digitalChannel.get("mntSw");
         fourthTileSwitch = hardwareMap.digitalChannel.get("fourthTileSw");
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
         gyroSense = hardwareMap.gyroSensor.get("gyro");
@@ -213,6 +213,7 @@ public class CCHS4507Autonomous extends OpMode {
         moveDelayTime = (long)(delayPot.getValue() * (15000 / 1024));
         nearMountainFlag = nearMountainSwitch.getState();
         fourthTileFlag = fourthTileSwitch.getState();
+        toMountainFlag = toMountainSwitch.getState();
         if (redBlueSwitch.getState()) { //This is for when we're going to blue
             redAlliance = false;
             lookingForRedFlag = false;
@@ -243,7 +244,11 @@ public class CCHS4507Autonomous extends OpMode {
         motorLeft.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         armPivot.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-        nextMove = MoveState.FIRSTMOVE;
+        if (toMountainFlag == true) {
+            nextMove = MoveState.STRAIGHTTORAMP;
+        } else {
+            nextMove = MoveState.FIRSTMOVE;
+        }
         currentMove = MoveState.MOVEDELAY;
         telemetryMove = MoveState.MOVEDELAY;
         sawRedFlag = false;
@@ -260,7 +265,6 @@ public class CCHS4507Autonomous extends OpMode {
         xHeading = 0;
         yHeading = 0;
         gyroReadLast = System.currentTimeMillis();
-        //zipTieSweeper.setPosition(.75);
         trackLifter.setPower(0.1);
         trackLifter.setTargetPosition(30);
         servoClimberDumper.setPosition(1.0);
@@ -547,6 +551,25 @@ public class CCHS4507Autonomous extends OpMode {
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DOWNTRACK;
                 telemetryMove = MoveState.ALIGNRAMP;
+                break;
+
+            case STRAIGHTTORAMP:
+                moveStraight(142.0, fastSpeed);
+                moveDelayTime = delayMillisec;
+                currentMove = MoveState.MOVEDELAY;
+                nextMove = MoveState.STRAIGHTTORAMPTURN;
+                telemetryMove = MoveState.STRAIGHTTORAMP;
+                break;
+
+            case STRAIGHTTORAMPTURN:
+                if (redAlliance) {
+                    moveTurn(-90.0, turnSpeed);
+                } else {
+                    moveTurn(90.0, turnSpeed);
+                }
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DOWNTRACK;
+                telemetryMove = MoveState.STRAIGHTTORAMPTURN;
                 break;
 
             case DOWNTRACK:
