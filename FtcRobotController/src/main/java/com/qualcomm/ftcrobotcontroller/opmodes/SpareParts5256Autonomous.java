@@ -20,7 +20,7 @@ import java.util.Date;
 public class SpareParts5256Autonomous extends OpMode {
     enum MoveState {
         STARTMOVE, MOVING, MOVEDELAY, DELAY, FIRSTMOVE, TURNDIAG, MOVEDIAGNEAR, MOVEDIAGFAR,
-        TURNTONEARMOUNTAIN, TURNTOFARMOUNTAIN, DRIVETOMOUNTAIN, CLIMBMOUNTAIN, DONE
+        TURNTONEARMOUNTAIN, TURNTOFARMOUNTAIN, DRIVETONEARMOUNTAIN, DRIVETOFARMOUNTAIN, CLIMBMOUNTAIN, DONE
     }
 
     //dc motors
@@ -75,6 +75,7 @@ public class SpareParts5256Autonomous extends OpMode {
     int nearMtn;
     int redBlue;
     double mountainDist;
+    double upMountainDist;
     int delay = 101;
     long delayTime;
     boolean redAlliance = false;
@@ -290,7 +291,7 @@ public class SpareParts5256Autonomous extends OpMode {
                 break;
 
             case FIRSTMOVE:
-                moveStraight(30.48, fastSpeed);
+                moveStraight(91.44, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNDIAG;
                 telemetryMove = MoveState.FIRSTMOVE;
@@ -306,7 +307,7 @@ public class SpareParts5256Autonomous extends OpMode {
                 break;
 
             case MOVEDIAGNEAR:
-                moveStraight(57.11, fastSpeed);
+                moveStraight(121.92, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNTONEARMOUNTAIN;
                 telemetryMove = MoveState.MOVEDIAGNEAR;
@@ -314,7 +315,7 @@ public class SpareParts5256Autonomous extends OpMode {
                 break;
 
             case MOVEDIAGFAR:
-                moveStraight(14, fastSpeed);
+                moveStraight(60.96, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNTOFARMOUNTAIN;
                 telemetryMove = MoveState.MOVEDIAGFAR;
@@ -324,7 +325,7 @@ public class SpareParts5256Autonomous extends OpMode {
             case TURNTONEARMOUNTAIN:
                 moveTurn(-90.0 * redBlue, turnSpeed);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DRIVETOMOUNTAIN;
+                nextMove = MoveState.DRIVETONEARMOUNTAIN;
                 telemetryMove = MoveState.TURNTONEARMOUNTAIN;
                 moveDelayTime = delay;
                 break;
@@ -332,20 +333,29 @@ public class SpareParts5256Autonomous extends OpMode {
             case TURNTOFARMOUNTAIN:
                 moveTurn(-90.0 * redBlue, turnSpeed);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DRIVETOMOUNTAIN;
+                nextMove = MoveState.DRIVETOFARMOUNTAIN;
                 telemetryMove = MoveState.TURNTOFARMOUNTAIN;
                 moveDelayTime = delay;
                 break;
 
-            case DRIVETOMOUNTAIN:
-                moveStraight(81.28, fastSpeed);
+            case DRIVETONEARMOUNTAIN:
+                moveStraight(106.68, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.CLIMBMOUNTAIN;
-                telemetryMove = MoveState.DRIVETOMOUNTAIN;
+                telemetryMove = MoveState.DRIVETONEARMOUNTAIN;
+                moveDelayTime = delay;
+                break;
+
+            case DRIVETOFARMOUNTAIN:
+                moveStraight(180.34,fastSpeed);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.CLIMBMOUNTAIN;
+                telemetryMove = MoveState.DRIVETOFARMOUNTAIN;
                 moveDelayTime = delay;
                 break;
 
             case CLIMBMOUNTAIN:
+                moveStraight(upMountainDist, fastSpeed);
                 nextMove = MoveState.DONE;
                 telemetryMove = MoveState.CLIMBMOUNTAIN;
                 break;
@@ -368,4 +378,3 @@ public class SpareParts5256Autonomous extends OpMode {
     public void stop() {
     }
 }
-
