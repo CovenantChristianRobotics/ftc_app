@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
@@ -38,22 +39,23 @@ public class CCHS5256Autonomous extends OpMode {
     DcMotor chinUp;
     DcMotor endGameLights;
     // Servos
-    Servo beaconPinion;
-    Servo beaconPusher;
+    Servo armLock;
     Servo climberDumper;
     Servo ultraSenseServo;
     Servo leftOmniPinion;
     Servo rightOmniPinion;
-//    Servo leftPlow;
-//    Servo rightPlow;
+    Servo leftPlow;
+    Servo rightPlow;
+    Servo leftTrigger;
+    Servo rightTrigger;
     // Sensors
     GyroSensor gyroSense;
 //    ColorSensor colorSense;
     ColorSensor fColorSense;
     UltrasonicSensor ultraSense;
     // Switches
-//    DigitalChannel nearMtnSwitch;
-//    DigitalChannel redBlueBeaconSwitch;
+    DigitalChannel nearMtnSwitch;
+    DigitalChannel redBlueBeaconSwitch;
 //    DigitalChannel delayPotSwitch;
 //    DigitalChannel thirdTileSwitch;
 //    AnalogInput delayPotentiometer;
@@ -72,6 +74,8 @@ public class CCHS5256Autonomous extends OpMode {
     boolean thirdTile;
     boolean fourthTile;
     boolean delayRobot;
+    boolean lookingWithUltraSense;
+    double targetReading;
     // State Machine Settings
     MoveState currentMove;
     MoveState nextMove;
@@ -209,69 +213,60 @@ public class CCHS5256Autonomous extends OpMode {
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         endGameLights.setPower(1.0);
         // Servos
-        beaconPinion = hardwareMap.servo.get("beaconPinion");
-        beaconPusher = hardwareMap.servo.get("beaconPusher");
+        armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
         ultraSenseServo = hardwareMap.servo.get("servoUltra");
         leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
         rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
-//        leftPlow = hardwareMap.servo.get("lP");
-//        rightPlow = hardwareMap.servo.get("rP");
+        leftPlow = hardwareMap.servo.get("lP");
+        rightPlow = hardwareMap.servo.get("rP");
+        leftTrigger = hardwareMap.servo.get("lT");
+        rightTrigger = hardwareMap.servo.get("rT");
         // Servo Settings
-        beaconPinion.setPosition(0.5);
-        beaconPusher.setPosition(0.3);
+        armLock.setPosition(0.5);
         climberDumper.setPosition(0.5);
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
-//        leftPlow.setPosition(0.5);
-//        rightPlow.setPosition(0.5);
+        leftPlow.setPosition(0.5);
+        rightPlow.setPosition(0.5);
         // Sensors
         gyroSense = hardwareMap.gyroSensor.get("gyroSense");
 //        colorSense = hardwareMap.colorSensor.get("bColorSense");
         fColorSense = hardwareMap.colorSensor.get("fCS");
         ultraSense = hardwareMap.ultrasonicSensor.get("fUltraSense");
         // Switches
-//        nearMtnSwitch = hardwareMap.digitalChannel.get("nMtnSw");
-//        redBlueBeaconSwitch = hardwareMap.digitalChannel.get("rBSw");
+        nearMtnSwitch = hardwareMap.digitalChannel.get("nMtnSw");
+        redBlueBeaconSwitch = hardwareMap.digitalChannel.get("rBSw");
 //        delayPotSwitch = hardwareMap.digitalChannel.get("dPotSw");
 //        thirdTileSwitch = hardwareMap.digitalChannel.get("tileSw");
 //        delayPotentiometer = hardwareMap.analogInput.get("delPot");
         // Set Switch Flags
-//        if (redBlueBeaconSwitch.getState()) {   // WE ARE RED
-//            redBlue = 1.0;
-//            ultraSenseServo.setPosition(0.25);
-//            redAlliance = true;
-//            blueAlliance = false;
-//        } else {                                // WE ARE BLUE
-//            redBlue = -1.0;
-//            ultraSenseServo.setPosition(0.75);
-//            redAlliance = false;
-//            blueAlliance = true;
-//        }
-        redBlue = 1.0;
+        if (redBlueBeaconSwitch.getState()) {   // WE ARE RED
+            redBlue = 1.0;
             ultraSenseServo.setPosition(0.25);
             redAlliance = true;
             blueAlliance = false;
-//
-//        if (nearMtnSwitch.getState()) {         // WE GO TO NEAR MOUNTAIN
-//            diagMtnDist = 0.0;
-//            turnMtnDist = -90.0;
-//            toMtnDist = 100.0;
-//            nearMountain = true;
-//            farMountain = false;
-//        } else {                                // WE GO TO FAR MOUNTAIN
-//            diagMtnDist = 50.0;
-//            turnMtnDist = 90.0;
-//            toMtnDist = 200.0;
-//            nearMountain = false;
-//            farMountain = true;
-//        }
-        diagMtnDist = 0.0;
+        } else {                                // WE ARE BLUE
+            redBlue = -1.0;
+            ultraSenseServo.setPosition(0.75);
+            redAlliance = false;
+            blueAlliance = true;
+        }
+
+        if (nearMtnSwitch.getState()) {         // WE GO TO NEAR MOUNTAIN
+            diagMtnDist = 0.0;
             turnMtnDist = -90.0;
             toMtnDist = 100.0;
             nearMountain = true;
             farMountain = false;
+        } else {                                // WE GO TO FAR MOUNTAIN
+            diagMtnDist = 50.0;
+            turnMtnDist = 90.0;
+            toMtnDist = 200.0;
+            nearMountain = false;
+            farMountain = true;
+        }
 //
 //        if (delayPotSwitch.getState()) {        // WE DELAY
 //            delay = (delayPotentiometer.getValue() * (10000 / 1024));
@@ -324,6 +319,7 @@ public class CCHS5256Autonomous extends OpMode {
         if (gyroSense.isCalibrating()) {
             return;
         }
+        double distanceToWall = 0.0;
 
         endGameLights.setPower(1.0);
 
@@ -371,6 +367,13 @@ public class CCHS5256Autonomous extends OpMode {
 //                    leftDrive.setPower(0.0);
 //                    currentMove = MoveState.DELAYSETTINGS;
 //                }
+                if (lookingWithUltraSense) {
+                    if (ultraSense.getUltrasonicLevel() <= targetReading) {
+                        leftDrive.setPower(0.0);
+                        rightDrive.setPower(0.0);
+                        currentMove = MoveState.DELAYSETTINGS;
+                    }
+                }
                 if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
                     currentMove = MoveState.DELAYSETTINGS;
                 }
@@ -422,15 +425,15 @@ public class CCHS5256Autonomous extends OpMode {
                 moveDelayTime = commonDelayTime;
                 break;
 
-            case CHOOSEMOVE:
-                if (thirdTile) {
-                    currentMove = MoveState.FIRSTMOVE;
-                } else if (fourthTile){
-                    currentMove = MoveState.MOVEDIAG;
-                }
-                telemetryMove = MoveState.CHOOSEMOVE;
-                moveDelayTime = commonDelayTime;
-                break;
+//            case CHOOSEMOVE:
+//                if (thirdTile) {
+//                    currentMove = MoveState.FIRSTMOVE;
+//                } else if (fourthTile){
+//                    currentMove = MoveState.MOVEDIAG;
+//                }
+//                telemetryMove = MoveState.CHOOSEMOVE;
+//                moveDelayTime = commonDelayTime;
+//                break;
 
             case FIRSTMOVE:
                 // Move Straight firstMoveDist
@@ -488,7 +491,10 @@ public class CCHS5256Autonomous extends OpMode {
                 break;
 
             case DRIVETOBEACON:
-                // Move Straight to beacon with ultrasonic sensor
+                targetReading = 20.0;
+                lookingWithUltraSense = true;
+                moveStraight(25.0,fastSpeed);
+                currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.PUSHBUTTON;
                 telemetryMove = MoveState.DRIVETOBEACON;
                 moveDelayTime = commonDelayTime;
@@ -496,20 +502,21 @@ public class CCHS5256Autonomous extends OpMode {
 
             case PUSHBUTTON:
                 // push the button
+                lookingWithUltraSense = false;
                 nextMove = MoveState.UNPUSHBUTTON;
                 telemetryMove = MoveState.PUSHBUTTON;
-                moveDelayTime = commonDelayTime;
                 break;
 
             case UNPUSHBUTTON:
                 // unpush the button
                 nextMove = MoveState.BACKUP;
                 telemetryMove = MoveState.UNPUSHBUTTON;
-                moveDelayTime = commonDelayTime;
                 break;
 
             case BACKUP:
                 // Move Straight till can dump climbers
+                moveStraight(-20.0, fastSpeed);
+                currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DUMPCLIMBERS;
                 telemetryMove = MoveState.BACKUP;
                 moveDelayTime = commonDelayTime;
@@ -517,6 +524,9 @@ public class CCHS5256Autonomous extends OpMode {
 
             case DUMPCLIMBERS:
                 // Dump climbers
+                chinUp.setTargetPosition(15);
+                climberDumper.setPosition(1.0);
+                currentMove = MoveState.DELAYSETTINGS;
                 nextMove = MoveState.BACKUPFARTHER;
                 telemetryMove = MoveState.DUMPCLIMBERS;
                 moveDelayTime = commonDelayTime;
@@ -524,7 +534,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case  BACKUPFARTHER:
                 // Move Straight 15 so we can drive to mountain
-                moveStraight(15.0, fastSpeed);
+                moveStraight(-15.0, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNALONGLINE;
                 telemetryMove = MoveState.BACKUPFARTHER;
@@ -533,6 +543,8 @@ public class CCHS5256Autonomous extends OpMode {
 
             case TURNALONGLINE:
                 // Turn so we can position ourselves to go up the mountain
+                moveTurn(turnMtnDist,turnSpeed);
+                currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.DRIVEALONGLINE;
                 telemetryMove = MoveState.TURNALONGLINE;
                 moveDelayTime = commonDelayTime;
