@@ -23,7 +23,7 @@ public class CCHS5256AutonomousOLD extends OpMode {
 //        PRETURN, SERVOPINIONREDMOVE, SERVOPINIONNULLMOVE, SERVOPINIONBLUEMOVE, SERVOPUSHERMOVE,
 //        SERVODUMPERMOVE, MOVEDELAY, FIRSTMOVE, TURNDIAGWITHGYRO, TURNDIAGWITHENCODERS, MOVEDIAG,
 //        FINDWALL, TURNALONGWALLWITHGYRO, TURNALONGWALLWITHENCODERS, DRIVEALONGWALL, FINDBEACON,
-//        ALIGNDUMPER, DUMPCLIMBERS, ALIGNPRESSER, PRESSBUTTON, PULLAHEADALONGWALL,
+//        ALIGNDUMPER, EXTENDARM, ALIGNPRESSER, PRESSBUTTON, PULLAHEADALONGWALL,
 //        ROTATEFROMBEACONWITHGYRO, ROTATEFROMBEACONWITHENCODERS, MOVETORAMP, TURNTORAMPWITHGYRO,
 //        TURNTORAMPWITHENCODERS, UPRAMP, DONE
 //    }
@@ -667,7 +667,7 @@ public class CCHS5256AutonomousOLD extends OpMode {
 //                    servoBeaconPusher.setPosition(1.0);
 //                } else {
 //                    servoBeaconPusher.setPosition(0.5);
-//                    currentMove = MoveState.DUMPCLIMBERS;
+//                    currentMove = MoveState.EXTENDARM;
 //                }
 //                telemetryMove = MoveState.ALIGNDUMPER;
                   if (redAlliance) {
@@ -965,17 +965,17 @@ public class CCHS5256AutonomousOLD extends OpMode {
 //                ifBlueOnBeacon = beaconColorSense.blue();
 //                moveBeaconPinion(0.5);
 //                currentMove = MoveState.SERVOPINIONNULLMOVE;
-//                nextMove = MoveState.DUMPCLIMBERS;
+//                nextMove = MoveState.EXTENDARM;
 //                telemetryMove = MoveState.ALIGNDUMPER;
 //                moveDelayTime = 3000;
 //                break;
 //
-//            case DUMPCLIMBERS:
+//            case EXTENDARM:
 //                moveClimberDump(0.0);
 //                moveClimberDump(1.0);
 //                currentMove = MoveState.MOVEDELAY;
 //                nextMove = MoveState.ALIGNPRESSER;
-//                telemetryMove = MoveState.DUMPCLIMBERS;
+//                telemetryMove = MoveState.EXTENDARM;
 //                moveDelayTime = 3000;
 //                break;
 //
