@@ -29,7 +29,7 @@ public class CCHS5256Autonomous extends OpMode {
         STARTMOVE, MOVINGSTRAIGHT, STARTTURN, MOVINGTURN, DELAYSETTINGS, DELAY,
         INITIALIZEROBOT, CHOOSEMOVE, FIRSTMOVE, TURNDIAG, MOVEDIAG, TURNONCOLOREDLINE, GOTOWHITELINE,
         TURNTOBEACON, DRIVETOBEACON, READBEACON, PUSHBUTTON, UNPUSHBUTTON, BACKUP,
-        DUMPCLIMBERS,BACKUPFARTHER, TURNALONGLINE, DRIVEALONGLINE, TURNTOMOUNTAIN,
+        EXTENDARM, DUMPCLIMBERS, JIGGLE, BACKUPFARTHER, TURNALONGLINE, DRIVEALONGLINE, TURNTOMOUNTAIN,
         DRIVETOMOUNTAIN, GOUPMOUNTAIN, PREPTELEOP, DONE
     }
 
@@ -50,7 +50,6 @@ public class CCHS5256Autonomous extends OpMode {
     Servo rightTrigger;
     // Sensors
     GyroSensor gyroSense;
-//    ColorSensor colorSense;
     ColorSensor fColorSense;
     UltrasonicSensor ultraSense;
     // Switches
@@ -191,9 +190,9 @@ public class CCHS5256Autonomous extends OpMode {
             desiredHeading = desiredHeading + 360;
         }
         speed = robotSpeed;
-        leftTarget = leftDrive.getCurrentPosition() - degreesToCounts(degrees + gyroError);
+        leftTarget = leftDrive.getCurrentPosition() + degreesToCounts(degrees + gyroError);
         leftDrive.setTargetPosition(leftTarget);
-        rightTarget = rightDrive.getCurrentPosition() + degreesToCounts(degrees + gyroError);
+        rightTarget = rightDrive.getCurrentPosition() - degreesToCounts(degrees + gyroError);
         rightDrive.setTargetPosition(rightTarget);
         leftDrive.setPower(robotSpeed);
         rightDrive.setPower(robotSpeed);
@@ -210,6 +209,8 @@ public class CCHS5256Autonomous extends OpMode {
         leftDrive.setDirection(DcMotor.Direction.REVERSE);
         leftDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         rightDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+        chinUp.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+        chinUp.setPower(0.2);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         endGameLights.setPower(1.0);
         // Servos
@@ -223,35 +224,42 @@ public class CCHS5256Autonomous extends OpMode {
         leftTrigger = hardwareMap.servo.get("lT");
         rightTrigger = hardwareMap.servo.get("rT");
         // Servo Settings
-        armLock.setPosition(0.5);
+        armLock.setPosition(0.2292121569);
         climberDumper.setPosition(0.5);
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
         leftPlow.setPosition(0.5);
         rightPlow.setPosition(0.5);
+        leftTrigger.setPosition(0.8);
+        rightTrigger.setPosition(0.1);
         // Sensors
         gyroSense = hardwareMap.gyroSensor.get("gyroSense");
-//        colorSense = hardwareMap.colorSensor.get("bColorSense");
         fColorSense = hardwareMap.colorSensor.get("fCS");
-        ultraSense = hardwareMap.ultrasonicSensor.get("fUltraSense");
+        ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
         // Switches
         nearMtnSwitch = hardwareMap.digitalChannel.get("nMtnSw");
         redBlueBeaconSwitch = hardwareMap.digitalChannel.get("rBSw");
 //        delayPotSwitch = hardwareMap.digitalChannel.get("dPotSw");
 //        thirdTileSwitch = hardwareMap.digitalChannel.get("tileSw");
 //        delayPotentiometer = hardwareMap.analogInput.get("delPot");
+        //statemachine settings
+        currentMove = MoveState.INITIALIZEROBOT;
+        nextMove = MoveState.FIRSTMOVE;
+        telemetryMove = MoveState.FIRSTMOVE;
         // Set Switch Flags
         if (redBlueBeaconSwitch.getState()) {   // WE ARE RED
             redBlue = 1.0;
             ultraSenseServo.setPosition(0.25);
             redAlliance = true;
             blueAlliance = false;
+            turnDiagDegrees = 45.0;
         } else {                                // WE ARE BLUE
             redBlue = -1.0;
             ultraSenseServo.setPosition(0.75);
             redAlliance = false;
             blueAlliance = true;
+            turnDiagDegrees = -45.0;
         }
 
         if (nearMtnSwitch.getState()) {         // WE GO TO NEAR MOUNTAIN
@@ -291,8 +299,7 @@ public class CCHS5256Autonomous extends OpMode {
 //            thirdTile = false;
 //            fourthTile = true;
 //        }
-            firstMoveDist = 30.38;
-            turnDiagDegrees = 45.0;
+            firstMoveDist = 81.44;
             moveDiagDist = 0.0;
             thirdTile = true;
             fourthTile = false;
@@ -301,8 +308,8 @@ public class CCHS5256Autonomous extends OpMode {
         fastSpeed = 0.8;
         mediumSpeed = 0.5;
         slowSpeed = 0.2;
-        turnSpeed = 0.6;
-        commonDelayTime = 150;
+        turnSpeed = 0.4;
+        commonDelayTime = 200;
         lookingForWhiteLine = false;
         // Elapsed Time
         currentTime = new ElapsedTime();
@@ -321,8 +328,6 @@ public class CCHS5256Autonomous extends OpMode {
         }
         double distanceToWall = 0.0;
 
-        endGameLights.setPower(1.0);
-
         switch (currentMove) {
             //  WE USE THESE IN ALL MOVES
             case STARTMOVE:
@@ -332,13 +337,13 @@ public class CCHS5256Autonomous extends OpMode {
                 break;
 
             case MOVINGSTRAIGHT:
-                if (lookingForWhiteLine) {
-                    if (fColorSense.red() >= 4.0 && fColorSense.blue() >= 4.0 && fColorSense.green() >= 4.0) {
-                        leftDrive.setPower(0.0);
-                        rightDrive.setPower(0.0);
-                        currentMove = MoveState.DELAYSETTINGS;
-                    }
-                }
+//                if (lookingForWhiteLine) {
+//                    if (fColorSense.alpha() >= 1.0) {
+//                        leftDrive.setPower(0.0);
+//                        rightDrive.setPower(0.0);
+//                        currentMove = MoveState.DELAYSETTINGS;
+//                    }
+//                }
                 gyroError = desiredHeading - gyroSense.getHeading();
                 if (gyroError > 180) {
                     gyroError = 360 - gyroError;
@@ -349,8 +354,8 @@ public class CCHS5256Autonomous extends OpMode {
                 if (!movingForward) {
                     gyroError = -gyroError;
                 }
-                rightDrive.setPower(Range.clip(speed + (gyroError * 0.2), -1.0, 1.0));
-                leftDrive.setPower(Range.clip(speed - (gyroError * 0.2), -1.0, 1.0));
+                rightDrive.setPower(Range.clip(speed - (gyroError * 0.01), -1.0, 1.0));
+                leftDrive.setPower(Range.clip(speed + (gyroError * 0.01), -1.0, 1.0));
 //                if (colorSense.blue() >= 1) {
 //                    sawBlueFlag = true;
 //                }
@@ -368,10 +373,13 @@ public class CCHS5256Autonomous extends OpMode {
 //                    currentMove = MoveState.DELAYSETTINGS;
 //                }
                 if (lookingWithUltraSense) {
-                    if (ultraSense.getUltrasonicLevel() <= targetReading) {
-                        leftDrive.setPower(0.0);
-                        rightDrive.setPower(0.0);
-                        currentMove = MoveState.DELAYSETTINGS;
+                    distanceToWall = ultraSense.getUltrasonicLevel();
+                    if (distanceToWall > 0 && distanceToWall < 255) {
+                        if (distanceToWall <= targetReading) {
+                            leftDrive.setPower(0.0);
+                            rightDrive.setPower(0.0);
+                            currentMove = MoveState.DELAYSETTINGS;
+                        }
                     }
                 }
                 if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
@@ -420,7 +428,7 @@ public class CCHS5256Autonomous extends OpMode {
                 currentTime.reset();
                 moveDelayTime = (long)delay;
                 currentMove = MoveState.DELAYSETTINGS;
-                nextMove = MoveState.CHOOSEMOVE;
+                nextMove = MoveState.FIRSTMOVE;
                 telemetryMove = MoveState.INITIALIZEROBOT;
                 moveDelayTime = commonDelayTime;
                 break;
@@ -437,7 +445,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case FIRSTMOVE:
                 // Move Straight firstMoveDist
-                moveStraight(firstMoveDist, fastSpeed);
+                moveStraight(firstMoveDist, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNDIAG;
                 telemetryMove = MoveState.FIRSTMOVE;
@@ -455,11 +463,10 @@ public class CCHS5256Autonomous extends OpMode {
 
             case MOVEDIAG:
                 // Move straight 70 + moveDiagDist to red
-                lookingForWhiteLine = true;
-                moveStraight(180 + moveDiagDist, fastSpeed);
+//                lookingForWhiteLine = true;
+                moveStraight(167 + moveDiagDist, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
-//                nextMove = MoveState.TURNONCOLOREDLINE;
-                nextMove = MoveState.DONE;
+                nextMove = MoveState.TURNONCOLOREDLINE;
                 telemetryMove = MoveState.MOVEDIAG;
                 moveDelayTime = commonDelayTime;
                 break;
@@ -468,69 +475,89 @@ public class CCHS5256Autonomous extends OpMode {
                 // Move Turn -45 degrees
                 moveTurn(-45.0, turnSpeed);
                 currentMove = MoveState.STARTTURN;
-                nextMove = MoveState.GOTOWHITELINE;
+                nextMove = MoveState.DRIVETOBEACON;
                 telemetryMove = MoveState.TURNONCOLOREDLINE;
                 moveDelayTime = commonDelayTime;
                 break;
 
-            case GOTOWHITELINE:
-                // Move Straight to white line
-                lookingForWhiteLine = true;
-                nextMove = MoveState.TURNTOBEACON;
-                telemetryMove = MoveState.GOTOWHITELINE;
-                moveDelayTime = commonDelayTime;
-                break;
+//            case GOTOWHITELINE:
+//                 Move Straight to white line
+//                lookingForWhiteLine = true;
+//                moveStraight(45.0, slowSpeed);
+//                currentMove = MoveState.STARTMOVE;
+//                nextMove = MoveState.DONE;
+//                telemetryMove = MoveState.GOTOWHITELINE;
+//                moveDelayTime = commonDelayTime;
+//                break;
 
-            case TURNTOBEACON:
-                // Move Turn 90 degrees to the beacon
-                moveTurn(90.0, turnSpeed);
-                currentMove = MoveState.STARTTURN;
-                nextMove = MoveState.DRIVETOBEACON;
-                telemetryMove = MoveState.TURNTOBEACON;
-                moveDelayTime = commonDelayTime;
-                break;
+//            case TURNTOBEACON:
+//                 Move Turn 90 degrees to the beacon
+//                moveTurn(90.0, turnSpeed);
+//                currentMove = MoveState.STARTTURN;
+//                nextMove = MoveState.DRIVETOBEACON;
+//                telemetryMove = MoveState.TURNTOBEACON;
+//                moveDelayTime = commonDelayTime;
+//                break;
 
             case DRIVETOBEACON:
                 targetReading = 20.0;
                 lookingWithUltraSense = true;
-                moveStraight(25.0,fastSpeed);
+                moveStraight(48.0, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.PUSHBUTTON;
+                nextMove = MoveState.EXTENDARM;
                 telemetryMove = MoveState.DRIVETOBEACON;
                 moveDelayTime = commonDelayTime;
                 break;
 
-            case PUSHBUTTON:
-                // push the button
-                lookingWithUltraSense = false;
-                nextMove = MoveState.UNPUSHBUTTON;
-                telemetryMove = MoveState.PUSHBUTTON;
-                break;
+//            case PUSHBUTTON:
+//                 push the button
+//                lookingWithUltraSense = false;
+//                nextMove = MoveState.UNPUSHBUTTON;
+//                telemetryMove = MoveState.PUSHBUTTON;
+//                break;
+//
+//            case UNPUSHBUTTON:
+//                 unpush the button
+//                nextMove = MoveState.BACKUP;
+//                telemetryMove = MoveState.UNPUSHBUTTON;
+//                break;
 
-            case UNPUSHBUTTON:
-                // unpush the button
-                nextMove = MoveState.BACKUP;
-                telemetryMove = MoveState.UNPUSHBUTTON;
-                break;
+//            case BACKUP:
+//                 Move Straight till can dump climbers
+//                lookingWithUltraSense = false;
+//                moveStraight(-5.0, mediumSpeed);
+//                currentMove = MoveState.STARTMOVE;
+//                nextMove = MoveState.EXTENDARM;
+//                telemetryMove = MoveState.BACKUP;
+//                moveDelayTime = commonDelayTime;
+//                break;
 
-            case BACKUP:
-                // Move Straight till can dump climbers
-                moveStraight(-20.0, fastSpeed);
-                currentMove = MoveState.STARTMOVE;
+            case EXTENDARM:
+                // Dump climbers
+                chinUp.setTargetPosition(-3360);
+                currentMove = MoveState.DELAYSETTINGS;
                 nextMove = MoveState.DUMPCLIMBERS;
-                telemetryMove = MoveState.BACKUP;
-                moveDelayTime = commonDelayTime;
+                telemetryMove = MoveState.EXTENDARM;
+                moveDelayTime = 500;
                 break;
 
             case DUMPCLIMBERS:
-                // Dump climbers
-                chinUp.setTargetPosition(15);
-                climberDumper.setPosition(1.0);
-                currentMove = MoveState.DELAYSETTINGS;
-                nextMove = MoveState.BACKUPFARTHER;
-                telemetryMove = MoveState.DUMPCLIMBERS;
-                moveDelayTime = commonDelayTime;
+               if (!chinUp.isBusy()) {
+                   climberDumper.setPosition(1.0);
+                   currentMove = MoveState.DELAYSETTINGS;
+                   nextMove = MoveState.JIGGLE;
+                   telemetryMove = MoveState.DUMPCLIMBERS;
+                   moveDelayTime = commonDelayTime;
+               }
                 break;
+
+            case JIGGLE:
+                moveStraight(1.0, mediumSpeed);
+                moveStraight(-1.0, mediumSpeed);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.BACKUPFARTHER;
+                telemetryMove = MoveState.JIGGLE;
+                moveDelayTime = commonDelayTime;
 
             case  BACKUPFARTHER:
                 // Move Straight 15 so we can drive to mountain
@@ -543,9 +570,9 @@ public class CCHS5256Autonomous extends OpMode {
 
             case TURNALONGLINE:
                 // Turn so we can position ourselves to go up the mountain
-                moveTurn(turnMtnDist,turnSpeed);
+                moveTurn(-90.0,turnSpeed);
                 currentMove = MoveState.STARTTURN;
-                nextMove = MoveState.DRIVEALONGLINE;
+                nextMove = MoveState.DONE;
                 telemetryMove = MoveState.TURNALONGLINE;
                 moveDelayTime = commonDelayTime;
                 break;
@@ -605,6 +632,11 @@ public class CCHS5256Autonomous extends OpMode {
         telemetry.addData("current move", telemetryMove.toString());
         telemetry.addData("Elapsed Time", currentTime.time());
         telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
+        telemetry.addData("ColorSensor", Integer.toString(fColorSense.alpha()));
+        telemetry.addData("red", Integer.toString(fColorSense.red()));
+        telemetry.addData("blue", Integer.toString(fColorSense.blue()));
+        telemetry.addData("green", Integer.toString(fColorSense.green()));
+
 
     }
 
