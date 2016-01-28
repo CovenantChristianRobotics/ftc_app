@@ -30,6 +30,7 @@ public class CCHS4507TeleOp extends OpMode {
     Servo climberTriggerRight;
     Servo climberDoor;
     Servo cowCatcher;
+    Servo armLock;
     //Servo zipTieSweeper;
 
     //Sensors
@@ -65,6 +66,7 @@ public class CCHS4507TeleOp extends OpMode {
         climberTriggerLeft = hardwareMap.servo.get("trigLeft");
         climberTriggerRight = hardwareMap.servo.get("trigRight");
         cowCatcher = hardwareMap.servo.get("cowCatcher");
+        armLock = hardwareMap.servo.get("armLock");
         //zipTieSweeper = hardwareMap.servo.get("zipTieSweeper");
         ColorSense = hardwareMap.colorSensor.get("color");
         nearMountainSwitch = hardwareMap.digitalChannel.get("nearMtnSw");
@@ -86,6 +88,7 @@ public class CCHS4507TeleOp extends OpMode {
         armExtend.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         climberTriggerLeft.setPosition(0.5);
         climberTriggerRight.setPosition(0.5);
+        armLock.setPosition(0.5);
     }
 
     @Override
@@ -163,6 +166,9 @@ public class CCHS4507TeleOp extends OpMode {
         }
         if (gamepad2.y) {
             //zipTieSweeper.setPosition(.75);
+        }
+        if (gamepad2.start) {
+            armLock.setPosition(0.7);
         }
 
         telemetry.addData("trackLifter", Integer.toString(trackLifter.getCurrentPosition()));
