@@ -222,7 +222,7 @@ public class CCHS5256Autonomous extends OpMode {
         chinUp.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         chinUp.setPower(0.2);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-        endGameLights.setPower(1.0);
+        endGameLights.setPower(0.7);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
