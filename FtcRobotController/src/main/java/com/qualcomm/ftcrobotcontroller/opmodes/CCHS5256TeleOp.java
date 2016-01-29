@@ -71,7 +71,7 @@ public class CCHS5256TeleOp extends OpMode {
         chinUp.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         chinUp.setPower(0.2);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-        endGameLights.setPower(1.0);
+        endGameLights.setPower(0.7);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
@@ -90,8 +90,8 @@ public class CCHS5256TeleOp extends OpMode {
         rightOmniPinion.setPosition(0.5);
         leftPlow.setPosition(0.5);
         rightPlow.setPosition(0.5);
-        leftTrigger.setPosition(0.8);
-        rightTrigger.setPosition(0.1);
+        leftTrigger.setPosition(0.5);
+        rightTrigger.setPosition(0.5);
         // Sensors
         gyroSense = hardwareMap.gyroSensor.get("gyroSense");
         fColorSense = hardwareMap.colorSensor.get("fCS");
