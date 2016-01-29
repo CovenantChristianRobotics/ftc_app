@@ -29,12 +29,12 @@ public class CCHS5256Autonomous extends OpMode {
         STARTMOVE, MOVINGSTRAIGHT, STARTTURN, MOVINGTURN, DELAYSETTINGS, DELAY,
         INITIALIZEROBOT, CHOOSEMOVE, FIRSTMOVE, TURNDIAG, MOVEDIAG, TURNONCOLOREDLINE, GOTOWHITELINE,
         TURNTOBEACON, DRIVETOBEACON, READBEACON, PUSHBUTTON, UNPUSHBUTTON, BACKUP,
-        EXTENDARM, DUMPCLIMBERS, JIGGLE, BACKUPFARTHER, TURNALONGLINE, DRIVEALONGLINE, TURNTOMOUNTAIN,
+        EXTENDARM, DUMPCLIMBERS, JIGGLEFORWARD, JIGGLEBACKWARD, PULLARMIN, BACKUPFARTHER, TURNALONGLINE, DRIVEALONGLINE, TURNTOMOUNTAIN,
         DRIVETOMOUNTAIN, GOUPMOUNTAIN, PREPTELEOP, DONE
     }
 
     enum OmniCtlr {
-        NOTMOVING, EXTENDING, IN, OUT, DELAYSETTINGS, DELAY
+        NOTMOVING, EXTENDING, IN, OUT, DELAYSETTINGSOMNI, DELAYOMNI
     }
 
     // DC Motors
@@ -85,10 +85,14 @@ public class CCHS5256Autonomous extends OpMode {
     MoveState telemetryMove;
     OmniCtlr currentOmni;
     OmniCtlr nextOmni;
+    OmniCtlr chosenOmni;
     long delayUntil;
     long moveDelayTime;
     long commonDelayTime;
     long now;
+    long nowOmni;
+    long moveDelaytimeOmni;
+    long delayUntilOmni;
     double fastSpeed;
     double mediumSpeed;
     double slowSpeed;
@@ -218,7 +222,7 @@ public class CCHS5256Autonomous extends OpMode {
         chinUp.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         chinUp.setPower(0.2);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-        endGameLights.setPower(1.0);
+        endGameLights.setPower(0.7);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
@@ -230,7 +234,7 @@ public class CCHS5256Autonomous extends OpMode {
         leftTrigger = hardwareMap.servo.get("lT");
         rightTrigger = hardwareMap.servo.get("rT");
         // Servo Settings
-        armLock.setPosition(0.2292121569);
+        armLock.setPosition(0.25);
         climberDumper.setPosition(0.5);
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
@@ -254,6 +258,7 @@ public class CCHS5256Autonomous extends OpMode {
         nextMove = MoveState.FIRSTMOVE;
         telemetryMove = MoveState.FIRSTMOVE;
         currentOmni = OmniCtlr.NOTMOVING;
+        chosenOmni = OmniCtlr.NOTMOVING;
         // Set Switch Flags
         if (redBlueBeaconSwitch.getState()) {   // WE ARE RED
             redBlue = 1.0;
@@ -334,6 +339,7 @@ public class CCHS5256Autonomous extends OpMode {
             return;
         }
         double distanceToWall = 0.0;
+        endGameLights.setPower(1.0);
 
         switch (currentMove) {
             //  WE USE THESE IN ALL MOVES
@@ -509,7 +515,7 @@ public class CCHS5256Autonomous extends OpMode {
             case DRIVETOBEACON:
                 targetReading = 20.0;
                 lookingWithUltraSense = true;
-                moveStraight(48.0, mediumSpeed);
+                moveStraight(45.0, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.EXTENDARM;
                 telemetryMove = MoveState.DRIVETOBEACON;
@@ -552,41 +558,59 @@ public class CCHS5256Autonomous extends OpMode {
                if (!chinUp.isBusy()) {
                    climberDumper.setPosition(1.0);
                    currentMove = MoveState.DELAYSETTINGS;
-                   nextMove = MoveState.JIGGLE;
+                   nextMove = MoveState.JIGGLEFORWARD;
                    telemetryMove = MoveState.DUMPCLIMBERS;
                    moveDelayTime = commonDelayTime;
                }
                 break;
 
-            case JIGGLE:
-                moveStraight(1.0, mediumSpeed);
-                moveStraight(-1.0, mediumSpeed);
+            case JIGGLEFORWARD:
+                moveStraight(3.0, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.BACKUPFARTHER;
-                telemetryMove = MoveState.JIGGLE;
-                moveDelayTime = commonDelayTime;
-
-            case  BACKUPFARTHER:
-                // Move Straight 15 so we can drive to mountain
-                moveStraight(-15.0, fastSpeed);
-                currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.TURNALONGLINE;
-                telemetryMove = MoveState.BACKUPFARTHER;
+                nextMove = MoveState.JIGGLEBACKWARD;
+                telemetryMove = MoveState.JIGGLEFORWARD;
                 moveDelayTime = commonDelayTime;
                 break;
 
+            case JIGGLEBACKWARD:
+                moveStraight(-3.0, fastSpeed);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.PULLARMIN;
+                telemetryMove = MoveState.JIGGLEBACKWARD;
+                moveDelayTime = commonDelayTime;
+                break;
+
+            case PULLARMIN:
+                chinUp.setTargetPosition(3360);
+                currentMove = MoveState.DELAYSETTINGS;
+                nextMove = MoveState.TURNALONGLINE;
+                telemetryMove = MoveState.EXTENDARM;
+                moveDelayTime = 700;
+                break;
+
+
             case TURNALONGLINE:
                 // Turn so we can position ourselves to go up the mountain
-                moveTurn(-90.0,turnSpeed);
+                moveTurn(90.0, turnSpeed);
                 currentMove = MoveState.STARTTURN;
-                nextMove = MoveState.DONE;
+                nextMove = MoveState.BACKUPFARTHER;
                 telemetryMove = MoveState.TURNALONGLINE;
+                moveDelayTime = commonDelayTime;
+                break;
+
+            case  BACKUPFARTHER:
+                // Move Straight 15 so we can drive to mountain
+                moveStraight(-60.0, mediumSpeed);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DONE;
+                telemetryMove = MoveState.BACKUPFARTHER;
+                chosenOmni = OmniCtlr.EXTENDING;
                 moveDelayTime = commonDelayTime;
                 break;
 
             case DRIVEALONGLINE:
                 // Move Straight 25 + diagMtnDist
-                moveStraight(25 + diagMtnDist, fastSpeed);
+                moveStraight(25 + diagMtnDist, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNTOMOUNTAIN;
                 telemetryMove = MoveState.DRIVEALONGLINE;
@@ -604,7 +628,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case DRIVETOMOUNTAIN:
                 // Move Straight toMtnDist
-                moveStraight(toMtnDist, fastSpeed);
+                moveStraight(toMtnDist, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.GOUPMOUNTAIN;
                 telemetryMove = MoveState.DRIVETOMOUNTAIN;
@@ -613,7 +637,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case GOUPMOUNTAIN:
                 // Move Straight up mountain
-                moveStraight(100.0, fastSpeed);
+                moveStraight(100.0, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.PREPTELEOP;
                 telemetryMove = MoveState.GOUPMOUNTAIN;
@@ -622,7 +646,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case PREPTELEOP:
                 // get robot ready for TeleOp
-                currentMove = MoveState.DONE;
+                nextMove = MoveState.DONE;
                 telemetryMove = MoveState.PREPTELEOP;
                 moveDelayTime = commonDelayTime;
                 break;
@@ -634,15 +658,50 @@ public class CCHS5256Autonomous extends OpMode {
                 break;
         }
 
+        switch (currentOmni) {
+            case DELAYSETTINGSOMNI:
+                nowOmni = System.currentTimeMillis();
+                delayUntilOmni = nowOmni + moveDelaytimeOmni;
+                currentOmni = OmniCtlr.DELAYOMNI;
+                break;
+
+            case DELAYOMNI:
+                if (System.currentTimeMillis() >= delayUntilOmni) {
+                    currentOmni = nextOmni;
+                }
+                break;
+
+            case NOTMOVING:
+                leftOmniPinion.setPosition(0.5);
+                rightOmniPinion.setPosition(0.5);
+                currentOmni = chosenOmni;
+                break;
+
+            case EXTENDING:
+                leftOmniPinion.setPosition(1.0);
+                rightOmniPinion.setPosition(1.0);
+                currentOmni = OmniCtlr.DELAYSETTINGSOMNI;
+                nextOmni = OmniCtlr.OUT;
+                moveDelaytimeOmni = 5500;
+                break;
+
+            case OUT:
+                leftOmniPinion.setPosition(0.5);
+                rightOmniPinion.setPosition(0.5);
+                currentOmni = OmniCtlr.NOTMOVING;
+                break;
+
+        }
+
         telemetry.addData("left encoder", leftDrive.getCurrentPosition());
         telemetry.addData("right encoder", rightDrive.getCurrentPosition());
         telemetry.addData("current move", telemetryMove.toString());
         telemetry.addData("Elapsed Time", currentTime.time());
-        telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
         telemetry.addData("ColorSensor", Integer.toString(fColorSense.alpha()));
         telemetry.addData("red", Integer.toString(fColorSense.red()));
         telemetry.addData("blue", Integer.toString(fColorSense.blue()));
         telemetry.addData("green", Integer.toString(fColorSense.green()));
+        telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
 
 
     }
