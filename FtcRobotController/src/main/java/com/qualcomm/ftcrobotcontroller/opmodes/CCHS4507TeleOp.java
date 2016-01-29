@@ -130,7 +130,7 @@ public class CCHS4507TeleOp extends OpMode {
 //            cowCatcherUp = true;
         } else if (gamepad1.left_trigger > 0.5) {
 //            cowCatcherUp = false;
-            cowCatcher.setPosition(0.3);
+            cowCatcher.setPosition(0.5);
 //        } else if (!cowCatcherUp) {
 //            cowCatcher.setPosition(0.2);
         }
@@ -168,7 +168,10 @@ public class CCHS4507TeleOp extends OpMode {
             //zipTieSweeper.setPosition(.75);
         }
         if (gamepad2.start) {
-            armLock.setPosition(0.7);
+            armLock.setPosition(0.3);
+        }
+        if (gamepad2.x) {
+            armLock.setPosition(0.5);
         }
 
         telemetry.addData("trackLifter", Integer.toString(trackLifter.getCurrentPosition()));
