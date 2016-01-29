@@ -33,6 +33,10 @@ public class CCHS5256Autonomous extends OpMode {
         DRIVETOMOUNTAIN, GOUPMOUNTAIN, PREPTELEOP, DONE
     }
 
+    enum OmniCtlr {
+        NOTMOVING, EXTENDING, IN, OUT, DELAYSETTINGS, DELAY
+    }
+
     // DC Motors
     DcMotor leftDrive;
     DcMotor rightDrive;
@@ -79,6 +83,8 @@ public class CCHS5256Autonomous extends OpMode {
     MoveState currentMove;
     MoveState nextMove;
     MoveState telemetryMove;
+    OmniCtlr currentOmni;
+    OmniCtlr nextOmni;
     long delayUntil;
     long moveDelayTime;
     long commonDelayTime;
@@ -247,6 +253,7 @@ public class CCHS5256Autonomous extends OpMode {
         currentMove = MoveState.INITIALIZEROBOT;
         nextMove = MoveState.FIRSTMOVE;
         telemetryMove = MoveState.FIRSTMOVE;
+        currentOmni = OmniCtlr.NOTMOVING;
         // Set Switch Flags
         if (redBlueBeaconSwitch.getState()) {   // WE ARE RED
             redBlue = 1.0;
