@@ -96,6 +96,8 @@ public class CCHS5256TeleOp extends OpMode {
         gyroSense = hardwareMap.gyroSensor.get("gyroSense");
         fColorSense = hardwareMap.colorSensor.get("fCS");
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
+        speedUp= false;
+        slowDown = false;
     }
 
     @Override
@@ -150,26 +152,26 @@ public class CCHS5256TeleOp extends OpMode {
         } else if (gamepad1.dpad_right) {
             left = -0.1;
             right = 0.1;
-            if (speedUp) {
-                left = (double) fast(left);
-                right = (double) fast(right);
-            } else if (slowDown) {
-                left = (double) slow(left);
-                right = (double) slow(right);
-            } else {
-                left = left;
-                right = right;
-            }
+//            if (speedUp) {
+//                left = (double) fast(left);
+//                right = (double) fast(right);
+//            } else if (slowDown) {
+//                left = (double) slow(left);
+//                right = (double) slow(right);
+//            } else {
+//                left = left;
+//                right = right;
+//            }
         } else if (gamepad1.dpad_left) {
             left = 0.1;
             right = -0.1;
-            if (speedUp) {
-                left = (double) fast(left);
-                right = (double) fast(right);
-            } else if (slowDown) {
-                left = (float) slow(left);
-                right = (float) slow(right);
-            }
+//            if (speedUp) {
+//                left = (double) fast(left);
+//                right = (double) fast(right);
+//            } else if (slowDown) {
+//                left = (float) slow(left);
+//                right = (float) slow(right);
+//            }
         } else {
             left = (float) medium(left);
             right = (float) medium(right);

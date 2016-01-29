@@ -34,7 +34,7 @@ public class CCHS5256Autonomous extends OpMode {
     }
 
     enum OmniCtlr {
-        NOTMOVING, EXTENDING, IN, OUT, DELAYSETTINGSOMNI, DELAYOMNI
+        NOTMOVING, EXTENDING, IN, OUT, DELAYSETTINGSOMNI, DELAYOMNI, RETRACT, DONE
     }
 
     // DC Motors
@@ -220,9 +220,9 @@ public class CCHS5256Autonomous extends OpMode {
         leftDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         rightDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         chinUp.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        chinUp.setPower(0.0);
+        chinUp.setPower(0.5);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-        endGameLights.setPower(1.0);
+        endGameLights.setPower(0.7);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
@@ -241,8 +241,8 @@ public class CCHS5256Autonomous extends OpMode {
         rightOmniPinion.setPosition(0.5);
         leftPlow.setPosition(0.5);
         rightPlow.setPosition(0.5);
-        leftTrigger.setPosition(0.8);
-        rightTrigger.setPosition(0.1);
+        leftTrigger.setPosition(0.5);
+        rightTrigger.setPosition(0.5);
         // Sensors
         gyroSense = hardwareMap.gyroSensor.get("gyroSense");
         fColorSense = hardwareMap.colorSensor.get("fCS");
@@ -339,7 +339,7 @@ public class CCHS5256Autonomous extends OpMode {
             return;
         }
         double distanceToWall = 0.0;
-        endGameLights.setPower(1.0);
+        endGameLights.setPower(0.7);
 
         switch (currentMove) {
             //  WE USE THESE IN ALL MOVES
@@ -515,7 +515,7 @@ public class CCHS5256Autonomous extends OpMode {
             case DRIVETOBEACON:
                 targetReading = 20.0;
                 lookingWithUltraSense = true;
-                moveStraight(45.0, mediumSpeed);
+                moveStraight(48.0, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.EXTENDARM;
                 telemetryMove = MoveState.DRIVETOBEACON;
@@ -558,26 +558,11 @@ public class CCHS5256Autonomous extends OpMode {
                if (!chinUp.isBusy()) {
                    climberDumper.setPosition(1.0);
                    currentMove = MoveState.DELAYSETTINGS;
-                   nextMove = MoveState.JIGGLEFORWARD;
+                   nextMove = MoveState.PULLARMIN;
                    telemetryMove = MoveState.DUMPCLIMBERS;
-                   moveDelayTime = commonDelayTime;
+                   chosenOmni = OmniCtlr.EXTENDING;
+                   moveDelayTime = 1500;
                }
-                break;
-
-            case JIGGLEFORWARD:
-                moveStraight(3.0, fastSpeed);
-                currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.JIGGLEBACKWARD;
-                telemetryMove = MoveState.JIGGLEFORWARD;
-                moveDelayTime = commonDelayTime;
-                break;
-
-            case JIGGLEBACKWARD:
-                moveStraight(-3.0, fastSpeed);
-                currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.PULLARMIN;
-                telemetryMove = MoveState.JIGGLEBACKWARD;
-                moveDelayTime = commonDelayTime;
                 break;
 
             case PULLARMIN:
@@ -591,7 +576,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case TURNALONGLINE:
                 // Turn so we can position ourselves to go up the mountain
-                moveTurn(90.0, turnSpeed);
+                moveTurn(95.0, turnSpeed);
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.BACKUPFARTHER;
                 telemetryMove = MoveState.TURNALONGLINE;
@@ -600,7 +585,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case  BACKUPFARTHER:
                 // Move Straight 15 so we can drive to mountain
-                moveStraight(-60.0, mediumSpeed);
+                moveStraight(-40.0, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
                 telemetryMove = MoveState.BACKUPFARTHER;
@@ -681,15 +666,22 @@ public class CCHS5256Autonomous extends OpMode {
                 leftOmniPinion.setPosition(1.0);
                 rightOmniPinion.setPosition(1.0);
                 currentOmni = OmniCtlr.DELAYSETTINGSOMNI;
-                nextOmni = OmniCtlr.OUT;
+                nextOmni = OmniCtlr.RETRACT;
                 moveDelaytimeOmni = 5500;
                 break;
 
-            case OUT:
-                leftOmniPinion.setPosition(0.5);
-                rightOmniPinion.setPosition(0.5);
-                currentOmni = OmniCtlr.NOTMOVING;
+            case RETRACT:
+                leftOmniPinion.setPosition(0.25);
+                rightOmniPinion.setPosition(0.25);
+                currentOmni = OmniCtlr.DELAYSETTINGSOMNI;
+                nextOmni = OmniCtlr.DONE;
+                moveDelaytimeOmni = 5500;
                 break;
+
+            case DONE:
+                break;
+
+
 
         }
 
