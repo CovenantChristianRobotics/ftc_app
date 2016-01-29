@@ -1,10 +1,12 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -18,20 +20,25 @@ public class CCHS5256TeleOp extends OpMode {
         PREMATCH, START, ON, ENDGAME, BLINKOFF, BLINKON, DELAYSETTINGS, DELAY
     }
 
-    //DcMotors
+    // DC Motors
     DcMotor leftDrive;
     DcMotor rightDrive;
-    DcMotor endGameLights;
     DcMotor chinUp;
-    //Servos
-    Servo servoUltraSense;
-    Servo leftOmniPinion;
-    Servo rightOmniPinion;
+    DcMotor endGameLights;
+    // Servos
     Servo armLock;
     Servo climberDumper;
-    //    Servo leftPlow;
-//    Servo rightPlow;
-    //sensors
+    Servo ultraSenseServo;
+    Servo leftOmniPinion;
+    Servo rightOmniPinion;
+    Servo leftPlow;
+    Servo rightPlow;
+    Servo leftTrigger;
+    Servo rightTrigger;
+    // Sensors
+    GyroSensor gyroSense;
+    ColorSensor fColorSense;
+    UltrasonicSensor ultraSense;
     // Speed functions
     boolean speedUp;
     boolean slowDown;
@@ -52,41 +59,43 @@ public class CCHS5256TeleOp extends OpMode {
 
     @Override
     public void init() {
-        //DcMotors
+        // DC Motors
         leftDrive = hardwareMap.dcMotor.get("motorL");
         rightDrive = hardwareMap.dcMotor.get("motorR");
-        endGameLights = hardwareMap.dcMotor.get("endGameLights");
         chinUp = hardwareMap.dcMotor.get("chinUp");
-        //Servos
-        servoUltraSense = hardwareMap.servo.get("servoUltra");
-        leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
-        rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
-        rightOmniPinion.setDirection(Servo.Direction.REVERSE);
-        armLock = hardwareMap.servo.get("armLock");
-        climberDumper = hardwareMap.servo.get("climber_dumper");
-//        leftPlow = hardwareMap.servo.get("lP");
-//        rightPlow = hardwareMap.servo.get("rP");
-//        rightPlow.setDirection(Servo.Direction.REVERSE);
-        //sensors
-        // speed functions
-        speedUp = false;
-        slowDown = false;
-        //motor configurations
-        rightDrive.setDirection(DcMotor.Direction.REVERSE);
+        endGameLights = hardwareMap.dcMotor.get("endGameLights");
+        // DC Motor Settings
+        leftDrive.setDirection(DcMotor.Direction.REVERSE);
         leftDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         rightDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-        endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         chinUp.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-        //statemachine settings
-        currentControl = ledControl.PREMATCH;
-        //servo positions
+        chinUp.setPower(0.2);
+        endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
+        endGameLights.setPower(1.0);
+        // Servos
+        armLock = hardwareMap.servo.get("armLock");
+        climberDumper = hardwareMap.servo.get("climber_dumper");
+        ultraSenseServo = hardwareMap.servo.get("servoUltra");
+        leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
+        rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
+        leftPlow = hardwareMap.servo.get("lP");
+        rightPlow = hardwareMap.servo.get("rP");
+        leftTrigger = hardwareMap.servo.get("lT");
+        rightTrigger = hardwareMap.servo.get("rT");
+        // Servo Settings
+        armLock.setPosition(0.5);
+        climberDumper.setPosition(0.5);
+        rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
-        armLock.setPosition(0.5);
-        endGameTime = new ElapsedTime();
-        endGameLights.setPower(0.5);
-        climberDumper.setDirection(Servo.Direction.FORWARD);
-        climberDumper.setPosition(0.55);
+        leftPlow.setPosition(0.5);
+        rightPlow.setPosition(0.5);
+        leftTrigger.setPosition(0.8);
+        rightTrigger.setPosition(0.1);
+        // Sensors
+        gyroSense = hardwareMap.gyroSensor.get("gyroSense");
+        fColorSense = hardwareMap.colorSensor.get("fCS");
+        ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
     }
 
     @Override
@@ -172,10 +181,28 @@ public class CCHS5256TeleOp extends OpMode {
             chinUp.setPower(0.0);
         }
 
+//        if (gamepad2.a) {
+//            armLock.setPosition(0.2292121569);
+//        } else if (gamepad2.b) {
+//            armLock.setPosition(0.5);
+//        }
+
         if (gamepad2.a) {
-            armLock.setPosition(0.2292121569);
+            armLock.setPosition(0.76862746);
         } else if (gamepad2.b) {
             armLock.setPosition(0.5);
+        }
+
+        if (gamepad1.a) {
+            leftTrigger.setPosition(0.1);
+        } else if (gamepad1.b) {
+            leftTrigger.setPosition(0.8);
+        }
+
+        if (gamepad1.x) {
+            rightTrigger.setPosition(0.8);
+        } else if (gamepad1.y) {
+            rightTrigger.setPosition(0.1);
         }
 
         leftDrive.setPower(left);
