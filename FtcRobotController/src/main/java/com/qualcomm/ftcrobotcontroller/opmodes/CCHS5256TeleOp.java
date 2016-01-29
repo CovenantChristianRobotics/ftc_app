@@ -71,7 +71,7 @@ public class CCHS5256TeleOp extends OpMode {
         chinUp.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         chinUp.setPower(0.2);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-        endGameLights.setPower(0.7);
+        endGameLights.setPower(1.0);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
