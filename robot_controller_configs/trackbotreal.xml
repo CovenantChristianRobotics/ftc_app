@@ -28,6 +28,9 @@
         <Servo name="trigLeft" port="4" />
         <Servo name="trigRight" port="5" />
         <Servo name="cowCatcher" port="6" />
+	</ServoController>
+	<ServoController name="Servo Controller 2" serialNumber="AI02RMPE">
+		 <Servo name="armLock" port="1" />
     </ServoController> 
     <MotorController name="MotorController 3" serialNumber="AL00VXR8">
         <Motor name="motorR" port="1" />

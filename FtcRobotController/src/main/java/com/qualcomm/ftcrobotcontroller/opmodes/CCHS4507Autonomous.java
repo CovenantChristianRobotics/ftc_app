@@ -34,6 +34,7 @@ public class CCHS4507Autonomous extends OpMode {
     Servo climberTriggerLeft;
     Servo climberTriggerRight;
     Servo climberDoor;
+    Servo cowCatcher;
     //Servo zipTieSweeper;
     ColorSensor ColorSense;
     ColorSensor colorGroundSense;
@@ -53,6 +54,7 @@ public class CCHS4507Autonomous extends OpMode {
     boolean takeADump;
     boolean stowLifter;
     boolean noSquiggle;
+    boolean cowCatcherUp = false;
     double fastSpeed;
     double slowSpeed;
     double turnSpeed;
@@ -198,7 +200,7 @@ public class CCHS4507Autonomous extends OpMode {
         climberTriggerLeft = hardwareMap.servo.get("trigLeft");
         climberTriggerRight = hardwareMap.servo.get("trigRight");
         climberDoor = hardwareMap.servo.get("climberDoor");
-        //zipTieSweeper = hardwareMap.servo.get("zipTieSweeper");
+        cowCatcher = hardwareMap.servo.get("cowCatcher");
         ColorSense = hardwareMap.colorSensor.get("color");
         colorGroundSense = hardwareMap.colorSensor.get("colorGround");
         nearMountainSwitch = hardwareMap.digitalChannel.get("nearMtnSw");
@@ -216,13 +218,13 @@ public class CCHS4507Autonomous extends OpMode {
         toMountainFlag = toMountainSwitch.getState();
         if (redBlueSwitch.getState()) { //This is for when we're going to blue
             redAlliance = false;
-            lookingForRedFlag = false;
+            lookingForRedFlag = true;
             lookingForBlueFlag = true;
             servoDist.setPosition(0.75);
         } else { //This is for red
             redAlliance = true;
             lookingForRedFlag = true;
-            lookingForBlueFlag = false;
+            lookingForBlueFlag = true;
             servoDist.setPosition(0.25);
         }
 
@@ -328,7 +330,7 @@ public class CCHS4507Autonomous extends OpMode {
                     motorLeft.setPower(0.0);
                     currentMove = MoveState.MOVEDELAY;
                 }
-                if (noSquiggle) {
+                if (!noSquiggle) {
                      if (!motorLeft.isBusy() || !motorRight.isBusy()) {
                          motorRight.setPower(0.0);
                          motorLeft.setPower(0.0);
@@ -374,6 +376,7 @@ public class CCHS4507Autonomous extends OpMode {
 
             case FIRSTMOVE:
                 moveStraight(60.0 + (fourthTileFlag ? 45.0 : 0.0), fastSpeed);
+                cowCatcher.setPosition(0.3);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNDIAG;
                 telemetryMove = MoveState.FIRSTMOVE;
@@ -555,6 +558,7 @@ public class CCHS4507Autonomous extends OpMode {
 
             case STRAIGHTTORAMP:
                 moveStraight(142.0, fastSpeed);
+                cowCatcher.setPosition(0.3);
                 moveDelayTime = delayMillisec;
                 currentMove = MoveState.MOVEDELAY;
                 nextMove = MoveState.STRAIGHTTORAMPTURN;
@@ -563,9 +567,9 @@ public class CCHS4507Autonomous extends OpMode {
 
             case STRAIGHTTORAMPTURN:
                 if (redAlliance) {
-                    moveTurn(-90.0, turnSpeed);
-                } else {
                     moveTurn(90.0, turnSpeed);
+                } else {
+                    moveTurn(-90.0, turnSpeed);
                 }
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DOWNTRACK;
