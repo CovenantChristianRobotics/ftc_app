@@ -272,10 +272,10 @@ public class CCHS5256TeleOp extends OpMode {
                 break;
 
             case BLINKON:
-                endGameLights.setPower(1.0);
+                endGameLights.setPower(0.7);
                 moveDelayTime = 1000;
                 if (moveDelayTime > 75) {
-                    moveDelayTime = moveDelayTime - 10;
+                    moveDelayTime = moveDelayTime - 20  ;
                 }
                 currentControl = ledControl.DELAYSETTINGS;
                 nextControl = ledControl.BLINKOFF;

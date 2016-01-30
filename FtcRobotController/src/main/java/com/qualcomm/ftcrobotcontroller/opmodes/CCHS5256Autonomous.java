@@ -226,7 +226,7 @@ public class CCHS5256Autonomous extends OpMode {
         chinUp.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         chinUp.setPower(0.5);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-        endGameLights.setPower(0.7);
+        endGameLights.setPower(0.6);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
@@ -348,7 +348,7 @@ public class CCHS5256Autonomous extends OpMode {
             return;
         }
         double distanceToWall = 0.0;
-        endGameLights.setPower(1.0);
+        endGameLights.setPower(0.7);
 
         Log.i("THE MARK OF THE BEAST", Long.toString(the_mark_of_the_beast));
 
