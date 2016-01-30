@@ -89,7 +89,7 @@ public class CCHS5256TeleOp extends OpMode {
         rightTrigger = hardwareMap.servo.get("rT");
         // Servo Settings
         armLock.setPosition(0.5);
-        climberDumper.setPosition(0.5);
+        climberDumper.setPosition(0.45);
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
@@ -229,7 +229,7 @@ public class CCHS5256TeleOp extends OpMode {
         }
 
         if (gamepad2.y) {
-            climberDumper.setPosition(0.55);
+            climberDumper.setPosition(0.45);
         } else if (gamepad2.x) {
             climberDumper.setPosition(1.0);
         }

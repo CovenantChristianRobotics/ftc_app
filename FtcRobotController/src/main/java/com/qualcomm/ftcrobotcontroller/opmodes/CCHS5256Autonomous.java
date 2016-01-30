@@ -187,6 +187,8 @@ public class CCHS5256Autonomous extends OpMode {
         int rightTarget;
         int leftTarget;
 
+        degrees = (degrees * redBlue);
+
         // Figure out how far off we are at the end of the previous move so we can correct
         gyroError =  desiredHeading - gyroSense.getHeading();
         if(gyroError > 180) {
@@ -196,7 +198,7 @@ public class CCHS5256Autonomous extends OpMode {
             gyroError = 360 + gyroError;
         }
 
-        desiredHeading = desiredHeading + (int)(degrees * redBlue);
+        desiredHeading = desiredHeading + (int)(degrees);
         if (desiredHeading >= 360) {
             desiredHeading = desiredHeading - 360;
         }
@@ -224,7 +226,6 @@ public class CCHS5256Autonomous extends OpMode {
         leftDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         rightDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         chinUp.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        chinUp.setPower(0.5);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         endGameLights.setPower(0.6);
         // Servos
@@ -239,7 +240,7 @@ public class CCHS5256Autonomous extends OpMode {
         rightTrigger = hardwareMap.servo.get("rT");
         // Servo Settings
         armLock.setPosition(0.25);
-        climberDumper.setPosition(0.5);
+        climberDumper.setPosition(0.45);
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
@@ -264,18 +265,16 @@ public class CCHS5256Autonomous extends OpMode {
         currentOmni = OmniCtlr.NOTMOVING;
         chosenOmni = OmniCtlr.NOTMOVING;
         // Set Switch Flags
-        if (redBlueBeaconSwitch.getState()) {   // WE ARE RED
-            redBlue = 1.0;
-            ultraSenseServo.setPosition(0.25);
-            redAlliance = true;
-            blueAlliance = false;
-            turnDiagDegrees = 45.0;
-        } else {                                // WE ARE BLUE
+        if (redBlueBeaconSwitch.getState()) {   // WE ARE BLUE
             redBlue = -1.0;
             ultraSenseServo.setPosition(0.75);
             redAlliance = false;
             blueAlliance = true;
-            turnDiagDegrees = -45.0;
+        } else {                                // WE ARE RED
+            redBlue = 1.0;
+            ultraSenseServo.setPosition(0.25);
+            redAlliance = true;
+            blueAlliance = false;
         }
 
         if (nearMtnSwitch.getState()) {         // WE GO TO NEAR MOUNTAIN
@@ -315,7 +314,7 @@ public class CCHS5256Autonomous extends OpMode {
 //            thirdTile = false;
 //            fourthTile = true;
 //        }
-            firstMoveDist = 81.44;
+            firstMoveDist = 71.44;
             moveDiagDist = 0.0;
             thirdTile = true;
             fourthTile = false;
@@ -480,7 +479,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case TURNDIAG:
                 // Move Turn turnDiagDegrees
-                moveTurn(turnDiagDegrees, turnSpeed);
+                moveTurn(45, turnSpeed);
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.MOVEDIAG;
                 telemetryMove = MoveState.TURNDIAG;
@@ -489,7 +488,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case MOVEDIAG:
                 // Move straight 70 + moveDiagDist to red
-//                lookingForWhiteLine = true;
+//                lookingForWhiteLine = true; m
                 moveStraight(167 + moveDiagDist, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNONCOLOREDLINE;
@@ -499,7 +498,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case TURNONCOLOREDLINE:
                 // Move Turn -45 degrees
-                moveTurn(-45.0, turnSpeed);
+                moveTurn(45.0, turnSpeed);
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.DRIVETOBEACON;
                 telemetryMove = MoveState.TURNONCOLOREDLINE;
@@ -561,6 +560,7 @@ public class CCHS5256Autonomous extends OpMode {
             case EXTENDARM:
                 // Dump climbers
                 chinUp.setTargetPosition(-3360);
+                chinUp.setPower(0.5);
                 currentMove = MoveState.DELAYSETTINGS;
                 nextMove = MoveState.DUMPCLIMBERS;
                 telemetryMove = MoveState.EXTENDARM;
@@ -579,7 +579,8 @@ public class CCHS5256Autonomous extends OpMode {
                 break;
 
             case PULLARMIN:
-                chinUp.setTargetPosition(3360);
+                chinUp.setTargetPosition(-300);
+                chinUp.setPower(0.5);
                 currentMove = MoveState.DELAYSETTINGS;
                 nextMove = MoveState.TURNALONGLINE;
                 telemetryMove = MoveState.EXTENDARM;
@@ -589,7 +590,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case TURNALONGLINE:
                 // Turn so we can position ourselves to go up the mountain
-                moveTurn(95.0, turnSpeed);
+                moveTurn(-105.0, turnSpeed);
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.BACKUPFARTHER;
                 telemetryMove = MoveState.TURNALONGLINE;
@@ -598,7 +599,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case  BACKUPFARTHER:
                 // Move Straight 15 so we can drive to mountain
-                moveStraight(-40.0, mediumSpeed);
+                moveStraight(-70.0, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
                 telemetryMove = MoveState.BACKUPFARTHER;
@@ -716,6 +717,8 @@ public class CCHS5256Autonomous extends OpMode {
     public void stop () {
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
+        chinUp.setTargetPosition(0);
+        chinUp.setPower(0.0);
     }
 
 }
