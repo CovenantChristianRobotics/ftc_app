@@ -1,6 +1,6 @@
 // CCHS 5256 Autonomous Software
 // Run in Autonomous Mode of FTC Challenge 2015-2016
-// Autonomous for FIRST ResQ challenge;'
+// Autonomous for FIRST ResQ challenge;
 
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
@@ -114,6 +114,10 @@ public class CCHS5256Autonomous extends OpMode {
     int gyroError;
     int desiredHeading;
 
+    // THE MARK OF THE BEAST
+
+    long the_mark_of_the_beast;
+
     // Methods that are called in the loop
 
     /**
@@ -192,7 +196,7 @@ public class CCHS5256Autonomous extends OpMode {
             gyroError = 360 + gyroError;
         }
 
-        desiredHeading = desiredHeading + (int)degrees;
+        desiredHeading = desiredHeading + (int)(degrees * redBlue);
         if (desiredHeading >= 360) {
             desiredHeading = desiredHeading - 360;
         }
@@ -239,8 +243,8 @@ public class CCHS5256Autonomous extends OpMode {
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
-        leftPlow.setPosition(0.5);
-        rightPlow.setPosition(0.5);
+        leftPlow.setPosition(0.43137255);
+        rightPlow.setPosition(0.827451);
         leftTrigger.setPosition(0.5);
         rightTrigger.setPosition(0.5);
         // Sensors
@@ -328,6 +332,11 @@ public class CCHS5256Autonomous extends OpMode {
         // log switch positions
 //        Log.i("delay", Double.toString(delay));
         // Calibrate Gyro
+
+        // THE MARK OF THE BEAST
+
+        the_mark_of_the_beast = 666;
+
         gyroSense.calibrate();
         while (gyroSense.isCalibrating()) {
         }
@@ -339,7 +348,9 @@ public class CCHS5256Autonomous extends OpMode {
             return;
         }
         double distanceToWall = 0.0;
-        endGameLights.setPower(0.7);
+        endGameLights.setPower(1.0);
+
+        Log.i("THE MARK OF THE BEAST", Long.toString(the_mark_of_the_beast));
 
         switch (currentMove) {
             //  WE USE THESE IN ALL MOVES
@@ -439,6 +450,8 @@ public class CCHS5256Autonomous extends OpMode {
             // MOVES WE USE ONCE, IN A SEQUENCE
             case INITIALIZEROBOT:
                 currentTime.reset();
+                rightPlow.setPosition(0.627451);
+                leftPlow.setPosition(0.52156866);
                 moveDelayTime = (long)delay;
                 currentMove = MoveState.DELAYSETTINGS;
                 nextMove = MoveState.FIRSTMOVE;
@@ -671,11 +684,11 @@ public class CCHS5256Autonomous extends OpMode {
                 break;
 
             case RETRACT:
-                leftOmniPinion.setPosition(0.25);
-                rightOmniPinion.setPosition(0.25);
+                leftOmniPinion.setPosition(0.0);
+                rightOmniPinion.setPosition(0.0);
                 currentOmni = OmniCtlr.DELAYSETTINGSOMNI;
                 nextOmni = OmniCtlr.DONE;
-                moveDelaytimeOmni = 5500;
+                moveDelaytimeOmni = 5000;
                 break;
 
             case DONE:
@@ -685,6 +698,7 @@ public class CCHS5256Autonomous extends OpMode {
 
         }
 
+        telemetry.addData("THE MARK OF THE BEAST", the_mark_of_the_beast);
         telemetry.addData("left encoder", leftDrive.getCurrentPosition());
         telemetry.addData("right encoder", rightDrive.getCurrentPosition());
         telemetry.addData("current move", telemetryMove.toString());
@@ -700,6 +714,8 @@ public class CCHS5256Autonomous extends OpMode {
 
     @Override
     public void stop () {
+        leftOmniPinion.setPosition(0.5);
+        rightOmniPinion.setPosition(0.5);
     }
 
 }
