@@ -115,8 +115,8 @@ public class CCHS5256TeleOp extends OpMode {
     @Override
     public void loop() {
 
-        double left = gamepad1.left_stick_y;
-        double right = gamepad1.right_stick_y;
+        double left = -gamepad1.left_stick_y;
+        double right = -gamepad1.right_stick_y;
         double hang = gamepad2.left_stick_y;
         float omniWheels = gamepad2.left_stick_y;
         float rightStickPos = -gamepad1.right_stick_y;
@@ -202,9 +202,9 @@ public class CCHS5256TeleOp extends OpMode {
             leftTrigger.setPosition(0.8);
             rightTrigger.setPosition(0.1);
         } else if (gamepad1.b) {
-            rightTrigger.setPosition(0.8);
+            rightTrigger.setPosition(Range.clip((rightTrigger.getPosition()) + 0.01, 0, 1));
         } else if (gamepad1.x) {
-            leftTrigger.setPosition(0.1);
+            leftTrigger.setPosition(Range.clip((leftTrigger.getPosition()) - 0.01, 0, 1));
         }
 
 
@@ -259,7 +259,7 @@ public class CCHS5256TeleOp extends OpMode {
                 break;
 
             case ON:
-                if (endGameTime.time() > 5.0) {
+                if (endGameTime.time() > 90.0) {
                     currentControl = ledControl.ENDGAME;
                 } else {
                     currentControl = ledControl.ON;
@@ -273,9 +273,9 @@ public class CCHS5256TeleOp extends OpMode {
 
             case BLINKON:
                 endGameLights.setPower(1.0);
-                moveDelayTime = 250;
+                moveDelayTime = 1000;
                 if (moveDelayTime > 75) {
-                    moveDelayTime = moveDelayTime - 5;
+                    moveDelayTime = moveDelayTime - 10;
                 }
                 currentControl = ledControl.DELAYSETTINGS;
                 nextControl = ledControl.BLINKOFF;
@@ -283,7 +283,7 @@ public class CCHS5256TeleOp extends OpMode {
 
             case BLINKOFF:
                 endGameLights.setPower(0.0);
-                moveDelayTime = 250;
+                moveDelayTime = 1000;
                 currentControl = ledControl.DELAYSETTINGS;
                 nextControl = ledControl.BLINKON;
                 break;
