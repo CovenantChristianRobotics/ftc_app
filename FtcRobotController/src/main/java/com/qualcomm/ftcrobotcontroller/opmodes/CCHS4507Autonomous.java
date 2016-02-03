@@ -37,14 +37,17 @@ public class CCHS4507Autonomous extends OpMode {
     Servo cowCatcher;
     Servo armLock;
     //Servo zipTieSweeper;
-    ColorSensor ColorSense;
-    ColorSensor colorGroundSense;
+    ColorSensor colorSense;
+    //ColorSensor colorGroundSense;
     MoveState currentMove;
     MoveState nextMove;
     MoveState telemetryMove;
     long moveDelayTime;
     boolean lookingForRedFlag;
     boolean lookingForBlueFlag;
+    int ambientRed;
+    int ambientBlue;
+    int lightAverageCounter;
     boolean sawBlueFlag;
     boolean sawRedFlag;
     boolean fourthTileFlag;
@@ -164,7 +167,6 @@ public class CCHS4507Autonomous extends OpMode {
         if (gyroError < -180) {
             gyroError = 360 + gyroError;
         }
-
         desiredHeading = desiredHeading + (int)degrees;
         if (desiredHeading >= 360) {
             desiredHeading = desiredHeading - 360;
@@ -204,15 +206,14 @@ public class CCHS4507Autonomous extends OpMode {
         climberDoor = hardwareMap.servo.get("climberDoor");
         cowCatcher = hardwareMap.servo.get("cowCatcher");
         armLock = hardwareMap.servo.get("armLock");
-        ColorSense = hardwareMap.colorSensor.get("color");
-        colorGroundSense = hardwareMap.colorSensor.get("colorGround");
+        colorSense = hardwareMap.colorSensor.get("color");
+        //colorGroundSense = hardwareMap.colorSensor.get("colorGround");
         nearMountainSwitch = hardwareMap.digitalChannel.get("nearMtnSw");
         redBlueSwitch = hardwareMap.digitalChannel.get("rbSw");
         toMountainSwitch = hardwareMap.digitalChannel.get("mntSw");
         fourthTileSwitch = hardwareMap.digitalChannel.get("fourthTileSw");
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
         gyroSense = hardwareMap.gyroSensor.get("gyro");
-        gyroSense.calibrate();
         liftCheck =  hardwareMap.touchSensor.get("liftCheck");
         delayPot = hardwareMap.analogInput.get("delayPot");
         moveDelayTime = (long)(delayPot.getValue() * (15000 / 1024));
@@ -221,13 +222,13 @@ public class CCHS4507Autonomous extends OpMode {
         toMountainFlag = toMountainSwitch.getState();
         if (redBlueSwitch.getState()) { //This is for when we're going to blue
             redAlliance = false;
-            lookingForRedFlag = true;
-            lookingForBlueFlag = true;
+            lookingForRedFlag = false;
+            lookingForBlueFlag = false;
             servoDist.setPosition(0.75);
         } else { //This is for red
             redAlliance = true;
-            lookingForRedFlag = true;
-            lookingForBlueFlag = true;
+            lookingForRedFlag = false;
+            lookingForBlueFlag = false;
             servoDist.setPosition(0.25);
         }
 
@@ -241,7 +242,7 @@ public class CCHS4507Autonomous extends OpMode {
         // } else {
 
         // }
-        ColorSense.enableLed(true);
+        colorSense.enableLed(false);
         motorLeft.setDirection(DcMotor.Direction.FORWARD);
         motorRight.setDirection(DcMotor.Direction.REVERSE);
         trackLifter.setDirection(DcMotor.Direction.REVERSE);
@@ -258,6 +259,9 @@ public class CCHS4507Autonomous extends OpMode {
         telemetryMove = MoveState.MOVEDELAY;
         sawRedFlag = false;
         sawBlueFlag = false;
+        ambientRed = colorSense.red();
+        ambientBlue = colorSense.blue();
+        lightAverageCounter = 1;
         desiredHeading = 0;
         speed = 0;
         movingForward = true;
@@ -284,6 +288,9 @@ public class CCHS4507Autonomous extends OpMode {
         if (liftCheck.isPressed()) {
             trackLifterUp = trackLifter.getCurrentPosition();
             trackLifter.setTargetPosition(trackLifterUp);
+        }
+        gyroSense.calibrate();
+        while (gyroSense.isCalibrating()) {
         }
     }
 
@@ -319,19 +326,19 @@ public class CCHS4507Autonomous extends OpMode {
                 }
                 motorRight.setPower(Range.clip(speed - (gyroError * 0.05), -1.0, 1.0));
                 motorLeft.setPower(Range.clip(speed + (gyroError * 0.05), -1.0, 1.0));
-                if (ColorSense.blue() >= 1) {
+                if (colorSense.blue() > ambientBlue) {
                     sawBlueFlag = true;
                 }
-                if (ColorSense.red() >= 1) {
+                if (colorSense.red() > ambientRed) {
                     sawRedFlag = true;
                 }
-                if (lookingForRedFlag && (ColorSense.red() >= 1))  {
+                if (lookingForRedFlag && (colorSense.red() > ambientRed))  {
                     motorRight.setPower(0.0);
                     motorLeft.setPower(0.0);
                     takeADump = true;
                     currentMove = MoveState.MOVEDELAY;
                 }
-                if (lookingForBlueFlag && (ColorSense.blue() >= 1))  {
+                if (lookingForBlueFlag && (colorSense.blue() > ambientBlue))  {
                     motorRight.setPower(0.0);
                     motorLeft.setPower(0.0);
                     currentMove = MoveState.MOVEDELAY;
@@ -412,11 +419,7 @@ public class CCHS4507Autonomous extends OpMode {
             case FINDWALL:
                 distanceToWall = ultraSense.getUltrasonicLevel();
                 if ((distanceToWall > 20.0) && (distanceToWall <= 80.0)) {
-                    if (redAlliance) {
-                        moveStraight((distanceToWall - 26.0) * 1.414, slowSpeed);
-                    } else {
-                        moveStraight((distanceToWall - 30.0) * 1.414, slowSpeed);
-                    }
+                    moveStraight((distanceToWall - 26.0) * 1.414, slowSpeed);
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.TURNALONGWALL;
                     telemetryMove = MoveState.FINDWALL;
@@ -437,10 +440,23 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case FINDBEACON:
+                if (lightAverageCounter < 8) {
+                    ambientBlue = ambientBlue + colorSense.blue();
+                    ambientRed = ambientRed + colorSense.red();
+                    lightAverageCounter++;
+                } else if (lightAverageCounter == 8) {
+                    ambientBlue = ambientBlue / 8;
+                    ambientRed = ambientRed / 8;
+                    lightAverageCounter++;
+                }
                 if (redAlliance) {
                     moveStraight(-90.0, fastSpeed);
+                    lookingForRedFlag = true;
+                    lookingForBlueFlag = true;
                 } else {
                     moveStraight(90.0, fastSpeed);
+                    lookingForBlueFlag = true;
+                    lookingForRedFlag = true;
                 }
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.CENTERBUCKET;
@@ -616,14 +632,17 @@ public class CCHS4507Autonomous extends OpMode {
         telemetry.addData("Current Move", telemetryMove.toString());
         telemetry.addData("desiredHeading", Integer.toString(desiredHeading));
         telemetry.addData("gyro", Integer.toString(gyroSense.getHeading()));
-        telemetry.addData("gyro", Integer.toString(gyroSense.rawX()));
         telemetry.addData("liftCheck", liftCheck.isPressed());
 
         Log.i("Current Move", currentMove.toString());
         Log.i("desiredHeading", Integer.toString(desiredHeading));
         Log.i("gyro", Integer.toString(gyroSense.getHeading()));
-        Log.i("time", Long.toString(System.currentTimeMillis()));
-        Log.i("delayUntil", Long.toString(delayUntil));
+        Log.i("colorRed", Integer.toString(colorSense.red()));
+        Log.i("colorBlue", Integer.toString(colorSense.blue()));
+        Log.i("colorGreen", Integer.toString(colorSense.green()));
+        Log.i("colorAlpha", Integer.toString(colorSense.alpha()));
+        Log.i("ambientRed", Integer.toString(ambientRed));
+        Log.i("ambientBlue", Integer.toString(ambientBlue));
     }
 
     @Override
