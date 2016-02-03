@@ -1,5 +1,7 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -51,6 +53,10 @@ public class CCHS5256TeleOp extends OpMode {
     long moveDelayTime;
     Date now;
 
+    // THE MARK OF THE BEAST
+
+    long the_mark_of_the_beast;
+
     /**
      * Constructor
      */
@@ -69,9 +75,8 @@ public class CCHS5256TeleOp extends OpMode {
         leftDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         rightDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         chinUp.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-        chinUp.setPower(0.2);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-        endGameLights.setPower(1.0);
+        endGameLights.setPower(0.7);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
@@ -84,25 +89,34 @@ public class CCHS5256TeleOp extends OpMode {
         rightTrigger = hardwareMap.servo.get("rT");
         // Servo Settings
         armLock.setPosition(0.5);
-        climberDumper.setPosition(0.5);
+        climberDumper.setPosition(0.45);
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
-        leftPlow.setPosition(0.5);
-        rightPlow.setPosition(0.5);
-        leftTrigger.setPosition(0.8);
-        rightTrigger.setPosition(0.1);
+        leftPlow.setPosition(0.43137255);
+        rightPlow.setPosition(0.827451);
+        leftTrigger.setPosition(0.5);
+        rightTrigger.setPosition(0.5);
         // Sensors
         gyroSense = hardwareMap.gyroSensor.get("gyroSense");
         fColorSense = hardwareMap.colorSensor.get("fCS");
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
+        speedUp= false;
+        slowDown = false;
+        // LED control
+        currentControl = ledControl.PREMATCH;
+        endGameTime = new ElapsedTime();
+
+        // THE MARK OF THE BEAST
+
+        the_mark_of_the_beast = 666;
     }
 
     @Override
     public void loop() {
 
-        double left = gamepad1.left_stick_y;
-        double right = gamepad1.right_stick_y;
+        double left = -gamepad1.left_stick_y;
+        double right = -gamepad1.right_stick_y;
         double hang = gamepad2.left_stick_y;
         float omniWheels = gamepad2.left_stick_y;
         float rightStickPos = -gamepad1.right_stick_y;
@@ -125,22 +139,19 @@ public class CCHS5256TeleOp extends OpMode {
             rightStickNeg = gamepad1.right_stick_y;
         }
 
-        if (gamepad1.left_bumper && !slowDown) {
-            slowDown = true;
-        } else if (gamepad1.right_bumper && !speedUp) {
-            speedUp = true;
-        } else if (gamepad1.left_bumper && slowDown) {
-            slowDown = false;
-        } else if (gamepad1.right_bumper && speedUp) {
-            speedUp = true;
+        if (gamepad1.left_bumper) {
+            if (slowDown) {
+                slowDown = false;
+            } else if (!slowDown) {
+                slowDown = true;
+            }
         }
 
-        if (speedUp) {
-            left = (float) fast(left);
-            right = (float) fast(right);
-        } else if (slowDown) {
-            left = (float) slow(left);
-            right = (float) slow(right);
+        if (slowDown) {
+//            left = (float) slow(left);
+//            right = (float) slow(right);
+            left = (left / 3);
+            right = (right / 3);
         } else if (gamepad1.dpad_up) {
             left = rightStickPos * -1;
             right = rightStickPos * -1;
@@ -150,29 +161,29 @@ public class CCHS5256TeleOp extends OpMode {
         } else if (gamepad1.dpad_right) {
             left = -0.1;
             right = 0.1;
-            if (speedUp) {
-                left = (double) fast(left);
-                right = (double) fast(right);
-            } else if (slowDown) {
-                left = (double) slow(left);
-                right = (double) slow(right);
-            } else {
-                left = left;
-                right = right;
-            }
+//            if (speedUp) {
+//                left = (double) fast(left);
+//                right = (double) fast(right);
+//            } else if (slowDown) {
+//                left = (double) slow(left);
+//                right = (double) slow(right);
+//            } else {
+//                left = left;
+//                right = right;
+//            }
         } else if (gamepad1.dpad_left) {
             left = 0.1;
             right = -0.1;
-            if (speedUp) {
-                left = (double) fast(left);
-                right = (double) fast(right);
-            } else if (slowDown) {
-                left = (float) slow(left);
-                right = (float) slow(right);
-            }
+//            if (speedUp) {
+//                left = (double) fast(left);
+//                right = (double) fast(right);
+//            } else if (slowDown) {
+//                left = (float) slow(left);
+//                right = (float) slow(right);
+//            }
         } else {
-            left = (float) medium(left);
-            right = (float) medium(right);
+//            left = (float) medium(left);
+//            right = (float) medium(right);
         }
 
         if (gamepad2.right_bumper) {
@@ -181,29 +192,21 @@ public class CCHS5256TeleOp extends OpMode {
             chinUp.setPower(0.0);
         }
 
-//        if (gamepad2.a) {
-//            armLock.setPosition(0.2292121569);
-//        } else if (gamepad2.b) {
-//            armLock.setPosition(0.5);
-//        }
-
         if (gamepad2.a) {
             armLock.setPosition(0.76862746);
         } else if (gamepad2.b) {
-            armLock.setPosition(0.5);
+            armLock.setPosition(0.25);
         }
 
         if (gamepad1.a) {
-            leftTrigger.setPosition(0.1);
-        } else if (gamepad1.b) {
             leftTrigger.setPosition(0.8);
+            rightTrigger.setPosition(0.1);
+        } else if (gamepad1.b) {
+            rightTrigger.setPosition(Range.clip((rightTrigger.getPosition()) + 0.01, 0, 1));
+        } else if (gamepad1.x) {
+            leftTrigger.setPosition(Range.clip((leftTrigger.getPosition()) - 0.01, 0, 1));
         }
 
-        if (gamepad1.x) {
-            rightTrigger.setPosition(0.8);
-        } else if (gamepad1.y) {
-            rightTrigger.setPosition(0.1);
-        }
 
         leftDrive.setPower(left);
         rightDrive.setPower(right);
@@ -217,16 +220,16 @@ public class CCHS5256TeleOp extends OpMode {
             rightOmniPinion.setPosition((gamepad2.right_stick_y / 2) + 0.5);
         }
 
-//        if (gamepad1.b) {
-//            leftPlow.setPosition(Range.clip((leftPlow.getPosition() + 0.01), 0.0, 1.0));
-//            rightPlow.setPosition(Range.clip((rightPlow.getPosition() + 0.01), 0.0, 1.0));
-//        } else if (gamepad1.a) {
-//            leftPlow.setPosition(Range.clip((leftPlow.getPosition() - 0.01), 0.0, 1.0));
-//            rightPlow.setPosition(Range.clip((rightPlow.getPosition() - 0.01), 0.0, 1.0));
-//        }
+        if (gamepad2.dpad_up) {
+            rightPlow.setPosition(0.2627451);
+            leftPlow.setPosition(0.827451);
+        } else if (gamepad2.dpad_down) {
+            rightPlow.setPosition(0.627451);
+            leftPlow.setPosition(0.52156866);
+        }
 
         if (gamepad2.y) {
-            climberDumper.setPosition(0.55);
+            climberDumper.setPosition(0.45);
         } else if (gamepad2.x) {
             climberDumper.setPosition(1.0);
         }
@@ -269,24 +272,31 @@ public class CCHS5256TeleOp extends OpMode {
                 break;
 
             case BLINKON:
-                endGameLights.setPower(1.0);
-                moveDelayTime = 325;
+                endGameLights.setPower(0.7);
+                moveDelayTime = 1000;
+                if (moveDelayTime > 75) {
+                    moveDelayTime = moveDelayTime - 20  ;
+                }
                 currentControl = ledControl.DELAYSETTINGS;
                 nextControl = ledControl.BLINKOFF;
                 break;
 
             case BLINKOFF:
                 endGameLights.setPower(0.0);
-                moveDelayTime = 175;
+                moveDelayTime = 1000;
                 currentControl = ledControl.DELAYSETTINGS;
                 nextControl = ledControl.BLINKON;
                 break;
         }
 
+
+        Log.i("THE MARK OF THE BEAST", Long.toString(the_mark_of_the_beast));
+
+        telemetry.addData("THE MARK OF THE BEAST", the_mark_of_the_beast);
         telemetry.addData("LED", currentControl.toString());
         telemetry.addData("Elapsed Time", endGameTime.time());
-//        telemetry.addData("l plow", leftPlow.getPosition());
-//        telemetry.addData("r plow", rightPlow.getPosition());
+        telemetry.addData("l plow", leftPlow.getPosition());
+        telemetry.addData("r plow", rightPlow.getPosition());
         telemetry.addData("enc left", leftDrive.getCurrentPosition());
         telemetry.addData("enc right", rightDrive.getCurrentPosition());
         telemetry.addData("arm lock", armLock.getPosition());
@@ -297,18 +307,20 @@ public class CCHS5256TeleOp extends OpMode {
     }
     @Override
     public void stop () {
+        leftOmniPinion.setPosition(0.5);
+        rightOmniPinion.setPosition(0.5);
     }
 
     double scaleInput(double dVal) {
         double[] scaleArray = {0.0, 0.04, 0.07, 0.10, 0.13, 0.16, 0.19, 0.23,
-        0.28, 0.34, 0.41, 0.49, 0.58, 0.68, 0.72, 0.75, 0.75};
+        0.28, 0.34, 0.41, 0.49, 0.58, 0.68, 0.79, 0.91, 1.0, 1.0, 1.0};
 
         //get the corresponding index for the scaleInput array
-        int index = (int) (dVal * 16.0);
+        int index = (int) (dVal * 19.0);
         if (index < 0) {
             index = -index;
-        } else if (index > 16) {
-            index = 16;
+        } else if (index > 19) {
+            index = 19;
         }
 
         double dScale = 0.0;
@@ -321,13 +333,8 @@ public class CCHS5256TeleOp extends OpMode {
         return  dScale;
     }
 
-    double fast(double jVal) {
-        //scale input * 4/3 (top speed 1.0)
-        return ((4 / 3) * scaleInput(jVal));
-    }
-
     double medium(double jVal) {
-        //scale input * 1.0 (top speed = 0.75)
+        //scale input * 1.0 (top speed = 1.0)
         return  scaleInput(jVal);
     }
 
