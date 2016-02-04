@@ -49,7 +49,38 @@ public class sweeperTeleop extends OpMode {
     @Override
     public void loop() {
 
-        if (gamepad1.a)
+        if (gamepad1.x) {
+            left = true;
+            up = false;
+            right = false;
+            down = false;
+            chooseSweeper = sweeperControl.LEFT;
+        }
+
+        if (gamepad1.y) {
+            left = false;
+            up = true;
+            right = false;
+            down = false;
+            chooseSweeper = sweeperControl.UP;
+        }
+
+        if (gamepad1.b) {
+            left = false;
+            up = false;
+            right = true;
+            down = false;
+            chooseSweeper = sweeperControl.RIGHT;
+        }
+
+        if (gamepad1.a) {
+            left = false;
+            up = false;
+            right = false;
+            down = true;
+            chooseSweeper = sweeperControl.DOWN;
+        }
+
         switch (currentSweeper) {
 
             case PREMATCH:
