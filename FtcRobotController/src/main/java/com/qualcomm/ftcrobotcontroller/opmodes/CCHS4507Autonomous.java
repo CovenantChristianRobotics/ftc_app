@@ -216,7 +216,7 @@ public class CCHS4507Autonomous extends OpMode {
         gyroSense = hardwareMap.gyroSensor.get("gyro");
         liftCheck =  hardwareMap.touchSensor.get("liftCheck");
         delayPot = hardwareMap.analogInput.get("delayPot");
-        moveDelayTime = (long)(delayPot.getValue() * (15000 / 1024));
+        moveDelayTime = (long)((delayPot.getValue() * 10000) / 1024);
         nearMountainFlag = nearMountainSwitch.getState();
         fourthTileFlag = fourthTileSwitch.getState();
         toMountainFlag = toMountainSwitch.getState();
@@ -445,8 +445,8 @@ public class CCHS4507Autonomous extends OpMode {
                     ambientRed = ambientRed + colorSense.red();
                     lightAverageCounter++;
                 } else if (lightAverageCounter == 8) {
-                    ambientBlue = ambientBlue / 8;
-                    ambientRed = ambientRed / 8;
+                    ambientBlue = (int)(((double)ambientBlue / 8.0) + 0.5);
+                    ambientRed = (int)(((double)ambientRed / 8.0) + 0.5);
                     lightAverageCounter++;
                 }
                 if (redAlliance) {
