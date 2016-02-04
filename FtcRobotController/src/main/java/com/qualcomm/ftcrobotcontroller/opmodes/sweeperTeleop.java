@@ -72,7 +72,7 @@ public class sweeperTeleop extends OpMode {
                 if (left) {
                     currentSweeper = sweeperControl.PREIDLE;
                 } else if (down) {
-                    blockDumper.setTargetPosition((int) rotations(270));
+                    blockDumper.setTargetPosition((int) rotations(-90));
                     blockDumper.setPower(0.5);
                     currentSweeper = sweeperControl.PREIDLE;
                 } else if (up) {
@@ -94,7 +94,7 @@ public class sweeperTeleop extends OpMode {
                     blockDumper.setPower(0.5);
                     currentSweeper = sweeperControl.PREIDLE;
                 } else if (down) {
-                    blockDumper.setTargetPosition((int) rotations(90));
+                    blockDumper.setTargetPosition((int) rotations(-270));
                     blockDumper.setPower(0.5);
                     currentSweeper = sweeperControl.PREIDLE;
                 } else if (left) {
@@ -116,7 +116,7 @@ public class sweeperTeleop extends OpMode {
                     blockDumper.setPower(0.5);
                     currentSweeper = sweeperControl.PREIDLE;
                 } else if (down) {
-                    blockDumper.setTargetPosition((int) rotations(180));
+                    blockDumper.setTargetPosition((int) rotations(-180));
                     blockDumper.setPower(0.5);
                     currentSweeper = sweeperControl.PREIDLE;
                 }
@@ -126,15 +126,15 @@ public class sweeperTeleop extends OpMode {
                 if (down) {
                     currentSweeper = sweeperControl.PREIDLE;
                 } else if (left) {
-                    blockDumper.setTargetPosition((int) rotations(-270));
+                    blockDumper.setTargetPosition((int) rotations(90));
                     blockDumper.setPower(0.5);
                     currentSweeper = sweeperControl.PREIDLE;
                 } else if (up) {
-                    blockDumper.setTargetPosition((int) rotations(-180));
+                    blockDumper.setTargetPosition((int) rotations(180));
                     blockDumper.setPower(0.5);
                     currentSweeper = sweeperControl.PREIDLE;
                 } else if (right) {
-                    blockDumper.setTargetPosition((int) rotations(-90));
+                    blockDumper.setTargetPosition((int) rotations(-270));
                     blockDumper.setPower(0.5);
                     currentSweeper = sweeperControl.PREIDLE;
                 }
