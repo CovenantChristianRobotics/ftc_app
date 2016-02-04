@@ -590,7 +590,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case TURNALONGLINE:
                 // Turn so we can position ourselves to go up the mountain
-                moveTurn(-105.0, turnSpeed);
+                moveTurn(105.0, turnSpeed);
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.BACKUPFARTHER;
                 telemetryMove = MoveState.TURNALONGLINE;
@@ -599,7 +599,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case  BACKUPFARTHER:
                 // Move Straight 15 so we can drive to mountain
-                moveStraight(-70.0, mediumSpeed);
+                moveStraight(50.0, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
                 telemetryMove = MoveState.BACKUPFARTHER;
