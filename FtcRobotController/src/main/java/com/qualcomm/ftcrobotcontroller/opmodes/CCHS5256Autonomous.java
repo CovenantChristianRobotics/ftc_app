@@ -494,6 +494,7 @@ public class CCHS5256Autonomous extends OpMode {
                 nextMove = MoveState.TURNONCOLOREDLINE;
                 telemetryMove = MoveState.MOVEDIAG;
                 moveDelayTime = commonDelayTime;
+                chosenOmni = OmniCtlr.EXTENDING;
                 break;
 
             case TURNONCOLOREDLINE:
@@ -573,7 +574,6 @@ public class CCHS5256Autonomous extends OpMode {
                    currentMove = MoveState.DELAYSETTINGS;
                    nextMove = MoveState.PULLARMIN;
                    telemetryMove = MoveState.DUMPCLIMBERS;
-                   chosenOmni = OmniCtlr.EXTENDING;
                    moveDelayTime = 1500;
                }
                 break;
