@@ -36,6 +36,7 @@ public class CCHS4507Autonomous extends OpMode {
     Servo climberDoor;
     Servo cowCatcher;
     Servo armLock;
+    Servo trackLock;
     //Servo zipTieSweeper;
     ColorSensor colorSense;
     //ColorSensor colorGroundSense;
@@ -206,6 +207,7 @@ public class CCHS4507Autonomous extends OpMode {
         climberDoor = hardwareMap.servo.get("climberDoor");
         cowCatcher = hardwareMap.servo.get("cowCatcher");
         armLock = hardwareMap.servo.get("armLock");
+        trackLock = hardwareMap.servo.get("trackLock");
         colorSense = hardwareMap.colorSensor.get("color");
         //colorGroundSense = hardwareMap.colorSensor.get("colorGround");
         nearMountainSwitch = hardwareMap.digitalChannel.get("nearMtnSw");
@@ -267,7 +269,7 @@ public class CCHS4507Autonomous extends OpMode {
         movingForward = true;
         takeADump = false;
         stowLifter = true;
-        fastSpeed = 0.75;
+        fastSpeed = 0.50;
         mediumSpeed = 0.50;
         slowSpeed = 0.35;
         turnSpeed = 0.35;
@@ -282,8 +284,9 @@ public class CCHS4507Autonomous extends OpMode {
         climberTriggerRight.setPosition(0.5);
         armPivot.setPower(0.0);
         climberDoor.setPosition(0.0);
-        cowCatcher.setPosition(0.3);
+        cowCatcher.setPosition(0.2);
         armLock.setPosition(0.5);
+        trackLock.setPosition(0.8);
         //servoBeaconPusher.setPosition(0.0);
         if (liftCheck.isPressed()) {
             trackLifterUp = trackLifter.getCurrentPosition();
@@ -351,8 +354,6 @@ public class CCHS4507Autonomous extends OpMode {
                      }
                 } else {
                     if (!motorLeft.isBusy() && !motorRight.isBusy()) {
-                        motorRight.setPower(0.0);
-                        motorLeft.setPower(0.0);
                         currentMove = MoveState.MOVEDELAY;
                     }
                 }
@@ -377,19 +378,14 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case DELAY:
-                if (motorLeft.isBusy() || motorRight.isBusy()) {
-                    // If we aren't quite done moving, restart the delayMillisec
-                    currentMove = MoveState.MOVEDELAY;
-                } else {
-                    if (System.currentTimeMillis() >= delayUntil) {
-                        currentMove = nextMove;
-                    }
-               }
+                if (System.currentTimeMillis() >= delayUntil) {
+                    currentMove = nextMove;
+                }
                 break;
 
             case FIRSTMOVE:
                 moveStraight(60.0 + (fourthTileFlag ? 45.0 : 0.0), fastSpeed);
-                cowCatcher.setPosition(0.5);
+                cowCatcher.setPosition(0.2);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNDIAG;
                 telemetryMove = MoveState.FIRSTMOVE;
@@ -527,7 +523,7 @@ public class CCHS4507Autonomous extends OpMode {
                 if (redAlliance) {      // red alliance
                     distance = -108.0;
                 } else {                // blue alliance
-                    distance = -87.0;
+                    distance = -96.0;
                 }
                 if (!nearMountainFlag) {
                     distance -= 61.0;
@@ -601,7 +597,7 @@ public class CCHS4507Autonomous extends OpMode {
             case DOWNTRACK:
                 moveLifter(90.0);
                 cowCatcher.setPosition(.75);
-                moveDelayTime = 500;
+                moveDelayTime = 2000;
                 currentMove = MoveState.MOVEDELAY;
                 nextMove = MoveState.UPRAMP;
                 telemetryMove = MoveState.DOWNTRACK;
@@ -629,20 +625,22 @@ public class CCHS4507Autonomous extends OpMode {
         if (liftCheck.isPressed()) {
             trackLifterUp = trackLifter.getCurrentPosition();
         }
+        telemetry.addData("motorLeft", motorLeft.isBusy() ? "busy" : "done");
+        telemetry.addData("motorRiht", motorRight.isBusy() ? "busy" : "done");
         telemetry.addData("Current Move", telemetryMove.toString());
         telemetry.addData("desiredHeading", Integer.toString(desiredHeading));
         telemetry.addData("gyro", Integer.toString(gyroSense.getHeading()));
         telemetry.addData("liftCheck", liftCheck.isPressed());
 
-        Log.i("Current Move", currentMove.toString());
-        Log.i("desiredHeading", Integer.toString(desiredHeading));
-        Log.i("gyro", Integer.toString(gyroSense.getHeading()));
-        Log.i("colorRed", Integer.toString(colorSense.red()));
-        Log.i("colorBlue", Integer.toString(colorSense.blue()));
-        Log.i("colorGreen", Integer.toString(colorSense.green()));
-        Log.i("colorAlpha", Integer.toString(colorSense.alpha()));
-        Log.i("ambientRed", Integer.toString(ambientRed));
-        Log.i("ambientBlue", Integer.toString(ambientBlue));
+//        Log.i("Current Move", currentMove.toString());
+//        Log.i("desiredHeading", Integer.toString(desiredHeading));
+//        Log.i("gyro", Integer.toString(gyroSense.getHeading()));
+//        Log.i("colorRed", Integer.toString(colorSense.red()));
+//        Log.i("colorBlue", Integer.toString(colorSense.blue()));
+//        Log.i("colorGreen", Integer.toString(colorSense.green()));
+//        Log.i("colorAlpha", Integer.toString(colorSense.alpha()));
+//        Log.i("ambientRed", Integer.toString(ambientRed));
+//        Log.i("ambientBlue", Integer.toString(ambientBlue));
     }
 
     @Override

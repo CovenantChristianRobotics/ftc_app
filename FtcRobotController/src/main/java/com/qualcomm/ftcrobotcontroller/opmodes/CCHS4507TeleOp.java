@@ -31,6 +31,7 @@ public class CCHS4507TeleOp extends OpMode {
     Servo climberDoor;
     Servo cowCatcher;
     Servo armLock;
+    Servo trackLock;
     //Servo zipTieSweeper;
 
     //Sensors
@@ -67,6 +68,7 @@ public class CCHS4507TeleOp extends OpMode {
         climberTriggerRight = hardwareMap.servo.get("trigRight");
         cowCatcher = hardwareMap.servo.get("cowCatcher");
         armLock = hardwareMap.servo.get("armLock");
+        trackLock = hardwareMap.servo.get("trackLock");
         //zipTieSweeper = hardwareMap.servo.get("zipTieSweeper");
         ColorSense = hardwareMap.colorSensor.get("color");
         nearMountainSwitch = hardwareMap.digitalChannel.get("nearMtnSw");
@@ -81,8 +83,8 @@ public class CCHS4507TeleOp extends OpMode {
         motorLeft.setDirection(DcMotor.Direction.FORWARD);
         motorRight.setDirection(DcMotor.Direction.REVERSE);
         trackLifter.setDirection(DcMotor.Direction.REVERSE);
-        motorRight.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-        motorLeft.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        motorRight.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
+        motorLeft.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         trackLifter.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         armPivot.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         armExtend.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
@@ -130,7 +132,7 @@ public class CCHS4507TeleOp extends OpMode {
 //            cowCatcherUp = true;
         } else if (gamepad1.left_trigger > 0.5) {
 //            cowCatcherUp = false;
-            cowCatcher.setPosition(0.5);
+            cowCatcher.setPosition(0.2);
 //        } else if (!cowCatcherUp) {
 //            cowCatcher.setPosition(0.2);
         }
@@ -172,6 +174,12 @@ public class CCHS4507TeleOp extends OpMode {
         }
         if (gamepad2.x) {
             armLock.setPosition(0.5);
+        }
+        if (gamepad2.dpad_up) {
+            trackLock.setPosition(0.4);
+        }
+        if (gamepad2.dpad_down) {
+            trackLock.setPosition(0.8);
         }
 
         telemetry.addData("trackLifter", Integer.toString(trackLifter.getCurrentPosition()));

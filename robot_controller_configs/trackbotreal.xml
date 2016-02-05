@@ -31,6 +31,7 @@
 	</ServoController>
 	<ServoController name="Servo Controller 2" serialNumber="AI02RMPE">
 		 <Servo name="armLock" port="1" />
+		 <Servo name="trackLock" port="2" />
     </ServoController> 
     <MotorController name="MotorController 3" serialNumber="AL00VXR8">
         <Motor name="motorR" port="1" />
