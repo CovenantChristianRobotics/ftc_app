@@ -76,7 +76,7 @@ public class CCHS5256TeleOp extends OpMode {
         rightDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         chinUp.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-        endGameLights.setPower(0.7);
+        endGameLights.setPower(0.0);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
@@ -88,7 +88,7 @@ public class CCHS5256TeleOp extends OpMode {
         leftTrigger = hardwareMap.servo.get("lT");
         rightTrigger = hardwareMap.servo.get("rT");
         // Servo Settings
-        armLock.setPosition(0.5);
+        armLock.setPosition(0.25);
         climberDumper.setPosition(0.45);
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
@@ -109,7 +109,7 @@ public class CCHS5256TeleOp extends OpMode {
 
         // THE MARK OF THE BEAST
 
-        the_mark_of_the_beast = 666;
+//        the_mark_of_the_beast = 666;
     }
 
     @Override
@@ -152,35 +152,35 @@ public class CCHS5256TeleOp extends OpMode {
 //            right = (float) slow(right);
             left = (left / 3);
             right = (right / 3);
-        } else if (gamepad1.dpad_up) {
-            left = rightStickPos * -1;
-            right = rightStickPos * -1;
-        } else if (gamepad1.dpad_down) {
-            left = rightStickNeg * -1;
-            right = rightStickNeg * -1;
-        } else if (gamepad1.dpad_right) {
-            left = -0.1;
-            right = 0.1;
-//            if (speedUp) {
-//                left = (double) fast(left);
-//                right = (double) fast(right);
-//            } else if (slowDown) {
-//                left = (double) slow(left);
-//                right = (double) slow(right);
-//            } else {
-//                left = left;
-//                right = right;
-//            }
-        } else if (gamepad1.dpad_left) {
-            left = 0.1;
-            right = -0.1;
-//            if (speedUp) {
-//                left = (double) fast(left);
-//                right = (double) fast(right);
-//            } else if (slowDown) {
-//                left = (float) slow(left);
-//                right = (float) slow(right);
-//            }
+//        } else if (gamepad1.dpad_up) {
+//            left = rightStickPos * -1;
+//            right = rightStickPos * -1;
+//        } else if (gamepad1.dpad_down) {
+//            left = rightStickNeg * -1;
+//            right = rightStickNeg * -1;
+//        } else if (gamepad1.dpad_right) {
+//            left = -0.1;
+//            right = 0.1;
+////            if (speedUp) {
+////                left = (double) fast(left);
+////                right = (double) fast(right);
+////            } else if (slowDown) {
+////                left = (double) slow(left);
+////                right = (double) slow(right);
+////            } else {
+////                left = left;
+////                right = right;
+////            }
+//        } else if (gamepad1.dpad_left) {
+//            left = 0.1;
+//            right = -0.1;
+////            if (speedUp) {
+////                left = (double) fast(left);
+////                right = (double) fast(right);
+////            } else if (slowDown) {
+////                left = (float) slow(left);
+////                right = (float) slow(right);
+////            }
         } else {
 //            left = (float) medium(left);
 //            right = (float) medium(right);
@@ -212,12 +212,12 @@ public class CCHS5256TeleOp extends OpMode {
         rightDrive.setPower(right);
 
         if (gamepad2.dpad_left) {
-            leftOmniPinion.setPosition((gamepad2.right_stick_y / 2) + 0.5);
+            leftOmniPinion.setPosition((gamepad2.right_stick_y / 2.0) + 0.5);
         } else if (gamepad2.dpad_right) {
-            rightOmniPinion.setPosition((gamepad2.right_stick_y / 2) + 0.5);
+            rightOmniPinion.setPosition((gamepad2.right_stick_y / 2.0) + 0.5);
         } else {
-            leftOmniPinion.setPosition((gamepad2.right_stick_y / 2) + 0.5);
-            rightOmniPinion.setPosition((gamepad2.right_stick_y / 2) + 0.5);
+            leftOmniPinion.setPosition((gamepad2.right_stick_y / 2.0) + 0.5);
+            rightOmniPinion.setPosition((gamepad2.right_stick_y / 2.0) + 0.5);
         }
 
         if (gamepad2.dpad_up) {
@@ -254,7 +254,7 @@ public class CCHS5256TeleOp extends OpMode {
 
             case START:
                 endGameTime.reset();
-                endGameLights.setPower(1.0);
+                endGameLights.setPower(0.0);
                 currentControl = ledControl.ON;
                 break;
 
@@ -272,7 +272,7 @@ public class CCHS5256TeleOp extends OpMode {
                 break;
 
             case BLINKON:
-                endGameLights.setPower(0.7);
+                endGameLights.setPower(0.0);
                 moveDelayTime = 1000;
                 if (moveDelayTime > 75) {
                     moveDelayTime = moveDelayTime - 20  ;
@@ -290,9 +290,9 @@ public class CCHS5256TeleOp extends OpMode {
         }
 
 
-        Log.i("THE MARK OF THE BEAST", Long.toString(the_mark_of_the_beast));
+//        Log.i("THE MARK OF THE BEAST", Long.toString(the_mark_of_the_beast));
 
-        telemetry.addData("THE MARK OF THE BEAST", the_mark_of_the_beast);
+//        telemetry.addData("THE MARK OF THE BEAST", the_mark_of_the_beast);
         telemetry.addData("LED", currentControl.toString());
         telemetry.addData("Elapsed Time", endGameTime.time());
         telemetry.addData("l plow", leftPlow.getPosition());
