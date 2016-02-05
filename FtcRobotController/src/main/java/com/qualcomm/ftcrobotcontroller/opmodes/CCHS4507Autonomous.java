@@ -545,7 +545,7 @@ public class CCHS4507Autonomous extends OpMode {
 
             case MOVETORAMP:
                 if (redAlliance) {      // red alliance
-                    distance = -108.0;
+                    distance = -110.0;
                 } else {                // blue alliance
                     distance = -96.0;
                 }
@@ -628,7 +628,7 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case UPRAMP:
-                moveStraight(-100.0, fastSpeed);
+                moveStraight(-120.0, fastSpeed);
                 trackLifter.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
                 trackLifter.setPower(0.0);
                 trackLifter.setPowerFloat();
