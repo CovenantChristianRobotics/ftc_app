@@ -527,7 +527,7 @@ public class CCHS5256Autonomous extends OpMode {
             case DRIVETOBEACON:
                 targetReading = 20.0;
                 lookingWithUltraSense = true;
-                moveStraight(48.0, mediumSpeed);
+                moveStraight(50.0, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.EXTENDARM;
                 telemetryMove = MoveState.DRIVETOBEACON;
@@ -590,7 +590,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case TURNALONGLINE:
                 // Turn so we can position ourselves to go up the mountain
-                moveTurn(105.0, turnSpeed);
+                moveTurn(115.0, turnSpeed);
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.BACKUPFARTHER;
                 telemetryMove = MoveState.TURNALONGLINE;
@@ -599,7 +599,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case  BACKUPFARTHER:
                 // Move Straight 15 so we can drive to mountain
-                moveStraight(50.0, mediumSpeed);
+                moveStraight(70.0, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
                 telemetryMove = MoveState.BACKUPFARTHER;
@@ -719,6 +719,7 @@ public class CCHS5256Autonomous extends OpMode {
         rightOmniPinion.setPosition(0.5);
         chinUp.setTargetPosition(0);
         chinUp.setPower(0.0);
+        currentOmni = OmniCtlr.DONE;
     }
 
 }
