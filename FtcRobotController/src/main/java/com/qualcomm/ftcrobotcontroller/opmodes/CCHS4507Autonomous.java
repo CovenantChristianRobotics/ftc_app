@@ -54,6 +54,8 @@ public class CCHS4507Autonomous extends OpMode {
     boolean fourthTileFlag;
     boolean toMountainFlag;
     long delayUntil;
+    int leftTargetPosition;
+    int rightTargetPosition;
     double speed;
     boolean movingForward;
     boolean takeADump;
@@ -83,6 +85,7 @@ public class CCHS4507Autonomous extends OpMode {
 //    double encoderCounts = 1120.0;      // encoder counts per revolution of the drive train motors
 //    double wheelBase = 41.0;            // wheelbase of the primary drive wheels
     double countsPerMeter = 5361.0; // 10439;    // Found this experimentally: Measured one meter, drove distance, read counts
+    int moveDoneDelta;              // How close we need to call it done
     int dumperCounterThresh = 8;       // Doesn't let the dumper counter get above a certain number
     double countsPerDonut = 7661.0; // 14161;    // Encoder counts per 360 degrees
     double trackLifterCountsPerDegree = -1170.0 / 90.0;
@@ -128,9 +131,6 @@ public class CCHS4507Autonomous extends OpMode {
     }
 
     void moveStraight(double distanceCM, double targetSpeed) {
-        int rightTarget;
-        int leftTarget;
-
         if (distanceCM > 150.0) {
             noSquiggle = false;
         } else {
@@ -142,10 +142,10 @@ public class CCHS4507Autonomous extends OpMode {
         } else {
             movingForward = false;
         }
-        leftTarget = motorLeft.getCurrentPosition() + centimetersToCounts(distanceCM);
-        motorLeft.setTargetPosition(leftTarget);
-        rightTarget = motorRight.getCurrentPosition() + centimetersToCounts(distanceCM);
-        motorRight.setTargetPosition(rightTarget);
+        leftTargetPosition = motorLeft.getCurrentPosition() + centimetersToCounts(distanceCM);
+        motorLeft.setTargetPosition(leftTargetPosition);
+        rightTargetPosition = motorRight.getCurrentPosition() + centimetersToCounts(distanceCM);
+        motorRight.setTargetPosition(rightTargetPosition);
         motorLeft.setPower(targetSpeed);
         motorRight.setPower(targetSpeed);
     }
@@ -274,6 +274,7 @@ public class CCHS4507Autonomous extends OpMode {
         slowSpeed = 0.35;
         turnSpeed = 0.35;
         delayMillisec = 100;
+        moveDoneDelta = centimetersToCounts(0.5);
         xHeading = 0;
         yHeading = 0;
         gyroReadLast = System.currentTimeMillis();
@@ -347,15 +348,25 @@ public class CCHS4507Autonomous extends OpMode {
                     currentMove = MoveState.MOVEDELAY;
                 }
                 if (!noSquiggle) {
-                     if (!motorLeft.isBusy() || !motorRight.isBusy()) {
-                         motorRight.setPower(0.0);
-                         motorLeft.setPower(0.0);
-                         currentMove = MoveState.MOVEDELAY;
-                     }
-                } else {
-                    if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+                    if ((Math.abs(leftTargetPosition - motorLeft.getCurrentPosition()) < moveDoneDelta) ||
+                            (Math.abs(rightTargetPosition - motorRight.getCurrentPosition()) < moveDoneDelta)) {
+                        motorRight.setPower(0.0);
+                        motorLeft.setPower(0.0);
                         currentMove = MoveState.MOVEDELAY;
                     }
+//                    if (!motorLeft.isBusy() || !motorRight.isBusy()) {
+//                        motorRight.setPower(0.0);
+//                        motorLeft.setPower(0.0);
+//                        currentMove = MoveState.MOVEDELAY;
+//                    }
+                } else {
+                    if ((Math.abs(leftTargetPosition - motorLeft.getCurrentPosition()) < moveDoneDelta) &&
+                            (Math.abs(rightTargetPosition - motorRight.getCurrentPosition()) < moveDoneDelta)) {
+                        currentMove = MoveState.MOVEDELAY;
+                    }
+//                    if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+//                        currentMove = MoveState.MOVEDELAY;
+//                    }
                 }
                 break;
 
@@ -366,9 +377,13 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case TURNING:
-                if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+                if ((Math.abs(leftTargetPosition - motorLeft.getCurrentPosition()) < moveDoneDelta) &&
+                        (Math.abs(rightTargetPosition - motorRight.getCurrentPosition()) < moveDoneDelta)) {
                     currentMove = MoveState.MOVEDELAY;
                 }
+//                if (!motorLeft.isBusy() && !motorRight.isBusy()) {
+//                    currentMove = MoveState.MOVEDELAY;
+//                }
                 break;
 
             case MOVEDELAY:
