@@ -157,9 +157,6 @@ public class CCHS4507Autonomous extends OpMode {
      * @param targetSpeed
      */
     void moveTurn(double degrees, double targetSpeed) {
-        int rightTarget;
-        int leftTarget;
-
         // Figure out how far off we are at the end of the previous move so we can correct
         gyroError =  desiredHeading - gyroSense.getHeading();
         if(gyroError > 180) {
@@ -176,10 +173,10 @@ public class CCHS4507Autonomous extends OpMode {
             desiredHeading = desiredHeading + 360;
         }
         speed = targetSpeed;
-        leftTarget = motorLeft.getCurrentPosition() + degreesToCounts(degrees + gyroError);
-        motorLeft.setTargetPosition(leftTarget);
-        rightTarget = motorRight.getCurrentPosition() - degreesToCounts(degrees + gyroError);
-        motorRight.setTargetPosition(rightTarget);
+        leftTargetPosition = motorLeft.getCurrentPosition() + degreesToCounts(degrees + gyroError);
+        motorLeft.setTargetPosition(leftTargetPosition);
+        rightTargetPosition = motorRight.getCurrentPosition() - degreesToCounts(degrees + gyroError);
+        motorRight.setTargetPosition(rightTargetPosition);
         motorLeft.setPower(targetSpeed);
         motorRight.setPower(targetSpeed);
     }
@@ -345,6 +342,7 @@ public class CCHS4507Autonomous extends OpMode {
                 if (lookingForBlueFlag && (colorSense.blue() > ambientBlue))  {
                     motorRight.setPower(0.0);
                     motorLeft.setPower(0.0);
+                    takeADump = true;
                     currentMove = MoveState.MOVEDELAY;
                 }
                 if (!noSquiggle) {
