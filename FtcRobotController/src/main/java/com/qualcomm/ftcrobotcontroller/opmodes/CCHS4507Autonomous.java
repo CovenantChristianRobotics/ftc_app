@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 public class CCHS4507Autonomous extends OpMode {
     enum MoveState {
         DELAY, STARTMOVE, MOVING, STARTTURN, TURNING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
-        FINDBEACON, CENTERBUCKET, DUMPTRUCK, OPENDOOR, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, ALIGNRAMP,
+        FINDBEACON, MEASUREAMBIENT, CENTERBUCKET, DUMPTRUCK, OPENDOOR, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, ALIGNRAMP,
         DOWNTRACK, UPRAMP, STRAIGHTTORAMP, STRAIGHTTORAMPTURN, DONE
     }
 
@@ -451,15 +451,6 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case FINDBEACON:
-                if (lightAverageCounter < 8) {
-                    ambientBlue = ambientBlue + colorSense.blue();
-                    ambientRed = ambientRed + colorSense.red();
-                    lightAverageCounter++;
-                } else if (lightAverageCounter == 8) {
-                    ambientBlue = (int)(((double)ambientBlue / 8.0) + 0.5);
-                    ambientRed = (int)(((double)ambientRed / 8.0) + 0.5);
-                    lightAverageCounter++;
-                }
                 if (redAlliance) {
                     moveStraight(-90.0, fastSpeed);
                     lookingForRedFlag = true;
@@ -471,9 +462,31 @@ public class CCHS4507Autonomous extends OpMode {
                 }
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.CENTERBUCKET;
+                // TODO: Verify MEASUREAMBIENT works correctly and enable it.
+//                nextMove = MoveState.MEASUREAMBIENT;
                 telemetryMove = MoveState.FINDBEACON;
                 moveDelayTime = delayMillisec;
                 break;
+
+            case MEASUREAMBIENT:
+                if (lightAverageCounter < 8) {
+                    ambientBlue = ambientBlue + colorSense.blue();
+                    ambientRed = ambientRed + colorSense.red();
+                    lightAverageCounter++;
+                    Log.i("ambientRed", Integer.toString(ambientRed));
+                    Log.i("ambientBlue", Integer.toString(ambientBlue));
+                } else if (lightAverageCounter == 8) {
+                    ambientBlue = (int)(((double)ambientBlue / 8.0) + 0.5);
+                    ambientRed = (int)(((double)ambientRed / 8.0) + 0.5);
+                    lightAverageCounter++;
+                    Log.i("ambientRed", Integer.toString(ambientRed));
+                    Log.i("ambientBlue", Integer.toString(ambientBlue));
+                } else {
+                    currentMove = MoveState.CENTERBUCKET;
+                }
+                telemetryMove = MoveState.MEASUREAMBIENT;
+                break;
+
 
             case CENTERBUCKET:
                 lookingForRedFlag = false;
@@ -482,8 +495,7 @@ public class CCHS4507Autonomous extends OpMode {
                 // and dump the climbers.
                 if (!takeADump)  {
                     currentMove = MoveState.ROTATEFROMBEACON;
-                }
-                if ((redAlliance && !sawBlueFlag) || (!redAlliance && !sawRedFlag)) {
+                } else {
                     if (redAlliance) {
                         moveStraight(-10.0, fastSpeed);
                     } else {
@@ -493,10 +505,9 @@ public class CCHS4507Autonomous extends OpMode {
                     nextMove = MoveState.DUMPTRUCK;
                     telemetryMove = MoveState.CENTERBUCKET;
                     moveDelayTime = delayMillisec;
-        } else {
-            currentMove = MoveState.DUMPTRUCK;
-        }
-        break;
+
+                }
+                break;
 
             case DUMPTRUCK:
                 // If timer hits threshold, reset timer and move servo
@@ -640,9 +651,9 @@ public class CCHS4507Autonomous extends OpMode {
         if (liftCheck.isPressed()) {
             trackLifterUp = trackLifter.getCurrentPosition();
         }
-        telemetry.addData("motorLeft", motorLeft.isBusy() ? "busy" : "done");
-        telemetry.addData("motorRiht", motorRight.isBusy() ? "busy" : "done");
         telemetry.addData("Current Move", telemetryMove.toString());
+        telemetry.addData("motorLeft", Integer.toString(Math.abs(motorLeft.getTargetPosition() - leftTargetPosition)));
+        telemetry.addData("motorRight", Integer.toString(Math.abs(motorLeft.getTargetPosition() - leftTargetPosition)));
         telemetry.addData("desiredHeading", Integer.toString(desiredHeading));
         telemetry.addData("gyro", Integer.toString(gyroSense.getHeading()));
         telemetry.addData("liftCheck", liftCheck.isPressed());
