@@ -28,7 +28,7 @@ public class CCHS4507TeleOp extends OpMode {
     Servo servoDist;
     Servo climberTriggerLeft;
     Servo climberTriggerRight;
-    Servo climberDoor;
+//    Servo climberDoor;
     Servo cowCatcher;
     Servo armLock;
     Servo trackLock;
@@ -62,7 +62,7 @@ public class CCHS4507TeleOp extends OpMode {
         //servos
         //servoBeaconPusher = hardwareMap.servo.get("beacon_pusher");
         servoClimberDumper = hardwareMap.servo.get("climber_dumper");
-        climberDoor = hardwareMap.servo.get("climberDoor");
+//        climberDoor = hardwareMap.servo.get("climberDoor");
         servoDist = hardwareMap.servo.get("servoDist");
         climberTriggerLeft = hardwareMap.servo.get("trigLeft");
         climberTriggerRight = hardwareMap.servo.get("trigRight");
@@ -163,11 +163,11 @@ public class CCHS4507TeleOp extends OpMode {
         } else {
            servoClimberDumper.setPosition(1.0);
         }
-        if (gamepad2.b) {
-            climberDoor.setPosition(0.5);
-        } else {
-            climberDoor.setPosition(0.2);
-        }
+//        if (gamepad2.b) {
+//            climberDoor.setPosition(0.5);
+//        } else {
+//            climberDoor.setPosition(0.2);
+//        }
         if (gamepad2.y) {
             //zipTieSweeper.setPosition(.75);
         }

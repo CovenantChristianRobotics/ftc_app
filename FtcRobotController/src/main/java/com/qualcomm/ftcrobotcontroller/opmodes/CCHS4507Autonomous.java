@@ -33,7 +33,7 @@ public class CCHS4507Autonomous extends OpMode {
     Servo servoDist;
     Servo climberTriggerLeft;
     Servo climberTriggerRight;
-    Servo climberDoor;
+    //Servo climberDoor;
     Servo cowCatcher;
     Servo armLock;
     Servo trackLock;
@@ -201,7 +201,7 @@ public class CCHS4507Autonomous extends OpMode {
         servoDist = hardwareMap.servo.get("servoDist");
         climberTriggerLeft = hardwareMap.servo.get("trigLeft");
         climberTriggerRight = hardwareMap.servo.get("trigRight");
-        climberDoor = hardwareMap.servo.get("climberDoor");
+        //climberDoor = hardwareMap.servo.get("climberDoor");
         cowCatcher = hardwareMap.servo.get("cowCatcher");
         armLock = hardwareMap.servo.get("armLock");
         trackLock = hardwareMap.servo.get("trackLock");
@@ -281,7 +281,7 @@ public class CCHS4507Autonomous extends OpMode {
         climberTriggerLeft.setPosition(0.5);
         climberTriggerRight.setPosition(0.5);
         armPivot.setPower(0.0);
-        climberDoor.setPosition(0.0);
+        //climberDoor.setPosition(0.0);
         cowCatcher.setPosition(0.2);
         armLock.setPosition(0.5);
         trackLock.setPosition(0.8);
@@ -422,12 +422,12 @@ public class CCHS4507Autonomous extends OpMode {
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDWALL;
                 telemetryMove = MoveState.MOVEDIAG;
-                moveDelayTime = delayMillisec;
+                moveDelayTime = delayMillisec * 2;
                 break;
 
             case FINDWALL:
                 distanceToWall = ultraSense.getUltrasonicLevel();
-                if ((distanceToWall > 20.0) && (distanceToWall <= 80.0)) {
+                if ((distanceToWall > 20.0) && (distanceToWall <= 120.0)) {
                     moveStraight((distanceToWall - 26.0) * 1.414, slowSpeed);
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.TURNALONGWALL;
@@ -460,8 +460,8 @@ public class CCHS4507Autonomous extends OpMode {
                 }
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.CENTERBUCKET;
-                // TODO: Verify MEASUREAMBIENT works correctly and enable it.
-//                nextMove = MoveState.MEASUREAMBIENT;
+                 //TODO: Verify MEASUREAMBIENT works correctly and enable it.
+                nextMove = MoveState.MEASUREAMBIENT;
                 telemetryMove = MoveState.FINDBEACON;
                 moveDelayTime = delayMillisec;
                 break;
@@ -514,7 +514,7 @@ public class CCHS4507Autonomous extends OpMode {
                     servoClimberDumper.setPosition(dumperPosition);
                     dumperCounter = 0;
                     // Target position reached; moving to next state
-                    if (dumperPosition <= .25) {
+                    if (dumperPosition <= 0.1) {
                         currentMove = MoveState.OPENDOOR;
                         telemetryMove = MoveState.DUMPTRUCK;
                     }
@@ -523,11 +523,11 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case OPENDOOR:
-                climberDoor.setPosition(0.25);
+                //climberDoor.setPosition(0.25);
                 nextMove = MoveState.ROTATEFROMBEACON;
                 currentMove = MoveState.MOVEDELAY;
                 telemetryMove = MoveState.OPENDOOR;
-                moveDelayTime = 500;
+                moveDelayTime = 1000;
                 break;
 
             case ROTATEFROMBEACON:
