@@ -603,7 +603,7 @@ public class CCHS5256Autonomous extends OpMode {
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
                 telemetryMove = MoveState.BACKUPFARTHER;
-                chosenOmni = OmniCtlr.EXTENDING;
+                chosenOmni = OmniCtlr.RETRACT;
                 moveDelayTime = commonDelayTime;
                 break;
 
@@ -680,7 +680,7 @@ public class CCHS5256Autonomous extends OpMode {
                 leftOmniPinion.setPosition(1.0);
                 rightOmniPinion.setPosition(1.0);
                 currentOmni = OmniCtlr.DELAYSETTINGSOMNI;
-                nextOmni = OmniCtlr.RETRACT;
+                nextOmni = chosenOmni;
                 moveDelaytimeOmni = 5500;
                 break;
 
