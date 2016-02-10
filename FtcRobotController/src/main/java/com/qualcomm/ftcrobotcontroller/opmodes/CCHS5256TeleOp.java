@@ -30,7 +30,6 @@ public class CCHS5256TeleOp extends OpMode {
     // Servos
     Servo armLock;
     Servo climberDumper;
-    Servo ultraSenseServo;
     Servo leftOmniPinion;
     Servo rightOmniPinion;
     Servo leftPlow;
@@ -52,10 +51,24 @@ public class CCHS5256TeleOp extends OpMode {
     long delayUntil;
     long moveDelayTime;
     Date now;
+    // Method stuff
+    double plowsUp = 1.0;
+    double plowsDown = 0.0;
 
     // THE MARK OF THE BEAST
 
     long the_mark_of_the_beast;
+
+
+    void setPlows(double position) {
+        if (position == plowsUp){
+            leftPlow.setPosition(.45882353);
+            rightPlow.setPosition(0.42745098);
+        } else if (position == plowsDown){
+            leftPlow.setPosition(0.18392157);
+            rightPlow.setPosition(0.68627450);
+        }
+    }
 
     /**
      * Constructor
@@ -80,7 +93,6 @@ public class CCHS5256TeleOp extends OpMode {
         // Servos
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
-        ultraSenseServo = hardwareMap.servo.get("servoUltra");
         leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
         rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
         leftPlow = hardwareMap.servo.get("lP");
@@ -93,8 +105,8 @@ public class CCHS5256TeleOp extends OpMode {
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
-        leftPlow.setPosition(0.43137255);
-        rightPlow.setPosition(0.827451);
+        leftPlow.setPosition(0.52156866);
+        rightPlow.setPosition(0.33333334);
         leftTrigger.setPosition(0.5);
         rightTrigger.setPosition(0.5);
         // Sensors
@@ -221,11 +233,11 @@ public class CCHS5256TeleOp extends OpMode {
         }
 
         if (gamepad2.dpad_up) {
-            rightPlow.setPosition(0.2627451);
-            leftPlow.setPosition(0.827451);
+            setPlows(plowsUp);
+//            rightPlow.setPosition(Range.clip(rightPlow.getPosition() + 0.01, 0, 1));
         } else if (gamepad2.dpad_down) {
-            rightPlow.setPosition(0.627451);
-            leftPlow.setPosition(0.52156866);
+//            rightPlow.setPosition(Range.clip(rightPlow.getPosition() - 0.01, 0, 1));
+            setPlows(plowsDown);
         }
 
         if (gamepad2.y) {

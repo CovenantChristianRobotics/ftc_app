@@ -24,7 +24,7 @@ public class sweeperTeleop extends OpMode {
     boolean down;
     boolean right;
 
-    double rotations (double rotationDegrees) {
+    public static double rotations (double rotationDegrees) {
         return ((3 + (1/9) * rotationDegrees));
     }
 

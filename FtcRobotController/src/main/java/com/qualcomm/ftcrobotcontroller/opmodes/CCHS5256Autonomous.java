@@ -45,7 +45,7 @@ public class CCHS5256Autonomous extends OpMode {
     // Servos
     Servo armLock;
     Servo climberDumper;
-    Servo ultraSenseServo;
+//    Servo ultraSenseServo;
     Servo leftOmniPinion;
     Servo rightOmniPinion;
     Servo leftPlow;
@@ -603,7 +603,6 @@ public class CCHS5256Autonomous extends OpMode {
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
                 telemetryMove = MoveState.BACKUPFARTHER;
-                chosenOmni = OmniCtlr.EXTENDING;
                 moveDelayTime = commonDelayTime;
                 break;
 
