@@ -233,11 +233,11 @@ public class CCHS5256TeleOp extends OpMode {
         }
 
         if (gamepad2.dpad_up) {
-            setPlows(plowsUp);
-//            rightPlow.setPosition(Range.clip(rightPlow.getPosition() + 0.01, 0, 1));
+//            setPlows(plowsUp);
+            rightPlow.setPosition(Range.clip(rightPlow.getPosition() + 0.01, 0, 1));
         } else if (gamepad2.dpad_down) {
-//            rightPlow.setPosition(Range.clip(rightPlow.getPosition() - 0.01, 0, 1));
-            setPlows(plowsDown);
+            rightPlow.setPosition(Range.clip(rightPlow.getPosition() - 0.01, 0, 1));
+//            setPlows(plowsDown);
         }
 
         if (gamepad2.y) {

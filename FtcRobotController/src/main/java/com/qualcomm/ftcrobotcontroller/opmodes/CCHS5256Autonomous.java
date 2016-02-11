@@ -231,7 +231,7 @@ public class CCHS5256Autonomous extends OpMode {
         // Servos
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
-        ultraSenseServo = hardwareMap.servo.get("servoUltra");
+//        ultraSenseServo = hardwareMap.servo.get("servoUltra");
         leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
         rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
         leftPlow = hardwareMap.servo.get("lP");
@@ -267,12 +267,12 @@ public class CCHS5256Autonomous extends OpMode {
         // Set Switch Flags
         if (redBlueBeaconSwitch.getState()) {   // WE ARE BLUE
             redBlue = -1.0;
-            ultraSenseServo.setPosition(0.75);
+//            ultraSenseServo.setPosition(0.75);
             redAlliance = false;
             blueAlliance = true;
         } else {                                // WE ARE RED
             redBlue = 1.0;
-            ultraSenseServo.setPosition(0.25);
+//            ultraSenseServo.setPosition(0.25);
             redAlliance = true;
             blueAlliance = false;
         }
@@ -590,7 +590,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case TURNALONGLINE:
                 // Turn so we can position ourselves to go up the mountain
-                moveTurn(115.0, turnSpeed);
+                moveTurn(85.0, turnSpeed);
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.BACKUPFARTHER;
                 telemetryMove = MoveState.TURNALONGLINE;
@@ -718,7 +718,6 @@ public class CCHS5256Autonomous extends OpMode {
         rightOmniPinion.setPosition(0.5);
         chinUp.setTargetPosition(0);
         chinUp.setPower(0.0);
-        currentOmni = OmniCtlr.DONE;
     }
 
 }
