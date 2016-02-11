@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 public class CCHS4507Autonomous extends OpMode {
     enum MoveState {
         DELAY, STARTMOVE, MOVING, STARTTURN, TURNING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
-        FINDBEACON, MEASUREAMBIENT, CENTERBUCKET, DUMPTRUCK, OPENDOOR, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, ALIGNRAMP,
+        FINDBEACON, MEASUREAMBIENT, CENTERBUCKET, DUMPTRUCK, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, ALIGNRAMP,
         DOWNTRACK, UPRAMP, STRAIGHTTORAMP, STRAIGHTTORAMPTURN, DONE
     }
 
@@ -33,7 +33,7 @@ public class CCHS4507Autonomous extends OpMode {
     Servo servoDist;
     Servo climberTriggerLeft;
     Servo climberTriggerRight;
-    Servo climberDoor;
+    //Servo climberDoor;
     Servo cowCatcher;
     Servo armLock;
     Servo trackLock;
@@ -76,17 +76,9 @@ public class CCHS4507Autonomous extends OpMode {
     int desiredHeading;
     UltrasonicSensor ultraSense;
 
-    //Global State Variables
-    int dumperCounter = 0;
-    double dumperPosition = 1.0;
-
     // robot constants
-//    double wheelDiameter = 6.75 / 2.0;  // wheel diameter in cm 2 to 1 gear ratio
-//    double encoderCounts = 1120.0;      // encoder counts per revolution of the drive train motors
-//    double wheelBase = 41.0;            // wheelbase of the primary drive wheels
     double countsPerMeter = 5361.0; // 10439;    // Found this experimentally: Measured one meter, drove distance, read counts
     int moveDoneDelta;              // How close we need to call it done
-    int dumperCounterThresh = 8;       // Doesn't let the dumper counter get above a certain number
     double countsPerDonut = 7661.0; // 14161;    // Encoder counts per 360 degrees
     double trackLifterCountsPerDegree = -1170.0 / 90.0;
 
@@ -110,24 +102,14 @@ public class CCHS4507Autonomous extends OpMode {
 
     int centimetersToCounts(double centimeters) {
         return (int)(centimeters * (countsPerMeter / 100.0));
-        //double wheelDiameteliftCheckr = 10.1;    // wheel diameter in cm
-        //double encoderCounts = 1120.0;  // encoder counts per revolution of the drive train motors
-        // return (int) ((centimeters / (wheelDiameter * Math.PI)) * encoderCounts);
-        // ^ Previous code to find the amount of counts for every wheel rotation
     }
 
     double countsToCentimeters(int counts) {
         return (double)counts * (100.0 / countsPerMeter);
-        //return (((double) counts / encoderCounts) * (wheelDiameter * Math.PI));
-        // ^ Previous code to find the amount of centimeters for the counts
     }
 
     int degreesToCounts(double degrees) {
         return (int)(degrees * (countsPerDonut / 360.0));
-        //double wheelBase = 40.3225; // wheelbase of the primary drive wheels
-        //double oneDegree = ((wheelBase * Math.PI) / 360);   // calculates the distance of one degree
-        //return centimetersToCounts(oneDegree * degrees);
-        // ^ Previous code to find the degrees per count using the diamemter of the wheels
     }
 
     void moveStraight(double distanceCM, double targetSpeed) {
@@ -201,7 +183,7 @@ public class CCHS4507Autonomous extends OpMode {
         servoDist = hardwareMap.servo.get("servoDist");
         climberTriggerLeft = hardwareMap.servo.get("trigLeft");
         climberTriggerRight = hardwareMap.servo.get("trigRight");
-        climberDoor = hardwareMap.servo.get("climberDoor");
+        //climberDoor = hardwareMap.servo.get("climberDoor");
         cowCatcher = hardwareMap.servo.get("cowCatcher");
         armLock = hardwareMap.servo.get("armLock");
         trackLock = hardwareMap.servo.get("trackLock");
@@ -235,12 +217,6 @@ public class CCHS4507Autonomous extends OpMode {
             trackLifterUp = trackLifter.getCurrentPosition();
             trackLifter.setTargetPosition(trackLifterUp);
         }
-        // tileFlag = tileliftCheckSwitch.getState();
-        //if (tileSwitch.getState()) {
-
-        // } else {
-
-        // }
         colorSense.enableLed(false);
         motorLeft.setDirection(DcMotor.Direction.FORWARD);
         motorRight.setDirection(DcMotor.Direction.REVERSE);
@@ -281,7 +257,6 @@ public class CCHS4507Autonomous extends OpMode {
         climberTriggerLeft.setPosition(0.5);
         climberTriggerRight.setPosition(0.5);
         armPivot.setPower(0.0);
-        climberDoor.setPosition(0.0);
         cowCatcher.setPosition(0.2);
         armLock.setPosition(0.5);
         trackLock.setPosition(0.8);
@@ -305,6 +280,7 @@ public class CCHS4507Autonomous extends OpMode {
         }
         now = System.currentTimeMillis();
         xHeading = xHeading + ((double)(now - gyroReadLast) / 1000.0) * (double)gyroSense.rawX();
+        yHeading = yHeading + ((double)(now - gyroReadLast) / 1000.0) * (double)gyroSense.rawY();
         gyroReadLast = now;
 
         switch (currentMove) {
@@ -352,19 +328,11 @@ public class CCHS4507Autonomous extends OpMode {
                         motorLeft.setPower(0.0);
                         currentMove = MoveState.MOVEDELAY;
                     }
-//                    if (!motorLeft.isBusy() || !motorRight.isBusy()) {
-//                        motorRight.setPower(0.0);
-//                        motorLeft.setPower(0.0);
-//                        currentMove = MoveState.MOVEDELAY;
-//                    }
                 } else {
                     if ((Math.abs(leftTargetPosition - motorLeft.getCurrentPosition()) < moveDoneDelta) &&
                             (Math.abs(rightTargetPosition - motorRight.getCurrentPosition()) < moveDoneDelta)) {
                         currentMove = MoveState.MOVEDELAY;
                     }
-//                    if (!motorLeft.isBusy() && !motorRight.isBusy()) {
-//                        currentMove = MoveState.MOVEDELAY;
-//                    }
                 }
                 break;
 
@@ -379,9 +347,6 @@ public class CCHS4507Autonomous extends OpMode {
                         (Math.abs(rightTargetPosition - motorRight.getCurrentPosition()) < moveDoneDelta)) {
                     currentMove = MoveState.MOVEDELAY;
                 }
-//                if (!motorLeft.isBusy() && !motorRight.isBusy()) {
-//                    currentMove = MoveState.MOVEDELAY;
-//                }
                 break;
 
             case MOVEDELAY:
@@ -422,12 +387,12 @@ public class CCHS4507Autonomous extends OpMode {
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDWALL;
                 telemetryMove = MoveState.MOVEDIAG;
-                moveDelayTime = delayMillisec;
+                moveDelayTime = delayMillisec * 2;
                 break;
 
             case FINDWALL:
                 distanceToWall = ultraSense.getUltrasonicLevel();
-                if ((distanceToWall > 20.0) && (distanceToWall <= 80.0)) {
+                if ((distanceToWall > 20.0) && (distanceToWall <= 120.0)) {
                     moveStraight((distanceToWall - 26.0) * 1.414, slowSpeed);
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.TURNALONGWALL;
@@ -460,8 +425,8 @@ public class CCHS4507Autonomous extends OpMode {
                 }
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.CENTERBUCKET;
-                // TODO: Verify MEASUREAMBIENT works correctly and enable it.
-//                nextMove = MoveState.MEASUREAMBIENT;
+                 //TODO: Verify MEASUREAMBIENT works correctly and enable it.
+                nextMove = MoveState.MEASUREAMBIENT;
                 telemetryMove = MoveState.FINDBEACON;
                 moveDelayTime = delayMillisec;
                 break;
@@ -508,26 +473,11 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case DUMPTRUCK:
-                // If timer hits threshold, reset timer and move servo
-                if (dumperCounter >= dumperCounterThresh) {
-                    dumperPosition -= .04;
-                    servoClimberDumper.setPosition(dumperPosition);
-                    dumperCounter = 0;
-                    // Target position reached; moving to next state
-                    if (dumperPosition <= .25) {
-                        currentMove = MoveState.OPENDOOR;
-                        telemetryMove = MoveState.DUMPTRUCK;
-                    }
-                }
-                dumperCounter++;
-                break;
-
-            case OPENDOOR:
-                climberDoor.setPosition(0.25);
+                servoClimberDumper.setPosition(0.1);
+                moveDelayTime = 1000;
                 nextMove = MoveState.ROTATEFROMBEACON;
                 currentMove = MoveState.MOVEDELAY;
-                telemetryMove = MoveState.OPENDOOR;
-                moveDelayTime = 500;
+                telemetryMove = MoveState.DUMPTRUCK;
                 break;
 
             case ROTATEFROMBEACON:
@@ -545,7 +495,7 @@ public class CCHS4507Autonomous extends OpMode {
 
             case MOVETORAMP:
                 if (redAlliance) {      // red alliance
-                    distance = -108.0;
+                    distance = -110.0;
                 } else {                // blue alliance
                     distance = -96.0;
                 }
@@ -599,10 +549,10 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case STRAIGHTTORAMP:
-                moveStraight(149.0, mediumSpeed);
-                cowCatcher.setPosition(0.5);
+                moveStraight(190.0, mediumSpeed);
+                //cowCatcher.setPosition(0.5);
                 moveDelayTime = delayMillisec;
-                currentMove = MoveState.MOVEDELAY;
+                currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.STRAIGHTTORAMPTURN;
                 telemetryMove = MoveState.STRAIGHTTORAMP;
                 break;
@@ -628,7 +578,11 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case UPRAMP:
-                moveStraight(-100.0, fastSpeed);
+                if (toMountainFlag == false) {
+                    moveStraight(-100.0, fastSpeed);
+                } else {
+                    moveStraight(-160.0, fastSpeed);
+                }
                 trackLifter.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
                 trackLifter.setPower(0.0);
                 trackLifter.setPowerFloat();
@@ -650,11 +604,13 @@ public class CCHS4507Autonomous extends OpMode {
             trackLifterUp = trackLifter.getCurrentPosition();
         }
         telemetry.addData("Current Move", telemetryMove.toString());
-        telemetry.addData("motorLeft", Integer.toString(Math.abs(motorLeft.getTargetPosition() - leftTargetPosition)));
-        telemetry.addData("motorRight", Integer.toString(Math.abs(motorLeft.getTargetPosition() - leftTargetPosition)));
+        telemetry.addData("motorLeft", Integer.toString(Math.abs(motorLeft.getCurrentPosition() - leftTargetPosition)));
+        telemetry.addData("motorRight", Integer.toString(Math.abs(motorLeft.getCurrentPosition() - leftTargetPosition)));
         telemetry.addData("desiredHeading", Integer.toString(desiredHeading));
         telemetry.addData("gyro", Integer.toString(gyroSense.getHeading()));
-        telemetry.addData("liftCheck", liftCheck.isPressed());
+        telemetry.addData("Xheading", xHeading);
+        telemetry.addData("yHeading", yHeading);
+        telemetry.addData("POT", Long.toString(moveDelayTime));
 
 //        Log.i("Current Move", currentMove.toString());
 //        Log.i("desiredHeading", Integer.toString(desiredHeading));
