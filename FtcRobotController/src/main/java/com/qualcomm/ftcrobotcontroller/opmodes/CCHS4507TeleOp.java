@@ -19,7 +19,6 @@ public class CCHS4507TeleOp extends OpMode {
     DcMotor motorRight;
     DcMotor motorLeft;
     DcMotor trackLifter;
-    DcMotor armPivot;
     DcMotor armExtend;
 
     //servos
@@ -56,7 +55,6 @@ public class CCHS4507TeleOp extends OpMode {
         motorRight = hardwareMap.dcMotor.get("motorR");
         motorLeft = hardwareMap.dcMotor.get("motorL");
         trackLifter = hardwareMap.dcMotor.get("trkLftr");
-        armPivot = hardwareMap.dcMotor.get("armPivot");
         armExtend = hardwareMap.dcMotor.get("armExtend");
 
         //servos
@@ -87,7 +85,6 @@ public class CCHS4507TeleOp extends OpMode {
         motorRight.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         motorLeft.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         trackLifter.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-        armPivot.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         armExtend.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         climberTriggerLeft.setPosition(0.5);
         climberTriggerRight.setPosition(0.5);
@@ -139,7 +136,6 @@ public class CCHS4507TeleOp extends OpMode {
 //            cowCatcher.setPosition(0.2);
         }
 
-        armPivot.setPower(gamepad2.right_stick_x / 4.0);
         armExtend.setPower(-gamepad2.left_stick_y);
 
         if (gamepad2.left_bumper) {

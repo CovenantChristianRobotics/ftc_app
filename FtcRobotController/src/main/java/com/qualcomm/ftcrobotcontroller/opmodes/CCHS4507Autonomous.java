@@ -26,7 +26,6 @@ public class CCHS4507Autonomous extends OpMode {
     DcMotor motorRight;
     DcMotor motorLeft;
     DcMotor trackLifter;
-    DcMotor armPivot;
     //servos
     //Servo servoBeaconPusher;
     Servo servoClimberDumper;
@@ -176,7 +175,6 @@ public class CCHS4507Autonomous extends OpMode {
         motorRight = hardwareMap.dcMotor.get("motorR");
         motorLeft = hardwareMap.dcMotor.get("motorL");
         trackLifter = hardwareMap.dcMotor.get("trkLftr");
-        armPivot = hardwareMap.dcMotor.get("armPivot");
         //servos
         //servoBeaconPusher = hardwareMap.servo.get("beacon_pusher");
         servoClimberDumper = hardwareMap.servo.get("climber_dumper");
@@ -224,7 +222,6 @@ public class CCHS4507Autonomous extends OpMode {
         motorRight.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        armPivot.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         if (toMountainFlag == true) {
             nextMove = MoveState.STRAIGHTTORAMP;
         } else {
@@ -256,7 +253,6 @@ public class CCHS4507Autonomous extends OpMode {
         servoClimberDumper.setPosition(1.0);
         climberTriggerLeft.setPosition(0.5);
         climberTriggerRight.setPosition(0.5);
-        armPivot.setPower(0.0);
         cowCatcher.setPosition(0.2);
         armLock.setPosition(0.5);
         trackLock.setPosition(0.8);
