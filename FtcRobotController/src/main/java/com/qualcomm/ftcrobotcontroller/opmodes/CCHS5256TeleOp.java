@@ -27,6 +27,7 @@ public class CCHS5256TeleOp extends OpMode {
     DcMotor rightDrive;
     DcMotor chinUp;
     DcMotor endGameLights;
+    DcMotor debrisSwivel;
     // Servos
     Servo armLock;
     Servo climberDumper;
@@ -36,6 +37,8 @@ public class CCHS5256TeleOp extends OpMode {
     Servo rightPlow;
     Servo leftTrigger;
     Servo rightTrigger;
+    Servo sweeper;
+    Servo debrisDoors;
     // Sensors
     GyroSensor gyroSense;
     ColorSensor fColorSense;
@@ -62,10 +65,10 @@ public class CCHS5256TeleOp extends OpMode {
 
     void setPlows(double position) {
         if (position == plowsUp){
-            leftPlow.setPosition(.45882353);
-            rightPlow.setPosition(0.42745098);
+            leftPlow.setPosition(0.40392157);
+            rightPlow.setPosition(0.45490196);
         } else if (position == plowsDown){
-            leftPlow.setPosition(0.18392157);
+            leftPlow.setPosition(0.16392157);
             rightPlow.setPosition(0.68627450);
         }
     }
@@ -83,6 +86,7 @@ public class CCHS5256TeleOp extends OpMode {
         rightDrive = hardwareMap.dcMotor.get("motorR");
         chinUp = hardwareMap.dcMotor.get("chinUp");
         endGameLights = hardwareMap.dcMotor.get("endGameLights");
+        debrisSwivel = hardwareMap.dcMotor.get("blockDumper");
         // DC Motor Settings
         leftDrive.setDirection(DcMotor.Direction.REVERSE);
         leftDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
@@ -90,6 +94,7 @@ public class CCHS5256TeleOp extends OpMode {
         chinUp.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         endGameLights.setPower(0.0);
+        debrisSwivel.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
@@ -99,6 +104,8 @@ public class CCHS5256TeleOp extends OpMode {
         rightPlow = hardwareMap.servo.get("rP");
         leftTrigger = hardwareMap.servo.get("lT");
         rightTrigger = hardwareMap.servo.get("rT");
+        sweeper = hardwareMap.servo.get("sweeper");
+        debrisDoors = hardwareMap.servo.get("dumperDoor");
         // Servo Settings
         armLock.setPosition(0.25);
         climberDumper.setPosition(0.45);
@@ -109,6 +116,8 @@ public class CCHS5256TeleOp extends OpMode {
         rightPlow.setPosition(0.33333334);
         leftTrigger.setPosition(0.5);
         rightTrigger.setPosition(0.5);
+        sweeper.setPosition(0.5);
+        debrisDoors.setPosition(0.0);
         // Sensors
         gyroSense = hardwareMap.gyroSensor.get("gyroSense");
         fColorSense = hardwareMap.colorSensor.get("fCS");
@@ -158,51 +167,72 @@ public class CCHS5256TeleOp extends OpMode {
                 slowDown = true;
             }
         }
-
-        if (slowDown) {
-//            left = (float) slow(left);
-//            right = (float) slow(right);
-            left = (left / 3);
-            right = (right / 3);
-//        } else if (gamepad1.dpad_up) {
-//            left = rightStickPos * -1;
-//            right = rightStickPos * -1;
-//        } else if (gamepad1.dpad_down) {
-//            left = rightStickNeg * -1;
-//            right = rightStickNeg * -1;
-//        } else if (gamepad1.dpad_right) {
-//            left = -0.1;
-//            right = 0.1;
-////            if (speedUp) {
-////                left = (double) fast(left);
-////                right = (double) fast(right);
-////            } else if (slowDown) {
-////                left = (double) slow(left);
-////                right = (double) slow(right);
-////            } else {
-////                left = left;
-////                right = right;
-////            }
-//        } else if (gamepad1.dpad_left) {
-//            left = 0.1;
-//            right = -0.1;
-////            if (speedUp) {
-////                left = (double) fast(left);
-////                right = (double) fast(right);
-////            } else if (slowDown) {
-////                left = (float) slow(left);
-////                right = (float) slow(right);
-////            }
+//
+////        if (slowDown) {
+//////            left = (float) slow(left);
+//////            right = (float) slow(right);
+////            left = (left / 3);
+////            right = (right / 3);
+//////        } else if (gamepad1.dpad_up) {
+//////            left = rightStickPos * -1;
+//////            right = rightStickPos * -1;
+//////        } else if (gamepad1.dpad_down) {
+//////            left = rightStickNeg * -1;
+//////            right = rightStickNeg * -1;
+//////        } else if (gamepad1.dpad_right) {
+//////            left = -0.1;
+//////            right = 0.1;
+////////            if (speedUp) {
+////////                left = (double) fast(left);
+////////                right = (double) fast(right);
+////////            } else if (slowDown) {
+////////                left = (double) slow(left);
+////////                right = (double) slow(right);
+////////            } else {
+////////                left = left;
+////////                right = right;
+////////            }
+//////        } else if (gamepad1.dpad_left) {
+//////            left = 0.1;
+//////            right = -0.1;
+////////            if (speedUp) {
+////////                left = (double) fast(left);
+////////                right = (double) fast(right);
+////////            } else if (slowDown) {
+////////                left = (float) slow(left);
+////////                right = (float) slow(right);
+////////            }
+////        } else {
+//////            left = (float) medium(left);
+//////            right = (float) medium(right);
+////        }
+//
+        if (gamepad1.dpad_up){
+            debrisSwivel.setPower(0.0);
+        } else if (gamepad1.dpad_down){
+            debrisSwivel.setPowerFloat();
+        } else if (gamepad1.dpad_left){
+            debrisSwivel.setPower(-0.5);
+        } else if (gamepad1.dpad_right) {
+            debrisSwivel.setPower(0.5);
         } else {
-//            left = (float) medium(left);
-//            right = (float) medium(right);
+            debrisSwivel.setPower(0.0);
         }
 
-        if (gamepad2.right_bumper) {
-            chinUp.setPower(hang);
-        } else {
-            chinUp.setPower(0.0);
+        if (gamepad1.right_bumper) {
+            sweeper.setPosition(1.0);
+        } else if (gamepad1.right_trigger > 0.5) {
+            sweeper.setPosition(0.5);
         }
+
+        if (gamepad1.left_bumper) {
+            debrisDoors.setPosition(0.36862746);
+        } else if (gamepad1.left_trigger > 0.5) {
+            debrisDoors.setPosition(0.0);
+        }
+
+
+        chinUp.setPower(hang);
 
         if (gamepad2.a) {
             armLock.setPosition(0.76862746);
@@ -220,6 +250,8 @@ public class CCHS5256TeleOp extends OpMode {
         }
 
 
+
+
         leftDrive.setPower(left);
         rightDrive.setPower(right);
 
@@ -233,17 +265,21 @@ public class CCHS5256TeleOp extends OpMode {
         }
 
         if (gamepad2.dpad_up) {
-//            setPlows(plowsUp);
-            rightPlow.setPosition(Range.clip(rightPlow.getPosition() + 0.01, 0, 1));
+            setPlows(plowsUp);
+//            leftPlow.setPosition(Range.clip(leftPlow.getPosition() + 0.01, 0, 1));
+//            leftPlow.setPosition(Range.clip(rightPlow.getPosition() - 0.01, 0.18392157, 0.40392157));
+//            rightPlow.setPosition(Range.clip(rightPlow.getPosition() + 0.01, 0.45490196, 0.68627450));
         } else if (gamepad2.dpad_down) {
-            rightPlow.setPosition(Range.clip(rightPlow.getPosition() - 0.01, 0, 1));
-//            setPlows(plowsDown);
+//            leftPlow.setPosition(Range.clip(leftPlow.getPosition() - 0.01, 0, 1));
+            setPlows(plowsDown);
+//            leftPlow.setPosition(Range.clip(rightPlow.getPosition() + 0.01, 0.18392157, 0.40392157));
+//            rightPlow.setPosition(Range.clip(rightPlow.getPosition() - 0.01, 0, 1));
         }
 
         if (gamepad2.y) {
             climberDumper.setPosition(0.45);
         } else if (gamepad2.x) {
-            climberDumper.setPosition(1.0);
+            climberDumper.setPosition(0.75);
         }
 
         switch (currentControl) {
@@ -313,8 +349,7 @@ public class CCHS5256TeleOp extends OpMode {
         telemetry.addData("enc right", rightDrive.getCurrentPosition());
         telemetry.addData("arm lock", armLock.getPosition());
         telemetry.addData("climber dumper", climberDumper.getPosition());
-        telemetry.addData("slow down", slowDown);
-        telemetry.addData("speed up", speedUp);
+        telemetry.addData("doors", debrisDoors.getPosition());
 
     }
     @Override

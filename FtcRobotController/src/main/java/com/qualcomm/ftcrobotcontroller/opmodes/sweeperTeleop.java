@@ -24,8 +24,8 @@ public class sweeperTeleop extends OpMode {
     boolean down;
     boolean right;
 
-    public static double rotations (double rotationDegrees) {
-        return ((3 + (1/9) * rotationDegrees));
+    public static double rotationsForDebris (double rotationDegrees) {
+        return ((3 + (1/9) * rotationDegrees * 7.5));
     }
 
     public sweeperTeleop() {
@@ -99,77 +99,77 @@ public class sweeperTeleop extends OpMode {
                 currentSweeper = chooseSweeper;
                 break;
 
-            case LEFT:
-                if (left) {
-                    currentSweeper = sweeperControl.PREIDLE;
-                } else if (down) {
-                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() - (int)rotations(-90));
-                    blockDumper.setPower(0.5);
-                    currentSweeper = sweeperControl.PREIDLE;
-                } else if (up) {
-                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() + (int)rotations(90));
-                    blockDumper.setPower(0.5);
-                    currentSweeper = sweeperControl.PREIDLE;
-                } else if (right) {
-                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() + (int)rotations(180));
-                    blockDumper.setPower(0.5);
-                    currentSweeper = sweeperControl.PREIDLE;
-                }
-                break;
-
-            case RIGHT:
-                if (right) {
-                    currentSweeper = sweeperControl.PREIDLE;
-                } else if (up) {
-                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() - (int)rotations(90));
-                    blockDumper.setPower(0.5);
-                    currentSweeper = sweeperControl.PREIDLE;
-                } else if (down) {
-                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() - (int)rotations(270));
-                    blockDumper.setPower(0.5);
-                    currentSweeper = sweeperControl.PREIDLE;
-                } else if (left) {
-                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() - (int)rotations(180));
-                    blockDumper.setPower(0.5);
-                    currentSweeper = sweeperControl.PREIDLE;
-                }
-                break;
-
-            case UP:
-                if (up) {
-                    currentSweeper = sweeperControl.PREIDLE;
-                } else if (left) {
-                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() - (int)rotations(-90));
-                    blockDumper.setPower(0.5);
-                    currentSweeper = sweeperControl.PREIDLE;
-                } else if (right) {
-                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() + (int)rotations(90));
-                    blockDumper.setPower(0.5);
-                    currentSweeper = sweeperControl.PREIDLE;
-                } else if (down) {
-                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() - (int)rotations(180));
-                    blockDumper.setPower(0.5);
-                    currentSweeper = sweeperControl.PREIDLE;
-                }
-                break;
-
-            case DOWN:
-                if (down) {
-                    currentSweeper = sweeperControl.PREIDLE;
-                } else if (left) {
-                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() + (int)rotations(90));
-                    blockDumper.setPower(0.5);
-                    currentSweeper = sweeperControl.PREIDLE;
-                } else if (up) {
-                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() + (int)rotations(180));
-                    blockDumper.setPower(0.5);
-                    currentSweeper = sweeperControl.PREIDLE;
-                } else if (right) {
-                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() - (int)rotations(270));
-                    blockDumper.setPower(0.5);
-                    currentSweeper = sweeperControl.PREIDLE;
-                }
-                break;
+//            case LEFT:
+//                if (left) {
+//                    currentSweeper = sweeperControl.PREIDLE;
+//                } else if (down) {
+//                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() - (int)rotations(-90));
+//                    blockDumper.setPower(0.5);
+//                    currentSweeper = sweeperControl.PREIDLE;
+//                } else if (up) {
+//                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() + (int)rotations(90));
+//                    blockDumper.setPower(0.5);
+//                    currentSweeper = sweeperControl.PREIDLE;
+//                } else if (right) {
+//                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() + (int)rotations(180));
+//                    blockDumper.setPower(0.5);
+//                    currentSweeper = sweeperControl.PREIDLE;
+//                }
+//                break;
+//
+//            case RIGHT:
+//                if (right) {
+//                    currentSweeper = sweeperControl.PREIDLE;
+//                } else if (up) {
+//                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() - (int)rotations(90));
+//                    blockDumper.setPower(0.5);
+//                    currentSweeper = sweeperControl.PREIDLE;
+//                } else if (down) {
+//                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() - (int)rotations(270));
+//                    blockDumper.setPower(0.5);
+//                    currentSweeper = sweeperControl.PREIDLE;
+//                } else if (left) {
+//                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() - (int)rotations(180));
+//                    blockDumper.setPower(0.5);
+//                    currentSweeper = sweeperControl.PREIDLE;
+//                }
+//                break;
+//
+//            case UP:
+//                if (up) {
+//                    currentSweeper = sweeperControl.PREIDLE;
+//                } else if (left) {
+//                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() - (int)rotations(-90));
+//                    blockDumper.setPower(0.5);
+//                    currentSweeper = sweeperControl.PREIDLE;
+//                } else if (right) {
+//                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() + (int)rotations(90));
+//                    blockDumper.setPower(0.5);
+//                    currentSweeper = sweeperControl.PREIDLE;
+//                } else if (down) {
+//                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() - (int)rotations(180));
+//                    blockDumper.setPower(0.5);
+//                    currentSweeper = sweeperControl.PREIDLE;
+//                }
+//                break;
+//
+//            case DOWN:
+//                if (down) {
+//                    currentSweeper = sweeperControl.PREIDLE;
+//                } else if (left) {
+//                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() + (int)rotations(90));
+//                    blockDumper.setPower(0.5);
+//                    currentSweeper = sweeperControl.PREIDLE;
+//                } else if (up) {
+//                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() + (int)rotations(180));
+//                    blockDumper.setPower(0.5);
+//                    currentSweeper = sweeperControl.PREIDLE;
+//                } else if (right) {
+//                    blockDumper.setTargetPosition(blockDumper.getCurrentPosition() - (int)rotations(270));
+//                    blockDumper.setPower(0.5);
+//                    currentSweeper = sweeperControl.PREIDLE;
+//                }
+//                break;
 
             case DUMP:
                 dumperDoor.setPosition(0.0);

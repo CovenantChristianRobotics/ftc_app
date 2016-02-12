@@ -14,6 +14,8 @@
 		<Servo name="rT" port="2" />
 		<Servo name="lP" port="3" />
 		<Servo name="rP" port="4" />
+		<Servo name="sweeper" port="5" />
+		<Servo name="dumperDoor" port="6" />
     </ServoController>
     <DeviceInterfaceModule name="Device Interface Module" serialNumber="AI02RHQD">
 		<ColorSensor name="fCS" port="4" />
@@ -26,6 +28,7 @@
         <Motor name="motorL" port="2" />
     </MotorController>
     <MotorController name="Motor Controller 5" serialNumber="AL00VXF8">
+	    <Motor name="blockDumper" port="1" />
     </MotorController>
     <MotorController name="endGameCtlr" serialNumber="AL00VTFB">
         <Motor name="endGameLights" port="1" />

@@ -37,6 +37,10 @@ public class CCHS5256Autonomous extends OpMode {
         NOTMOVING, EXTENDING, IN, OUT, DELAYSETTINGSOMNI, DELAYOMNI, RETRACT, DONE
     }
 
+    enum PlowCtlr {
+        DELAYPLOW, DELAYSETTINGSPLOW, START, GOINGUP, UP
+    }
+
     // DC Motors
     DcMotor leftDrive;
     DcMotor rightDrive;
@@ -86,13 +90,21 @@ public class CCHS5256Autonomous extends OpMode {
     OmniCtlr currentOmni;
     OmniCtlr nextOmni;
     OmniCtlr chosenOmni;
+    PlowCtlr currentPlow;
+    PlowCtlr nextPlow;
+    PlowCtlr chosenPlow;
+    double lDiff = 0.08549020;
+    double rDiff = -0.11372550;
     long delayUntil;
     long moveDelayTime;
     long commonDelayTime;
     long now;
     long nowOmni;
     long moveDelaytimeOmni;
+    long nowPlow;
+    long plowDelayUntil;
     long delayUntilOmni;
+    int counter;
     double fastSpeed;
     double mediumSpeed;
     double slowSpeed;
@@ -264,6 +276,9 @@ public class CCHS5256Autonomous extends OpMode {
         telemetryMove = MoveState.FIRSTMOVE;
         currentOmni = OmniCtlr.NOTMOVING;
         chosenOmni = OmniCtlr.NOTMOVING;
+        currentPlow = PlowCtlr.START;
+        chosenPlow = PlowCtlr.START;
+        counter = 0;
         // Set Switch Flags
         if (redBlueBeaconSwitch.getState()) {   // WE ARE BLUE
             redBlue = -1.0;
@@ -449,8 +464,8 @@ public class CCHS5256Autonomous extends OpMode {
             // MOVES WE USE ONCE, IN A SEQUENCE
             case INITIALIZEROBOT:
                 currentTime.reset();
-                rightPlow.setPosition(0.627451);
-                leftPlow.setPosition(0.52156866);
+                rightPlow.setPosition(0.80000000);
+                leftPlow.setPosition(0.07843138);
                 moveDelayTime = (long)delay;
                 currentMove = MoveState.DELAYSETTINGS;
                 nextMove = MoveState.FIRSTMOVE;
@@ -696,6 +711,38 @@ public class CCHS5256Autonomous extends OpMode {
 
 
 
+        }
+
+        switch (currentPlow){
+            case DELAYSETTINGSPLOW:
+                nowPlow = System.currentTimeMillis();
+                plowDelayUntil = nowPlow + (moveDelaytimeOmni / 11);
+                currentPlow = PlowCtlr.DELAYPLOW;
+                break;
+
+            case DELAYPLOW:
+                if (System.currentTimeMillis() >= delayUntilOmni) {
+                    currentPlow = nextPlow;
+                }
+                break;
+
+            case START:
+                currentPlow = chosenPlow;
+                break;
+
+            case GOINGUP:
+                leftPlow.setPosition(leftPlow.getPosition() + (lDiff / 11));
+                rightPlow.setPosition(rightPlow.getPosition() + (rDiff / 11));
+                counter = counter + 1;
+                if (counter >= 11){
+                    nextPlow = PlowCtlr.UP;
+                } else {
+                    nextPlow = PlowCtlr.GOINGUP;
+                }
+                break;
+
+            case UP:
+                break;
         }
 
         telemetry.addData("THE MARK OF THE BEAST", the_mark_of_the_beast);
