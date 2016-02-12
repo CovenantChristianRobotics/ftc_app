@@ -46,6 +46,7 @@ public class CCHS5256Autonomous extends OpMode {
     DcMotor rightDrive;
     DcMotor chinUp;
     DcMotor endGameLights;
+    DcMotor debrisSwivel;
     // Servos
     Servo armLock;
     Servo climberDumper;
@@ -56,6 +57,8 @@ public class CCHS5256Autonomous extends OpMode {
     Servo rightPlow;
     Servo leftTrigger;
     Servo rightTrigger;
+    Servo dumperDoor;
+    Servo sweeper;
     // Sensors
     GyroSensor gyroSense;
     ColorSensor fColorSense;
@@ -233,13 +236,15 @@ public class CCHS5256Autonomous extends OpMode {
         rightDrive = hardwareMap.dcMotor.get("motorR");
         chinUp = hardwareMap.dcMotor.get("chinUp");
         endGameLights = hardwareMap.dcMotor.get("endGameLights");
+        debrisSwivel = hardwareMap.dcMotor.get("blockDumper");
         // DC Motor Settings
         leftDrive.setDirection(DcMotor.Direction.REVERSE);
         leftDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         rightDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         chinUp.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-        endGameLights.setPower(0.6);
+        endGameLights.setPower(0.9);
+        debrisSwivel.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
@@ -250,16 +255,20 @@ public class CCHS5256Autonomous extends OpMode {
         rightPlow = hardwareMap.servo.get("rP");
         leftTrigger = hardwareMap.servo.get("lT");
         rightTrigger = hardwareMap.servo.get("rT");
+        sweeper = hardwareMap.servo.get("sweeper");
+        dumperDoor = hardwareMap.servo.get("dumperDoor");
         // Servo Settings
         armLock.setPosition(0.25);
         climberDumper.setPosition(0.45);
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
-        leftPlow.setPosition(0.43137255);
-        rightPlow.setPosition(0.827451);
+        leftPlow.setPosition(0.078431375);
+        rightPlow.setPosition(0.8);
         leftTrigger.setPosition(0.5);
         rightTrigger.setPosition(0.5);
+        sweeper.setPosition(0.5);
+        dumperDoor.setPosition(0.0);
         // Sensors
         gyroSense = hardwareMap.gyroSensor.get("gyroSense");
         fColorSense = hardwareMap.colorSensor.get("fCS");
@@ -362,7 +371,7 @@ public class CCHS5256Autonomous extends OpMode {
             return;
         }
         double distanceToWall = 0.0;
-        endGameLights.setPower(0.7);
+        endGameLights.setPower(0.9);
 
         Log.i("THE MARK OF THE BEAST", Long.toString(the_mark_of_the_beast));
 
@@ -510,6 +519,7 @@ public class CCHS5256Autonomous extends OpMode {
                 telemetryMove = MoveState.MOVEDIAG;
                 moveDelayTime = commonDelayTime;
                 chosenOmni = OmniCtlr.EXTENDING;
+                chosenPlow = PlowCtlr.GOINGUP;
                 break;
 
             case TURNONCOLOREDLINE:
@@ -734,6 +744,7 @@ public class CCHS5256Autonomous extends OpMode {
                 leftPlow.setPosition(leftPlow.getPosition() + (lDiff / 11));
                 rightPlow.setPosition(rightPlow.getPosition() + (rDiff / 11));
                 counter = counter + 1;
+                currentPlow = PlowCtlr.DELAYSETTINGSPLOW;
                 if (counter >= 11){
                     nextPlow = PlowCtlr.UP;
                 } else {

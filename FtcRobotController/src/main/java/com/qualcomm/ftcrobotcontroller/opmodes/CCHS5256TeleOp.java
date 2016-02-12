@@ -93,7 +93,7 @@ public class CCHS5256TeleOp extends OpMode {
         rightDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         chinUp.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-        endGameLights.setPower(0.0);
+        endGameLights.setPower(0.9);
         debrisSwivel.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
@@ -112,8 +112,8 @@ public class CCHS5256TeleOp extends OpMode {
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
-        leftPlow.setPosition(0.52156866);
-        rightPlow.setPosition(0.33333334);
+        leftPlow.setPosition(0.40392157);
+        rightPlow.setPosition(0.45490196);
         leftTrigger.setPosition(0.5);
         rightTrigger.setPosition(0.5);
         sweeper.setPosition(0.5);
@@ -225,6 +225,10 @@ public class CCHS5256TeleOp extends OpMode {
             sweeper.setPosition(0.5);
         }
 
+        if (gamepad1.y) {
+            sweeper.setPosition(0.0);
+        }
+
         if (gamepad1.left_bumper) {
             debrisDoors.setPosition(0.36862746);
         } else if (gamepad1.left_trigger > 0.5) {
@@ -302,7 +306,7 @@ public class CCHS5256TeleOp extends OpMode {
 
             case START:
                 endGameTime.reset();
-                endGameLights.setPower(0.0);
+                endGameLights.setPower(0.9);
                 currentControl = ledControl.ON;
                 break;
 
@@ -315,22 +319,22 @@ public class CCHS5256TeleOp extends OpMode {
                 break;
 
             case ENDGAME:
-                endGameLights.setPower(0.0);
+                endGameLights.setPower(0.05);
                 currentControl = ledControl.BLINKON;
                 break;
 
             case BLINKON:
-                endGameLights.setPower(0.0);
+                endGameLights.setPower(0.9);
                 moveDelayTime = 1000;
                 if (moveDelayTime > 75) {
-                    moveDelayTime = moveDelayTime - 20  ;
+                    moveDelayTime = moveDelayTime - 50  ;
                 }
                 currentControl = ledControl.DELAYSETTINGS;
                 nextControl = ledControl.BLINKOFF;
                 break;
 
             case BLINKOFF:
-                endGameLights.setPower(0.0);
+                endGameLights.setPower(0.05);
                 moveDelayTime = 1000;
                 currentControl = ledControl.DELAYSETTINGS;
                 nextControl = ledControl.BLINKON;
@@ -356,6 +360,7 @@ public class CCHS5256TeleOp extends OpMode {
     public void stop () {
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
+        sweeper.setPosition(0.5);
     }
 
     double scaleInput(double dVal) {
