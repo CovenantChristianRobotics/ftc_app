@@ -23,7 +23,7 @@ import com.qualcomm.robotcore.util.Range;
  * 5256 SpareParts Autonomous
  * FIRST ResQ
  */
-public class CCHS5256Autonomous extends OpMode {
+public class BEAST_MODE_Autonomous extends OpMode {
 
     enum MoveState {
         STARTMOVE, MOVINGSTRAIGHT, STARTTURN, MOVINGTURN, DELAYSETTINGS, DELAY,
@@ -46,7 +46,7 @@ public class CCHS5256Autonomous extends OpMode {
     DcMotor rightDrive;
     DcMotor chinUp;
     DcMotor endGameLights;
-    DcMotor debrisSwivel;
+//    DcMotor debrisSwivel;
     // Servos
     Servo armLock;
     Servo climberDumper;
@@ -236,7 +236,7 @@ public class CCHS5256Autonomous extends OpMode {
         rightDrive = hardwareMap.dcMotor.get("motorR");
         chinUp = hardwareMap.dcMotor.get("chinUp");
         endGameLights = hardwareMap.dcMotor.get("endGameLights");
-        debrisSwivel = hardwareMap.dcMotor.get("blockDumper");
+//        debrisSwivel = hardwareMap.dcMotor.get("blockDumper");
         // DC Motor Settings
         leftDrive.setDirection(DcMotor.Direction.REVERSE);
         leftDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
@@ -244,7 +244,7 @@ public class CCHS5256Autonomous extends OpMode {
         chinUp.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         endGameLights.setPower(0.9);
-        debrisSwivel.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+//        debrisSwivel.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
@@ -264,7 +264,7 @@ public class CCHS5256Autonomous extends OpMode {
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
         leftPlow.setPosition(0.078431375);
-        rightPlow.setPosition(0.8);
+        rightPlow.setPosition(0.75);
         leftTrigger.setPosition(0.5);
         rightTrigger.setPosition(0.5);
         sweeper.setPosition(0.5);
@@ -473,7 +473,7 @@ public class CCHS5256Autonomous extends OpMode {
             // MOVES WE USE ONCE, IN A SEQUENCE
             case INITIALIZEROBOT:
                 currentTime.reset();
-                rightPlow.setPosition(0.80000000);
+                rightPlow.setPosition(0.75);
                 leftPlow.setPosition(0.07843138);
                 moveDelayTime = (long)delay;
                 currentMove = MoveState.DELAYSETTINGS;
@@ -518,8 +518,6 @@ public class CCHS5256Autonomous extends OpMode {
                 nextMove = MoveState.TURNONCOLOREDLINE;
                 telemetryMove = MoveState.MOVEDIAG;
                 moveDelayTime = commonDelayTime;
-                chosenOmni = OmniCtlr.EXTENDING;
-                chosenPlow = PlowCtlr.GOINGUP;
                 break;
 
             case TURNONCOLOREDLINE:
@@ -585,7 +583,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case EXTENDARM:
                 // Dump climbers
-                chinUp.setTargetPosition(-3360);
+                chinUp.setTargetPosition(-3000);
                 chinUp.setPower(0.5);
                 currentMove = MoveState.DELAYSETTINGS;
                 nextMove = MoveState.DUMPCLIMBERS;
@@ -599,12 +597,13 @@ public class CCHS5256Autonomous extends OpMode {
                    currentMove = MoveState.DELAYSETTINGS;
                    nextMove = MoveState.PULLARMIN;
                    telemetryMove = MoveState.DUMPCLIMBERS;
+                   chosenOmni = OmniCtlr.EXTENDING;
                    moveDelayTime = 1500;
                }
                 break;
 
             case PULLARMIN:
-                chinUp.setTargetPosition(-300);
+                chinUp.setTargetPosition(-600);
                 chinUp.setPower(0.5);
                 currentMove = MoveState.DELAYSETTINGS;
                 nextMove = MoveState.TURNALONGLINE;
@@ -624,7 +623,7 @@ public class CCHS5256Autonomous extends OpMode {
 
             case  BACKUPFARTHER:
                 // Move Straight 15 so we can drive to mountain
-                moveStraight(70.0, mediumSpeed);
+                moveStraight(50.0, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
                 telemetryMove = MoveState.BACKUPFARTHER;
