@@ -87,7 +87,7 @@ public class FtcOpModeRegister implements OpModeRegister {
     manager.register("CCHS4507Autonomous", CCHS4507Autonomous.class);
     manager.register("CCHS4507Test", CCHS4507Test.class);
 //    manager.register("testgyroturn", testgyroturn.class);
-    manager.register("BEAST_MODE_Autonomous", BEAST_MODE_Autonomous.class);
+    manager.register("BEAST_MODE_AutonomousOLD", BEAST_MODE_AutonomousOLD.class);
     manager.register("BEAST_MODE_TeleOp", BEAST_MODE_TeleOp.class);
     manager.register("Fix TeleOp", FixTeleOp.class);
     manager.register("sweeper TeleOp", sweeperTeleop.class);
