@@ -27,7 +27,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
     DcMotor rightDrive;
     DcMotor chinUp;
     DcMotor endGameLights;
-//    DcMotor debrisSwivel;
+    DcMotor debrisSwivel;
     // Servos
     Servo armLock;
     Servo climberDumper;
@@ -86,7 +86,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
         rightDrive = hardwareMap.dcMotor.get("motorR");
         chinUp = hardwareMap.dcMotor.get("chinUp");
         endGameLights = hardwareMap.dcMotor.get("endGameLights");
-//        debrisSwivel = hardwareMap.dcMotor.get("blockDumper");
+        debrisSwivel = hardwareMap.dcMotor.get("blockDumper");
         // DC Motor Settings
         leftDrive.setDirection(DcMotor.Direction.REVERSE);
         leftDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
@@ -94,7 +94,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
         chinUp.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         endGameLights.setPower(0.9);
-//        debrisSwivel.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        debrisSwivel.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
@@ -207,17 +207,17 @@ public class BEAST_MODE_TeleOp extends OpMode {
 //////            right = (float) medium(right);
 ////        }
 //
-//        if (gamepad1.dpad_up){
-//            debrisSwivel.setPower(0.0);
-//        } else if (gamepad1.dpad_down){
-//            debrisSwivel.setPowerFloat();
-//        } else if (gamepad1.dpad_left){
-//            debrisSwivel.setPower(-0.5);
-//        } else if (gamepad1.dpad_right) {
-//            debrisSwivel.setPower(0.5);
-//        } else {
-//            debrisSwivel.setPower(0.0);
-//        }
+        if (gamepad1.dpad_up){
+            debrisSwivel.setPower(0.0);
+        } else if (gamepad1.dpad_down){
+            debrisSwivel.setPowerFloat();
+        } else if (gamepad1.dpad_left){
+            debrisSwivel.setPower(-0.5);
+        } else if (gamepad1.dpad_right) {
+            debrisSwivel.setPower(0.5);
+        } else {
+            debrisSwivel.setPower(0.0);
+        }
 
         if (gamepad1.right_bumper) {
             sweeper.setPosition(1.0);
