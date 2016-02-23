@@ -30,8 +30,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
         STARTMOVE, MOVINGSTRAIGHT, STARTTURN, MOVINGTURN, DELAYSETTINGS, DELAY,
         INITIALIZEROBOT, CHOOSEMOVE, FIRSTMOVE, TURNDIAG, MOVEDIAG, TURNONCOLOREDLINE, GOTOWHITELINE,
         TURNTOBEACON, DRIVETOBEACON, READBEACON, PUSHBUTTON, UNPUSHBUTTON, BACKUP,
-        EXTENDARM, DUMPCLIMBERS, JIGGLEFORWARD, JIGGLEBACKWARD, PULLARMIN, BACKUPFARTHER, TURNALONGLINE, DRIVEALONGLINE, TURNTOMOUNTAIN,
-        DRIVETOMOUNTAIN, GOUPMOUNTAIN, PREPTELEOP, DONE
+        EXTENDARM, DUMPCLIMBERS, JIGGLEFORWARD, JIGGLEBACKWARD, PULLARMIN, BACKUPFARTHER, TURNALONGLINE, DRIVEALONGLINE, 
+        TURNTOMOUNTAIN, DRIVETOMOUNTAIN, GOUPMOUNTAIN, PREPTELEOP, DONE
     }
     //movestate for our omniwheels in autonomous
     enum OmniCtlr {
@@ -713,7 +713,6 @@ public class BEAST_MODE_Autonomous extends OpMode {
         telemetry.addData("green", Integer.toString(fColorSense.green()));
         telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
 
-
     }
 
     @Override
@@ -723,5 +722,4 @@ public class BEAST_MODE_Autonomous extends OpMode {
         chinUp.setTargetPosition(0);
         chinUp.setPower(0.0);
     }
-
 }
