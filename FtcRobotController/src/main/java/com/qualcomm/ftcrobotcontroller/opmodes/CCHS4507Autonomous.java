@@ -70,6 +70,7 @@ public class CCHS4507Autonomous extends OpMode {
     long gyroReadLast;
     long delayMillisec;
     long now;
+    double distanceToWall;
     GyroSensor gyroSense;
     int gyroError;
     int desiredHeading;
@@ -79,7 +80,7 @@ public class CCHS4507Autonomous extends OpMode {
     double countsPerMeter = 5361.0; // 10439;    // Found this experimentally: Measured one meter, drove distance, read counts
     int moveDoneDelta;              // How close we need to call it done
     double countsPerDonut = 7661.0; // 14161;    // Encoder counts per 360 degrees
-    double trackLifterCountsPerDegree = -1170.0 / 90.0;
+    double trackLifterCountsPerDegree = -1170.0 * 2.0 / 90.0;
 
     // Switches
     DigitalChannel nearMountainSwitch;
@@ -167,7 +168,7 @@ public class CCHS4507Autonomous extends OpMode {
         } else {
             stowLifter = false;
         }
-        trackLifter.setTargetPosition(trackLifterUp + (int)(degrees * trackLifterCountsPerDegree));
+            trackLifter.setTargetPosition(trackLifterUp + (int)(degrees * trackLifterCountsPerDegree));
     }
 
     @Override
@@ -215,10 +216,11 @@ public class CCHS4507Autonomous extends OpMode {
             trackLifterUp = trackLifter.getCurrentPosition();
             trackLifter.setTargetPosition(trackLifterUp);
         }
+        distanceToWall = 0.0;
         colorSense.enableLed(false);
         motorLeft.setDirection(DcMotor.Direction.FORWARD);
         motorRight.setDirection(DcMotor.Direction.REVERSE);
-        trackLifter.setDirection(DcMotor.Direction.REVERSE);
+        trackLifter.setDirection(DcMotor.Direction.FORWARD);
         motorRight.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
@@ -248,14 +250,14 @@ public class CCHS4507Autonomous extends OpMode {
         xHeading = 0;
         yHeading = 0;
         gyroReadLast = System.currentTimeMillis();
-        trackLifter.setPower(0.1);
+        trackLifter.setPower(0.2);
         trackLifter.setTargetPosition(30);
         servoClimberDumper.setPosition(1.0);
         climberTriggerLeft.setPosition(0.5);
         climberTriggerRight.setPosition(0.5);
         cowCatcher.setPosition(0.2);
         armLock.setPosition(0.5);
-        trackLock.setPosition(0.8);
+        trackLock.setPosition(0.4);
         //servoBeaconPusher.setPosition(0.0);
         if (liftCheck.isPressed()) {
             trackLifterUp = trackLifter.getCurrentPosition();
@@ -268,7 +270,6 @@ public class CCHS4507Autonomous extends OpMode {
 
     @Override
     public void loop() {
-        double distanceToWall = 0.0;
         double distance = 0.0;
 
         if (gyroSense.isCalibrating()) {
@@ -383,13 +384,17 @@ public class CCHS4507Autonomous extends OpMode {
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDWALL;
                 telemetryMove = MoveState.MOVEDIAG;
-                moveDelayTime = delayMillisec * 2;
+                moveDelayTime = delayMillisec * 4;
                 break;
 
             case FINDWALL:
                 distanceToWall = ultraSense.getUltrasonicLevel();
                 if ((distanceToWall > 20.0) && (distanceToWall <= 120.0)) {
-                    moveStraight((distanceToWall - 26.0) * 1.414, slowSpeed);
+                    if (redAlliance) {
+                        moveStraight((distanceToWall - 26.0) * 1.414, slowSpeed);
+                    } else {
+                        moveStraight((distanceToWall - 30.0) * 1.414, slowSpeed);
+                    }
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.TURNALONGWALL;
                     telemetryMove = MoveState.FINDWALL;
@@ -565,6 +570,7 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case DOWNTRACK:
+                trackLock.setPosition(0.8);
                 moveLifter(90.0);
                 cowCatcher.setPosition(.75);
                 moveDelayTime = 2000;
@@ -604,9 +610,10 @@ public class CCHS4507Autonomous extends OpMode {
         telemetry.addData("motorRight", Integer.toString(Math.abs(motorLeft.getCurrentPosition() - leftTargetPosition)));
         telemetry.addData("desiredHeading", Integer.toString(desiredHeading));
         telemetry.addData("gyro", Integer.toString(gyroSense.getHeading()));
-        telemetry.addData("Xheading", xHeading);
-        telemetry.addData("yHeading", yHeading);
-        telemetry.addData("POT", Long.toString(moveDelayTime));
+        telemetry.addData("distToWall", distanceToWall);
+//        telemetry.addData("Xheading", xHeading);
+//        telemetry.addData("yHeading", yHeading);
+//        telemetry.addData("POT", Long.toString(moveDelayTime));
 
 //        Log.i("Current Move", currentMove.toString());
 //        Log.i("desiredHeading", Integer.toString(desiredHeading));
