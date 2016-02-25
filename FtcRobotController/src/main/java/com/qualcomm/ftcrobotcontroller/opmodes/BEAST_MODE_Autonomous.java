@@ -30,12 +30,13 @@ public class BEAST_MODE_Autonomous extends OpMode {
         STARTMOVE, MOVINGSTRAIGHT, STARTTURN, MOVINGTURN, DELAYSETTINGS, DELAY,
         DRIVEAWAYFROMWALL, TURNDIAG, MOVEDIAG, GOPASTREDTAPE, TURNPARALLELTOWALL,
         DRIVETOWHITELINE, TURNTOBEACON, DRIVETOBEACON, WINDOUTARM, DUMPCLIMBERS,
-        READBEACON, WINDINARMPARTWAY, TURNTOBUTTON, PUSHBUTTON, BACKUP,
+        WINDINARMPARTWAY, READBEACON,  TURNTOBUTTON, PUSHBUTTON, BACKUP,
         TURNTOFLOORGOAL, DRIVEINFLOORGOAL, DONE
     }
     //movestate for our omniwheels in autonomous
     enum OmniCtlr {
-        NOTMOVING, EXTENDING, IN, OUT, DELAYSETTINGSOMNI, DELAYOMNI, RETRACT, DONE
+        NOTMOVING, EXTENDING, IN, OUT, DELAYSETTINGSOMNI, DELAYOMNI, RETRACT, REEXTEND, RERETRACT,
+        DONE
     }
     //declaration of everything we will use
     // DC Motors
@@ -487,7 +488,55 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 }
                 currentMove = MoveState.STARTMOVE;
                 telemetryMove = MoveState.DRIVETOWHITELINE;
+                nextMove = MoveState.TURNTOBEACON;
+                moveDelayTime = commonDelayTime;
+                break;
+
+            case TURNTOBEACON:
+                moveTurn(90.0, turnSpeed);
+                currentMove = MoveState.STARTTURN;
+                nextMove = MoveState.DRIVETOBEACON;
+                telemetryMove = MoveState.TURNTOBEACON;
+                currentOmni = OmniCtlr.RETRACT;
+                moveDelayTime = commonDelayTime;
+                break;
+
+            case DRIVETOBEACON:
+                if (ultraSense.getUltrasonicLevel() > 20.0) {
+                    leftDrive.setPower(0.2);
+                    rightDrive.setPower(0.2);
+                } else {
+                    leftDrive.setPower(0.0);
+                    rightDrive.setPower(0.0);
+                }
+                currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
+                telemetryMove = MoveState.DRIVETOBEACON;
+                moveDelayTime = 1000;
+                break;
+
+            case WINDOUTARM:
+                chinUp.setTargetPosition(-3360);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DUMPCLIMBERS;
+                telemetryMove = MoveState.WINDOUTARM;
+                moveDelayTime = 1000;
+                break;
+
+            case DUMPCLIMBERS:
+                climberDumper.setPosition(0.75);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.WINDINARMPARTWAY;
+                telemetryMove = MoveState.DUMPCLIMBERS;
+                currentOmni = OmniCtlr.REEXTEND;
+                moveDelayTime = commonDelayTime;
+                break;
+
+            case WINDINARMPARTWAY:
+                chinUp.setTargetPosition(-1120);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DONE;
+                telemetryMove = MoveState.WINDINARMPARTWAY;
                 moveDelayTime = commonDelayTime;
                 break;
 
@@ -521,7 +570,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 leftOmniPinion.setPosition(1.0);
                 rightOmniPinion.setPosition(1.0);
                 currentOmni = OmniCtlr.DELAYSETTINGSOMNI;
-                nextOmni = OmniCtlr.RETRACT;
+                nextOmni = chosenOmni;
                 moveDelaytimeOmni = 5500;
                 break;
 
@@ -529,8 +578,23 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 leftOmniPinion.setPosition(0.0);
                 rightOmniPinion.setPosition(0.0);
                 currentOmni = OmniCtlr.DELAYSETTINGSOMNI;
+                nextOmni = chosenOmni;
+                moveDelaytimeOmni = 3500;
+                break;
+
+            case REEXTEND:
+                leftOmniPinion.setPosition(1.0);
+                rightOmniPinion.setPosition(1.0);
+                currentOmni = OmniCtlr.DELAYSETTINGSOMNI;
+                nextOmni = chosenOmni;
+                moveDelayTime = 3500;
+                break;
+
+            case RERETRACT:
+                leftOmniPinion.setPosition(0.0);
+                rightOmniPinion.setPosition(0.0);
+                currentOmni = OmniCtlr.DELAYSETTINGSOMNI;
                 nextOmni = OmniCtlr.DONE;
-                moveDelaytimeOmni = 5000;
                 break;
 
             case DONE:
