@@ -46,7 +46,7 @@ public class CCHS4507TeleOp extends OpMode {
     boolean redAllianceFlag = false;
     boolean cowCatcherUp = false;
     int trackLifterUp = 0;
-    int trackLifterDown = -1170;
+    int trackLifterDown = 1170 * 2;
 
 
     @Override
@@ -80,7 +80,7 @@ public class CCHS4507TeleOp extends OpMode {
         //set up motors
         motorLeft.setDirection(DcMotor.Direction.FORWARD);
         motorRight.setDirection(DcMotor.Direction.REVERSE);
-        trackLifter.setDirection(DcMotor.Direction.REVERSE);
+        trackLifter.setDirection(DcMotor.Direction.FORWARD);
         armExtend.setDirection(DcMotor.Direction.REVERSE);
         motorRight.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         motorLeft.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
@@ -90,6 +90,7 @@ public class CCHS4507TeleOp extends OpMode {
         climberTriggerRight.setPosition(0.5);
         armLock.setPosition(0.5);
         servoDist.setPosition(0.5);
+        trackLock.setPosition(0.8);
     }
 
     @Override
@@ -119,7 +120,7 @@ public class CCHS4507TeleOp extends OpMode {
             if (liftCheck.isPressed()) {
                 trackLifter.setPower(0.0);
             } else {
-                trackLifter.setPower(0.2);
+                trackLifter.setPower(0.5);
             }
         } else if (gamepad1.right_trigger > 0.1) { // down
             trackLifter.setPower(-0.5 * gamepad1.right_trigger);
