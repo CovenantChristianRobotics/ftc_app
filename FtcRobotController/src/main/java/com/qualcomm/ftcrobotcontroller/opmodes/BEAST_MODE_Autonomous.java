@@ -544,6 +544,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 leftDrive.setPower(0.0);
                 rightDrive.setPower(0.0);
                 telemetryMove = MoveState.DONE;
+                break;
 
         }
 
@@ -595,9 +596,12 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 rightOmniPinion.setPosition(0.0);
                 currentOmni = OmniCtlr.DELAYSETTINGSOMNI;
                 nextOmni = OmniCtlr.DONE;
+                moveDelayTime = 5500;
                 break;
 
             case DONE:
+                leftOmniPinion.setPosition(0.5);
+                rightOmniPinion.setPosition(0.5);
                 break;
         }
 

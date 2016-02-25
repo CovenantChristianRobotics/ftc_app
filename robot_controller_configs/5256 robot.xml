@@ -18,9 +18,10 @@
 		<Servo name="dumperDoor" port="6" />
     </ServoController>
     <DeviceInterfaceModule name="Device Interface Module" serialNumber="AI02RHQD">
+		<ColorSensor name="bCS" port="3" />
 		<ColorSensor name="fCS" port="4" />
 		<Gyro name="gyroSense" port="5" />
-		<DigitalDevice name="nMtnSw" port="0" />
+		<DigitalDevice name="tileSw" port="0" />
 		<DigitalDevice name="rBSw" port="1" />
     </DeviceInterfaceModule>
     <MotorController name="dTCtlr" serialNumber="AL00VSFZ">
