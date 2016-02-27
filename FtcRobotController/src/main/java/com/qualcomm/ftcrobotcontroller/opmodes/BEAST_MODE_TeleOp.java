@@ -26,7 +26,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
     DcMotor leftDrive;
     DcMotor rightDrive;
     DcMotor chinUp;
-    DcMotor endGameLights;
+//    DcMotor endGameLights;
     DcMotor debrisSwivel;
     // Servos
     Servo armLock;
@@ -85,15 +85,15 @@ public class BEAST_MODE_TeleOp extends OpMode {
         leftDrive = hardwareMap.dcMotor.get("motorL");
         rightDrive = hardwareMap.dcMotor.get("motorR");
         chinUp = hardwareMap.dcMotor.get("chinUp");
-        endGameLights = hardwareMap.dcMotor.get("endGameLights");
+//        endGameLights = hardwareMap.dcMotor.get("endGameLights");
         debrisSwivel = hardwareMap.dcMotor.get("blockDumper");
         // DC Motor Settings
         leftDrive.setDirection(DcMotor.Direction.REVERSE);
         leftDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         rightDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         chinUp.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-        endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-        endGameLights.setPower(0.9);
+//        endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
+//        endGameLights.setPower(0.9);
         debrisSwivel.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
@@ -112,8 +112,8 @@ public class BEAST_MODE_TeleOp extends OpMode {
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
-        leftPlow.setPosition(0.40392157);
-        rightPlow.setPosition(0.45490196);
+        leftPlow.setPosition(0.16392157);
+        rightPlow.setPosition(0.68627450);
         leftTrigger.setPosition(0.5);
         rightTrigger.setPosition(0.5);
         sweeper.setPosition(0.5);
@@ -168,45 +168,45 @@ public class BEAST_MODE_TeleOp extends OpMode {
             }
         }
 //
-////        if (slowDown) {
-//////            left = (float) slow(left);
-//////            right = (float) slow(right);
-////            left = (left / 3);
-////            right = (right / 3);
-//////        } else if (gamepad1.dpad_up) {
-//////            left = rightStickPos * -1;
-//////            right = rightStickPos * -1;
-//////        } else if (gamepad1.dpad_down) {
-//////            left = rightStickNeg * -1;
-//////            right = rightStickNeg * -1;
-//////        } else if (gamepad1.dpad_right) {
-//////            left = -0.1;
-//////            right = 0.1;
-////////            if (speedUp) {
-////////                left = (double) fast(left);
-////////                right = (double) fast(right);
-////////            } else if (slowDown) {
-////////                left = (double) slow(left);
-////////                right = (double) slow(right);
-////////            } else {
-////////                left = left;
-////////                right = right;
-////////            }
-//////        } else if (gamepad1.dpad_left) {
-//////            left = 0.1;
-//////            right = -0.1;
-////////            if (speedUp) {
-////////                left = (double) fast(left);
-////////                right = (double) fast(right);
-////////            } else if (slowDown) {
-////////                left = (float) slow(left);
-////////                right = (float) slow(right);
-////////            }
-////        } else {
-//////            left = (float) medium(left);
-//////            right = (float) medium(right);
-////        }
-//
+//        if (slowDown) {
+//            left = (float) slow(left);
+//            right = (float) slow(right);
+//            left = (left / 3);
+//            right = (right / 3);
+//        } else if (gamepad1.dpad_up) {
+//            left = rightStickPos * -1;
+//            right = rightStickPos * -1;
+//        } else if (gamepad1.dpad_down) {
+//            left = rightStickNeg * -1;
+//            right = rightStickNeg * -1;
+//        } else if (gamepad1.dpad_right) {
+//            left = -0.1;
+//            right = 0.1;
+//            if (speedUp) {
+//                left = (double) fast(left);
+//                right = (double) fast(right);
+//            } else if (slowDown) {
+//                left = (double) slow(left);
+//                right = (double) slow(right);
+//            } else {
+//                left = left;
+//                right = right;
+//            }
+//        } else if (gamepad1.dpad_left) {
+//            left = 0.1;
+//            right = -0.1;
+//            if (speedUp) {
+//                left = (double) fast(left);
+//                right = (double) fast(right);
+//            } else if (slowDown) {
+//                left = (float) slow(left);
+//                right = (float) slow(right);
+//            }
+//        } else {
+//            left = (float) medium(left);
+//            right = (float) medium(right);
+//        }
+
         if (gamepad1.dpad_up){
             debrisSwivel.setPower(0.0);
         } else if (gamepad1.dpad_down){
@@ -286,60 +286,60 @@ public class BEAST_MODE_TeleOp extends OpMode {
             climberDumper.setPosition(0.75);
         }
 
-        switch (currentControl) {
-            case DELAYSETTINGS:
-                now = new Date();
-                delayUntil = now.getTime() + moveDelayTime;
-                currentControl = ledControl.DELAY;
-                break;
-
-            case DELAY:
-                now = new Date();
-                if (now.getTime() >= delayUntil) {
-                    currentControl = nextControl;
-                }
-                break;
-
-            case PREMATCH:
-                currentControl = ledControl.START;
-                break;
-
-            case START:
-                endGameTime.reset();
-                endGameLights.setPower(0.9);
-                currentControl = ledControl.ON;
-                break;
-
-            case ON:
-                if (endGameTime.time() > 90.0) {
-                    currentControl = ledControl.ENDGAME;
-                } else {
-                    currentControl = ledControl.ON;
-                }
-                break;
-
-            case ENDGAME:
-                endGameLights.setPower(0.05);
-                currentControl = ledControl.BLINKON;
-                break;
-
-            case BLINKON:
-                endGameLights.setPower(0.9);
-                moveDelayTime = 1000;
-                if (moveDelayTime > 75) {
-                    moveDelayTime = moveDelayTime - 50  ;
-                }
-                currentControl = ledControl.DELAYSETTINGS;
-                nextControl = ledControl.BLINKOFF;
-                break;
-
-            case BLINKOFF:
-                endGameLights.setPower(0.05);
-                moveDelayTime = 1000;
-                currentControl = ledControl.DELAYSETTINGS;
-                nextControl = ledControl.BLINKON;
-                break;
-        }
+//        switch (currentControl) {
+//            case DELAYSETTINGS:
+//                now = new Date();
+//                delayUntil = now.getTime() + moveDelayTime;
+//                currentControl = ledControl.DELAY;
+//                break;
+//
+//            case DELAY:
+//                now = new Date();
+//                if (now.getTime() >= delayUntil) {
+//                    currentControl = nextControl;
+//                }
+//                break;
+//
+//            case PREMATCH:
+//                currentControl = ledControl.START;
+//                break;
+//
+//            case START:
+//                endGameTime.reset();
+//                endGameLights.setPower(0.9);
+//                currentControl = ledControl.ON;
+//                break;
+//
+//            case ON:
+//                if (endGameTime.time() > 90.0) {
+//                    currentControl = ledControl.ENDGAME;
+//                } else {
+//                    currentControl = ledControl.ON;
+//                }
+//                break;
+//
+//            case ENDGAME:
+//                endGameLights.setPower(0.05);
+//                currentControl = ledControl.BLINKON;
+//                break;
+//
+//            case BLINKON:
+//                endGameLights.setPower(0.9);
+//                moveDelayTime = 1000;
+//                if (moveDelayTime > 75) {
+//                    moveDelayTime = moveDelayTime - 50  ;
+//                }
+//                currentControl = ledControl.DELAYSETTINGS;
+//                nextControl = ledControl.BLINKOFF;
+//                break;
+//
+//            case BLINKOFF:
+//                endGameLights.setPower(0.05);
+//                moveDelayTime = 1000;
+//                currentControl = ledControl.DELAYSETTINGS;
+//                nextControl = ledControl.BLINKON;
+//                break;
+//        }
 
 
 //        Log.i("THE MARK OF THE BEAST", Long.toString(the_mark_of_the_beast));
