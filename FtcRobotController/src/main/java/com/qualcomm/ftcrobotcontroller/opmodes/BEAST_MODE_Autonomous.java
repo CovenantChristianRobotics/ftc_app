@@ -7,6 +7,7 @@
 
 package com.qualcomm.ftcrobotcontroller.opmodes;
 //all the classes we need to import to get our autonoumous running
+import android.graphics.Color;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -27,15 +28,15 @@ import com.qualcomm.robotcore.util.Range;
 public class BEAST_MODE_Autonomous extends OpMode {
     //movestate for our autonomous move
     enum MoveState {
-        STARTMOVE, MOVINGSTRAIGHT, STARTTURN, MOVINGTURN, DELAYSETTINGS, DELAY,
+        STARTMOVE, MOVINGSTRAIGHT, STARTTURN, MOVINGTURN, DELAYSETTINGS, DELAY, INITIALIZEROBOT,
         DRIVEAWAYFROMWALL, TURNDIAG, MOVEDIAG, GOPASTREDTAPE, TURNPARALLELTOWALL,
-        DRIVETOWHITELINE, TURNTOBEACON, DRIVETOBEACON, WINDOUTARM, DUMPCLIMBERS,
+        DRIVETOWHITELINE, DRIVEPASTWHITELINE, TURNTOBEACON, DRIVETOBEACON, WINDOUTARM, DUMPCLIMBERS,
         WINDINARMPARTWAY, READBEACON,  TURNTOBUTTON, PUSHBUTTON, BACKUP,
         TURNTOFLOORGOAL, DRIVEINFLOORGOAL, DONE
     }
     //movestate for our omniwheels in autonomous
     enum OmniCtlr {
-        NOTMOVING, EXTENDING, IN, OUT, DELAYSETTINGSOMNI, DELAYOMNI, RETRACT, REEXTEND, RERETRACT,
+        PRENOTMOVING, NOTMOVING, EXTENDING, IN, OUT, DELAYSETTINGSOMNI, DELAYOMNI, RETRACT, REEXTEND, RERETRACT,
         DONE
     }
     //declaration of everything we will use
@@ -59,6 +60,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
     // Sensors
     GyroSensor gyroSense;
     ColorSensor fColorSense;
+    float hsvValues[] = {0F,0F,0F};
     ColorSensor bColorSense;
     UltrasonicSensor ultraSense;
     // Switches
@@ -78,6 +80,10 @@ public class BEAST_MODE_Autonomous extends OpMode {
     boolean fourthTile;
     boolean lookingWithUltraSense;
     double targetReading;
+    boolean redL;
+    boolean redR;
+    boolean blueL;
+    boolean blueR;
     // State Machine Settings
     MoveState currentMove;
     MoveState nextMove;
@@ -255,7 +261,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
         bColorSense.setI2cAddress(0x42);
         bColorSense.enableLed(false);
         fColorSense = hardwareMap.colorSensor.get("fCS");
-        fColorSense.enableLed(false);
+//        fColorSense.setI2cAddress(0x40);
+        fColorSense.enableLed(true);
         lookingForWhiteLine = false;
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
         // Switches
@@ -265,20 +272,24 @@ public class BEAST_MODE_Autonomous extends OpMode {
         thirdTileSwitch = hardwareMap.digitalChannel.get("tileSw");
 //        delayPotentiometer = hardwareMap.analogInput.get("delPot");
         //statemachine settings
-        currentMove = MoveState.DRIVEAWAYFROMWALL;
-        telemetryMove = MoveState.DRIVEAWAYFROMWALL;
+        currentMove = MoveState.INITIALIZEROBOT;
+        telemetryMove = MoveState.INITIALIZEROBOT;
         currentOmni = OmniCtlr.NOTMOVING;
         chosenOmni = OmniCtlr.NOTMOVING;
         counter = 0;
+        redL = false;
+        redR = false;
+        blueL = false;
+        blueR = false;
         // Set Switch Flags
         if (redBlueBeaconSwitch.getState()) {   // WE ARE BLUE
             redBlue = -1.0;
-            redAlliance = false;
-            blueAlliance = true;
-        } else {                                // WE ARE RED
-            redBlue = 1.0;
             redAlliance = true;
             blueAlliance = false;
+        } else {                                // WE ARE RED
+            redBlue = 1.0;
+            redAlliance = false;
+            blueAlliance = true;
         }
 
 //        if (nearMtnSwitch.getState()) {         // WE GO TO NEAR MOUNTAIN
@@ -307,21 +318,21 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
         if (thirdTileSwitch.getState()) {       // WE ARE ON THE THIRD TILE FROM THE MOUNTAIN CORNER
             firstMoveDist = 6.35;
-            moveDiagDist = 220.0;
+            moveDiagDist = 217.0;
             thirdTile = true;
             fourthTile = false;
         } else {                                // WE ARE ON THE FOURTH TILE FROM THE MOUNTAIN CORNER
             firstMoveDist = 67.31;
-            moveDiagDist = 135.0;
+            moveDiagDist = 122.0;
             thirdTile = false;
             fourthTile = true;
         }
         // State Machine Settings
-        fastSpeed = 0.8;
+        fastSpeed = 1.0;
         mediumSpeed = 0.5;
         slowSpeed = 0.2;
         turnSpeed = 0.4;
-        commonDelayTime = 500;
+        commonDelayTime = 300;
         desiredHeading = 0;
         lookingForWhiteLine = false;
         // Elapsed Time
@@ -353,7 +364,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
             case MOVINGSTRAIGHT:
                 if (lookingForWhiteLine) {
-                    if (fColorSense.alpha() >= 2.0) {
+                    if (hsvValues[0] >= 68.0) {
                         leftDrive.setPower(0.0);
                         rightDrive.setPower(0.0);
                         currentMove = MoveState.DELAYSETTINGS;
@@ -424,6 +435,13 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             // MOVES WE USE ONCE, IN A SEQUENCE
+            case INITIALIZEROBOT:
+                climberDumper.setPosition(0.15);
+                currentMove = MoveState.DRIVEAWAYFROMWALL;
+                telemetryMove = MoveState.INITIALIZEROBOT;
+                moveDelayTime = commonDelayTime;
+                break;
+
             case DRIVEAWAYFROMWALL:
                 moveStraight(firstMoveDist, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
@@ -468,16 +486,24 @@ public class BEAST_MODE_Autonomous extends OpMode {
             case DRIVETOWHITELINE:
                 fColorSense.enableLed(true);
                 lookingForWhiteLine = true;
-                moveStraight(12.0, mediumSpeed);
+                moveStraight(30.0, slowSpeed);
                 currentMove = MoveState.STARTMOVE;
                 telemetryMove = MoveState.DRIVETOWHITELINE;
+                nextMove = MoveState.DRIVEPASTWHITELINE;
+                moveDelayTime = commonDelayTime;
+                break;
+
+            case DRIVEPASTWHITELINE:
+                fColorSense.enableLed(false);
+                lookingForWhiteLine = false;
+                moveStraight(3.5, slowSpeed);
+                currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNTOBEACON;
+                telemetryMove = MoveState.DRIVEPASTWHITELINE;
                 moveDelayTime = commonDelayTime;
                 break;
 
             case TURNTOBEACON:
-                fColorSense.enableLed(false);
-                lookingForWhiteLine = false;
                 moveTurn(90.0, turnSpeed);
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.DRIVETOBEACON;
@@ -488,8 +514,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
             case DRIVETOBEACON:
                 lookingWithUltraSense = true;
-                targetReading = 35.0;
-                moveStraight(15.0, slowSpeed);
+                targetReading = 30.0;
+                moveStraight(30.0, slowSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.WINDOUTARM;
                 telemetryMove = MoveState.DRIVETOBEACON;
@@ -498,6 +524,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
             case WINDOUTARM:
                 chinUp.setTargetPosition(-3360);
+                chinUp.setPower(0.5);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DUMPCLIMBERS;
                 telemetryMove = MoveState.WINDOUTARM;
@@ -505,19 +532,66 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case DUMPCLIMBERS:
+                lookingWithUltraSense = false;
                 climberDumper.setPosition(0.75);
-                currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.WINDINARMPARTWAY;
+                currentMove = MoveState.DELAYSETTINGS;
+                nextMove = MoveState.READBEACON;
                 telemetryMove = MoveState.DUMPCLIMBERS;
+                moveDelayTime = commonDelayTime;
+                break;
+
+            case READBEACON:
+                if (redAlliance){
+                    if (bColorSense.red() >= 1.0) {
+                        redL = true;
+                    } else {
+                        redR = true;
+                    }
+                } else if (blueAlliance) {
+                    if (bColorSense.blue() >= 1.0) {
+                        blueL = true;
+                    } else {
+                        blueR = true;
+                    }
+                }
+                currentMove = MoveState.WINDINARMPARTWAY;
+                break;
+
+            case WINDINARMPARTWAY:
+                chinUp.setTargetPosition(-75);
+                chinUp.setPower(0.5);
+                currentMove = MoveState.DELAYSETTINGS;
+                nextMove = MoveState.TURNTOBUTTON;
+                telemetryMove = MoveState.WINDINARMPARTWAY;
                 currentOmni = OmniCtlr.REEXTEND;
                 moveDelayTime = commonDelayTime;
                 break;
 
-            case WINDINARMPARTWAY:
-                chinUp.setTargetPosition(-1120);
+            case TURNTOBUTTON:
+                if (redL || blueL) {
+                    moveTurn(13, slowSpeed);
+                } else if (redR || blueR) {
+                    moveTurn(-13, slowSpeed);
+                }
+                currentMove = MoveState.STARTTURN;
+                nextMove = MoveState.PUSHBUTTON;
+                telemetryMove = MoveState.TURNTOBUTTON;
+                moveDelayTime = commonDelayTime;
+                break;
+
+            case PUSHBUTTON:
+                moveStraight(14.0, slowSpeed);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.BACKUP;
+                telemetryMove = MoveState.PUSHBUTTON;
+                moveDelayTime = commonDelayTime;
+                break;
+
+            case BACKUP:
+                moveStraight(-14.0, slowSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
-                telemetryMove = MoveState.WINDINARMPARTWAY;
+                telemetryMove = MoveState.BACKUP;
                 moveDelayTime = commonDelayTime;
                 break;
 
@@ -538,8 +612,13 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
             case DELAYOMNI:
                 if (System.currentTimeMillis() >= delayUntilOmni) {
-                    currentOmni = nextOmni;
+                    currentOmni = OmniCtlr.PRENOTMOVING;
                 }
+                break;
+
+            case PRENOTMOVING:
+                chosenOmni = OmniCtlr.NOTMOVING;
+                currentOmni = OmniCtlr.NOTMOVING;
                 break;
 
             case NOTMOVING:
@@ -585,16 +664,19 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 rightOmniPinion.setPosition(0.5);
                 break;
         }
+        Color.RGBToHSV(fColorSense.red(), fColorSense.green(), fColorSense.blue(), hsvValues);
 
         telemetry.addData("left encoder", leftDrive.getCurrentPosition());
         telemetry.addData("right encoder", rightDrive.getCurrentPosition());
         telemetry.addData("current move", telemetryMove.toString());
         telemetry.addData("Elapsed Time", currentTime.time());
-        telemetry.addData("ColorSensor", Integer.toString(fColorSense.alpha()));
-        telemetry.addData("red", Integer.toString(fColorSense.red()));
-        telemetry.addData("blue", Integer.toString(fColorSense.blue()));
-        telemetry.addData("green", Integer.toString(fColorSense.green()));
+        telemetry.addData("ColorSensor", Integer.toString(bColorSense.alpha()));
+        telemetry.addData("red", Integer.toString(bColorSense.red()));
+        telemetry.addData("blue", Integer.toString(bColorSense.blue()));
+        telemetry.addData("green", Integer.toString(bColorSense.green()));
         telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
+        telemetry.addData("redAlliance", redAlliance);
+
 
     }
 

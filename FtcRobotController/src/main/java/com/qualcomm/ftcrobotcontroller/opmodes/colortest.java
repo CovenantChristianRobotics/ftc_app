@@ -1,5 +1,7 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
+import android.graphics.Color;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
@@ -11,13 +13,19 @@ public class colortest extends OpMode {
     ColorSensor colorSense;
     ColorSensor otherOne;
 
+    float hsvValues[] = {0F,0F,0F};
+
+
+
     @Override
     public void init() {
         colorSense = hardwareMap.colorSensor.get("mr");
         colorSense.setI2cAddress(0x42);
         colorSense.enableLed(true);
         otherOne = hardwareMap.colorSensor.get("x");
+//        otherOne.setI2cAddress(0x40);
         otherOne.enableLed(false);
+
     }
 
     @Override
@@ -35,11 +43,19 @@ public class colortest extends OpMode {
             otherOne.enableLed(true);
         }
 
-        telemetry.addData("red", colorSense.red());
-        telemetry.addData("blue", colorSense.blue());
-        telemetry.addData("green", colorSense.green());
-        telemetry.addData("alpha", colorSense.alpha());
-        telemetry.addData("?", colorSense.argb());
+        Color.RGBToHSV(otherOne.red(), otherOne.green(), otherOne.blue(), hsvValues);
+
+        telemetry.addData("red", otherOne.red());
+        telemetry.addData("blue", otherOne.blue());
+        telemetry.addData("green", otherOne.green());
+        telemetry.addData("alpha", otherOne.alpha());
+//        telemetry.addData("?", otherOne.argb());
+        telemetry.addData("hue", hsvValues[0]);
+
+        telemetry.addData("redB", colorSense.red());
+        telemetry.addData("blueB", colorSense.blue());
+        telemetry.addData("HueB", colorSense.argb());
+        telemetry.addData("alphaB", colorSense.alpha());
     }
 
     @Override
