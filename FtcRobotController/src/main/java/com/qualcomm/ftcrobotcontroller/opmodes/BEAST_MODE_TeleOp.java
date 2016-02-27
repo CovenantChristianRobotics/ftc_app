@@ -281,7 +281,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
         }
 
         if (gamepad2.y) {
-            climberDumper.setPosition(0.45);
+            climberDumper.setPosition(0.15);
         } else if (gamepad2.x) {
             climberDumper.setPosition(0.75);
         }

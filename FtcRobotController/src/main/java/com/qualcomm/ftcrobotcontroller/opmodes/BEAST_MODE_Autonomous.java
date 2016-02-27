@@ -239,7 +239,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
         dumperDoor = hardwareMap.servo.get("dumperDoor");
         // Servo Settings
         armLock.setPosition(0.25);
-        climberDumper.setPosition(0.45);
+        climberDumper.setPosition(0.15);
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
@@ -251,10 +251,12 @@ public class BEAST_MODE_Autonomous extends OpMode {
         dumperDoor.setPosition(0.0);
         // Sensors
         gyroSense = hardwareMap.gyroSensor.get("gyroSense");
-        fColorSense = hardwareMap.colorSensor.get("fCS");
-//        fColorSense.setI2cAddress();
         bColorSense = hardwareMap.colorSensor.get("bCS");
-//        bColorSense.setI2cAddress();
+        bColorSense.setI2cAddress(0x42);
+        bColorSense.enableLed(false);
+        fColorSense = hardwareMap.colorSensor.get("fCS");
+        fColorSense.enableLed(false);
+        lookingForWhiteLine = false;
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
         // Switches
 //        nearMtnSwitch = hardwareMap.digitalChannel.get("nMtnSw");
@@ -305,12 +307,12 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
         if (thirdTileSwitch.getState()) {       // WE ARE ON THE THIRD TILE FROM THE MOUNTAIN CORNER
             firstMoveDist = 6.35;
-            moveDiagDist = 225.6;
+            moveDiagDist = 220.0;
             thirdTile = true;
             fourthTile = false;
         } else {                                // WE ARE ON THE FOURTH TILE FROM THE MOUNTAIN CORNER
             firstMoveDist = 67.31;
-            moveDiagDist = 139.7;
+            moveDiagDist = 135.0;
             thirdTile = false;
             fourthTile = true;
         }
@@ -351,7 +353,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
             case MOVINGSTRAIGHT:
                 if (lookingForWhiteLine) {
-                    if (fColorSense.alpha() >= 1.0) {
+                    if (fColorSense.alpha() >= 2.0) {
                         leftDrive.setPower(0.0);
                         rightDrive.setPower(0.0);
                         currentMove = MoveState.DELAYSETTINGS;
@@ -368,8 +370,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 if (!movingForward) {
                     gyroError = -gyroError;
                 }
-                rightDrive.setPower(Range.clip(speed - (gyroError * 0.01), -1.0, 1.0));
-                leftDrive.setPower(Range.clip(speed + (gyroError * 0.01), -1.0, 1.0));
+//                rightDrive.setPower(Range.clip(speed - (gyroError * 0.01), -1.0, 1.0));
+//                leftDrive.setPower(Range.clip(speed + (gyroError * 0.01), -1.0, 1.0));
                 if (lookingWithUltraSense) {
                     distanceToWall = ultraSense.getUltrasonicLevel();
                     if (distanceToWall > 0 && distanceToWall < 255) {
@@ -448,7 +450,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case GOPASTREDTAPE:
-                moveStraight(7.62, slowSpeed);
+                moveStraight(12.0, slowSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNPARALLELTOWALL;
                 telemetryMove = MoveState.GOPASTREDTAPE;
@@ -464,13 +466,9 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case DRIVETOWHITELINE:
-                if (fColorSense.alpha() < 2.0) {
-                    leftDrive.setPower(0.2);
-                    rightDrive.setPower(0.2);
-                } else if (fColorSense.alpha() >= 2.0) {
-                    leftDrive.setPower(0.0);
-                    rightDrive.setPower(0.0);
-                }
+                fColorSense.enableLed(true);
+                lookingForWhiteLine = true;
+                moveStraight(12.0, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
                 telemetryMove = MoveState.DRIVETOWHITELINE;
                 nextMove = MoveState.TURNTOBEACON;
@@ -478,26 +476,24 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case TURNTOBEACON:
+                fColorSense.enableLed(false);
+                lookingForWhiteLine = false;
                 moveTurn(90.0, turnSpeed);
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.DRIVETOBEACON;
                 telemetryMove = MoveState.TURNTOBEACON;
                 currentOmni = OmniCtlr.RETRACT;
-                moveDelayTime = commonDelayTime;
+                moveDelayTime = 1500;
                 break;
 
             case DRIVETOBEACON:
-                if (ultraSense.getUltrasonicLevel() > 20.0) {
-                    leftDrive.setPower(0.2);
-                    rightDrive.setPower(0.2);
-                } else {
-                    leftDrive.setPower(0.0);
-                    rightDrive.setPower(0.0);
-                }
+                lookingWithUltraSense = true;
+                targetReading = 35.0;
+                moveStraight(15.0, slowSpeed);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DONE;
+                nextMove = MoveState.WINDOUTARM;
                 telemetryMove = MoveState.DRIVETOBEACON;
-                moveDelayTime = 1000;
+                moveDelayTime = 1500;
                 break;
 
             case WINDOUTARM:
@@ -505,7 +501,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DUMPCLIMBERS;
                 telemetryMove = MoveState.WINDOUTARM;
-                moveDelayTime = 1000;
+                moveDelayTime = 1500;
                 break;
 
             case DUMPCLIMBERS:
