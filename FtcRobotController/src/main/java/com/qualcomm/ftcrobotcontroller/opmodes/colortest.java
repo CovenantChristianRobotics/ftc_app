@@ -9,11 +9,16 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 public class colortest extends OpMode {
 
     ColorSensor colorSense;
+    ColorSensor otherOne;
 
     @Override
     public void init() {
         colorSense = hardwareMap.colorSensor.get("mr");
+        colorSense.setI2cAddress(0x42);
         colorSense.enableLed(true);
+        otherOne = hardwareMap.colorSensor.get("x");
+        otherOne.setI2cAddress(0x3c);
+        otherOne.enableLed(false);
     }
 
     @Override

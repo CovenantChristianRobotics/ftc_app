@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 import com.qualcomm.robotcore.hardware.IrSeekerSensor;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -76,14 +77,14 @@ public class LinearI2cAddressChange extends LinearOpMode {
   public static final int BUFFER_CHANGE_ADDRESS_LENGTH = 0x03;
 
   // The port where your sensor is connected.
-  int port = 5;
+  int port = 4;
 
   byte[] readCache;
   Lock readLock;
   byte[] writeCache;
   Lock writeLock;
 
-  int currentAddress = IR_SEEKER_V3_ORIGINAL_ADDRESS;
+  int currentAddress = COLOR_SENSOR_ORIGINAL_ADDRESS;
   // I2c addresses on Modern Robotics devices must be divisible by 2, and between 0x7e and 0x10
   // Different hardware may have different rules.
   // Be sure to read the requirements for the hardware you're using!
@@ -123,21 +124,21 @@ public class LinearI2cAddressChange extends LinearOpMode {
 
     // make sure the first bytes are what we think they should be.
     int count = 0;
-    int[] initialArray = {READ_MODE, currentAddress, ADDRESS_MEMORY_START, TOTAL_MEMORY_LENGTH, FIRMWARE_REV, MANUFACTURER_CODE, SENSOR_ID};
-    while (!foundExpectedBytes(initialArray, readLock, readCache)) {
-      telemetry.addData("I2cAddressChange", "Confirming that we're reading the correct bytes...");
-      dim.readI2cCacheFromController(port);
-      sleep(1000);
-      count++;
-      // if we go too long with failure, we probably are expecting the wrong bytes.
-      if (count >= 10)  {
-        telemetry.addData("I2cAddressChange", String.format("Looping too long with no change, probably have the wrong address. Current address: 0x%02x", currentAddress));
-        hardwareMap.irSeekerSensor.get(String.format("Looping too long with no change, probably have the wrong address. Current address: 0x%02x", currentAddress));
-      }
-    }
+    int[] initialArray = {READ_MODE, currentAddress, ADDRESS_MEMORY_START, TOTAL_MEMORY_LENGTH, COLOR_SENSOR_FIRMWARE_REV, MANUFACTURER_CODE, COLOR_SENSOR_SENSOR_ID};
+//    while (!foundExpectedBytes(initialArray, readLock, readCache)) {
+//      telemetry.addData("I2cAddressChange", "Confirming that we're reading the correct bytes...");
+//      dim.readI2cCacheFromController(port);
+//      sleep(1000);
+//      count++;
+//      // if we go too long with failure, we probably are expecting the wrong bytes.
+//      if (count >= 10)  {
+//        telemetry.addData("I2cAddressChange", String.format("Looping too long with no change, probably have the wrong address. Current address: 0x%02x", currentAddress));
+//        hardwareMap.irSeekerSensor.get(String.format("Looping too long with no change, probably have the wrong address. Current address: 0x%02x", currentAddress));
+//      }
+//    }
 
     // Enable writes to the correct segment of the memory map.
-    performAction("write", port, currentAddress, ADDRESS_SET_NEW_I2C_ADDRESS, BUFFER_CHANGE_ADDRESS_LENGTH);
+  performAction("write", port, currentAddress, ADDRESS_SET_NEW_I2C_ADDRESS, BUFFER_CHANGE_ADDRESS_LENGTH);
 
     waitOneFullHardwareCycle();
 

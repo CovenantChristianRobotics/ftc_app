@@ -43,7 +43,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
     DcMotor leftDrive;
     DcMotor rightDrive;
     DcMotor chinUp;
-    DcMotor endGameLights;
+//    DcMotor endGameLights;
     DcMotor debrisSwivel;
     // Servos
     Servo armLock;
@@ -216,15 +216,15 @@ public class BEAST_MODE_Autonomous extends OpMode {
         leftDrive = hardwareMap.dcMotor.get("motorL");
         rightDrive = hardwareMap.dcMotor.get("motorR");
         chinUp = hardwareMap.dcMotor.get("chinUp");
-        endGameLights = hardwareMap.dcMotor.get("endGameLights");
+//        endGameLights = hardwareMap.dcMotor.get("endGameLights");
         debrisSwivel = hardwareMap.dcMotor.get("blockDumper");
         // DC Motor Settings
-        leftDrive.setDirection(DcMotor.Direction.REVERSE);
         leftDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         rightDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+        leftDrive.setDirection(DcMotor.Direction.REVERSE);
         chinUp.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-        endGameLights.setPower(0.9);
+//        endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
+//        endGameLights.setPower(0.9);
         debrisSwivel.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
@@ -245,8 +245,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
         rightOmniPinion.setPosition(0.5);
         leftPlow.setPosition(0.16392157);
         rightPlow.setPosition(0.68627450);
-        leftTrigger.setPosition(0.5);
-        rightTrigger.setPosition(0.5);
+        leftTrigger.setPosition(0.8);
+        rightTrigger.setPosition(0.1);
         sweeper.setPosition(0.5);
         dumperDoor.setPosition(0.0);
         // Sensors
@@ -305,7 +305,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
         if (thirdTileSwitch.getState()) {       // WE ARE ON THE THIRD TILE FROM THE MOUNTAIN CORNER
             firstMoveDist = 6.35;
-            moveDiagDist = 228.6;
+            moveDiagDist = 225.6;
             thirdTile = true;
             fourthTile = false;
         } else {                                // WE ARE ON THE FOURTH TILE FROM THE MOUNTAIN CORNER
@@ -319,7 +319,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
         mediumSpeed = 0.5;
         slowSpeed = 0.2;
         turnSpeed = 0.4;
-        commonDelayTime = 200;
+        commonDelayTime = 500;
+        desiredHeading = 0;
         lookingForWhiteLine = false;
         // Elapsed Time
         currentTime = new ElapsedTime();
@@ -338,7 +339,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
             return;
         }
         double distanceToWall = 0.0;
-        endGameLights.setPower(0.9);
+//        endGameLights.setPower(0.9);
 
         switch (currentMove) {
             //  WE USE THESE IN ALL MOVES
@@ -349,13 +350,13 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case MOVINGSTRAIGHT:
-//                if (lookingForWhiteLine) {
-//                    if (fColorSense.alpha() >= 1.0) {
-//                        leftDrive.setPower(0.0);
-//                        rightDrive.setPower(0.0);
-//                        currentMove = MoveState.DELAYSETTINGS;
-//                    }
-//                }
+                if (lookingForWhiteLine) {
+                    if (fColorSense.alpha() >= 1.0) {
+                        leftDrive.setPower(0.0);
+                        rightDrive.setPower(0.0);
+                        currentMove = MoveState.DELAYSETTINGS;
+                    }
+                }
                 //figures out the error and fixes it with the gyro
                 gyroError = desiredHeading - gyroSense.getHeading();
                 if (gyroError > 180) {
@@ -369,22 +370,6 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 }
                 rightDrive.setPower(Range.clip(speed - (gyroError * 0.01), -1.0, 1.0));
                 leftDrive.setPower(Range.clip(speed + (gyroError * 0.01), -1.0, 1.0));
-//                if (colorSense.blue() >= 1) {
-//                    sawBlueFlag = true;
-//                }
-//                if (colorSense.red() >= 1) {
-//                    sawRedFlag = true;
-//                }
-//                if (lookingForRedFlag && (colorSense.red() >= 1))  {
-//                    rightDrive.setPower(0.0);
-//                    leftDrive.setPower(0.0);
-//                    currentMove = MoveState.DELAYSETTINGS;
-//                }
-//                if (lookingForBlueFlag && (colorSense.blue() >= 1))  {
-//                    rightDrive.setPower(0.0);
-//                    leftDrive.setPower(0.0);
-//                    currentMove = MoveState.DELAYSETTINGS;
-//                }
                 if (lookingWithUltraSense) {
                     distanceToWall = ultraSense.getUltrasonicLevel();
                     if (distanceToWall > 0 && distanceToWall < 255) {

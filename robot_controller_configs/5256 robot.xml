@@ -17,7 +17,7 @@
 		<Servo name="sweeper" port="5" />
 		<Servo name="dumperDoor" port="6" />
     </ServoController>
-    <DeviceInterfaceModule name="Device Interface Module" serialNumber="AI02RHQD">
+    <DeviceInterfaceModule name="Device Interface Module" serialNumber="AL00VFP2">
 		<ColorSensor name="bCS" port="3" />
 		<ColorSensor name="fCS" port="4" />
 		<Gyro name="gyroSense" port="5" />
