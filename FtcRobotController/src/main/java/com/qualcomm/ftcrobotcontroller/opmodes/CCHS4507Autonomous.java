@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 public class CCHS4507Autonomous extends OpMode {
     enum MoveState {
         DELAY, STARTMOVE, MOVING, STARTTURN, TURNING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
-        FINDBEACON, MEASUREAMBIENT, CENTERBUCKET, DUMPTRUCK, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, ALIGNRAMP,
+        FINDBEACON, MEASUREAMBIENT, MOVETOBUTTON, PRESSBUTTON,CENTERBUCKET, DUMPTRUCK, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, ALIGNRAMP,
         DOWNTRACK, UPRAMP, STRAIGHTTORAMP, STRAIGHTTORAMPTURN, DONE
     }
 
@@ -220,7 +220,7 @@ public class CCHS4507Autonomous extends OpMode {
         colorSense.enableLed(false);
         motorLeft.setDirection(DcMotor.Direction.FORWARD);
         motorRight.setDirection(DcMotor.Direction.REVERSE);
-        trackLifter.setDirection(DcMotor.Direction.FORWARD);
+        trackLifter.setDirection(DcMotor.Direction.REVERSE);
         motorRight.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
@@ -252,7 +252,7 @@ public class CCHS4507Autonomous extends OpMode {
         gyroReadLast = System.currentTimeMillis();
         trackLifter.setPower(0.2);
         trackLifter.setTargetPosition(30);
-        servoClimberDumper.setPosition(1.0);
+        servoClimberDumper.setPosition(0.1);
         climberTriggerLeft.setPosition(0.5);
         climberTriggerRight.setPosition(0.5);
         cowCatcher.setPosition(0.2);
@@ -300,10 +300,10 @@ public class CCHS4507Autonomous extends OpMode {
                 }
                 motorRight.setPower(Range.clip(speed - (gyroError * 0.05), -1.0, 1.0));
                 motorLeft.setPower(Range.clip(speed + (gyroError * 0.05), -1.0, 1.0));
-                if (colorSense.blue() > ambientBlue) {
+                if (lookingForBlueFlag && colorSense.blue() > ambientBlue) {
                     sawBlueFlag = true;
                 }
-                if (colorSense.red() > ambientRed) {
+                if (lookingForRedFlag && colorSense.red() > ambientRed) {
                     sawRedFlag = true;
                 }
                 if (lookingForRedFlag && (colorSense.red() > ambientRed))  {
@@ -451,10 +451,38 @@ public class CCHS4507Autonomous extends OpMode {
                 telemetryMove = MoveState.MEASUREAMBIENT;
                 break;
 
+            case MOVETOBUTTON:
+                if (sawRedFlag) {
+                    if (redAlliance){
+                        moveStraight (-30, mediumSpeed);
+                    } else {
+                        moveStraight (-5, mediumSpeed);
+                    }
+                } else if (sawBlueFlag) {
+                    if (redAlliance) {
+                        moveStraight(-5, mediumSpeed);
+                    } else {
+                        moveStraight(-30, mediumSpeed);
+                    }
+                }
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.PRESSBUTTON;
+                telemetryMove = MoveState.MOVETOBUTTON;
+                moveDelayTime = delayMillisec;
+                break;
+
+            case PRESSBUTTON:
+                climberTriggerLeft.setPosition(0.8);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.CENTERBUCKET;
+                telemetryMove = MoveState.PRESSBUTTON;
+                moveDelayTime = delayMillisec;
+                break;
 
             case CENTERBUCKET:
                 lookingForRedFlag = false;
                 lookingForBlueFlag = false;
+                climberTriggerLeft.setPosition(0.5);
                 // Checking to see whether or not we saw the beacon, and if we didn't don't try
                 // and dump the climbers.
                 if (!takeADump)  {
@@ -474,7 +502,7 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case DUMPTRUCK:
-                servoClimberDumper.setPosition(0.1);
+                servoClimberDumper.setPosition(1.0);
                 moveDelayTime = 1000;
                 nextMove = MoveState.ROTATEFROMBEACON;
                 currentMove = MoveState.MOVEDELAY;
@@ -630,3 +658,37 @@ public class CCHS4507Autonomous extends OpMode {
     public void stop() {
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ;)

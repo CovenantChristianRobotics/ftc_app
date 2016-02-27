@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
+import com.qualcomm.robotcore.util.Range;
 
 /**
  * Created by cchsrobochargers on 12/10/15.
@@ -47,7 +48,8 @@ public class CCHS4507TeleOp extends OpMode {
     boolean cowCatcherUp = false;
     int trackLifterUp = 0;
     int trackLifterDown = 1170 * 2;
-
+    double climberTriggerLeftPos = 0.9;
+    double climberTriggerRightPos = 0.1;
 
     @Override
     public void init() {
@@ -74,13 +76,13 @@ public class CCHS4507TeleOp extends OpMode {
         ultraSense = hardwareMap.ultrasonicSensor.get("ultraSense");
         gyroSense = hardwareMap.gyroSensor.get("gyro");
         liftCheck = hardwareMap.touchSensor.get("liftCheck");
-        servoClimberDumper.setPosition(1.0);
+        servoClimberDumper.setPosition(0.0);
         //WHATEVER WE ARE GOING TO CALL THIS THING = hardwareMap.opticalDistanceSensor.get("STUFFANDTHINGS");
         nearMountainFlag = nearMountainSwitch.getState();
         //set up motors
         motorLeft.setDirection(DcMotor.Direction.FORWARD);
         motorRight.setDirection(DcMotor.Direction.REVERSE);
-        trackLifter.setDirection(DcMotor.Direction.FORWARD);
+        trackLifter.setDirection(DcMotor.Direction.REVERSE);
         armExtend.setDirection(DcMotor.Direction.REVERSE);
         motorRight.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         motorLeft.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
@@ -101,17 +103,17 @@ public class CCHS4507TeleOp extends OpMode {
         rightDrive = -gamepad1.right_stick_y;
         leftDrive = -gamepad1.left_stick_y;
         if (gamepad1.dpad_up) {
-            rightDrive = 0.1;
-            leftDrive = 0.1;
+            rightDrive = 0.3;
+            leftDrive = 0.3;
         } else if (gamepad1.dpad_down) {
-            rightDrive = -0.1;
-            leftDrive = -0.1;
+            rightDrive = -0.3;
+            leftDrive = -0.3;
         } else if (gamepad1.dpad_right) {
-            rightDrive = -0.1;
-            leftDrive = 0.1;
+            rightDrive = -0.3;
+            leftDrive = 0.3;
         } else if (gamepad1.dpad_left) {
-            rightDrive = 0.1;
-            leftDrive = -0.1;
+            rightDrive = 0.3;
+            leftDrive = -0.3;
         }
         motorRight.setPower(rightDrive);
         motorLeft.setPower(leftDrive);
@@ -140,25 +142,25 @@ public class CCHS4507TeleOp extends OpMode {
         armExtend.setPower(-gamepad2.left_stick_y);
 
         if (gamepad2.left_bumper) {
-            climberTriggerLeft.setPosition(1.0);
+            climberTriggerLeftPos = climberTriggerLeftPos - .01;
         } else if (gamepad2.left_trigger > 0.5) {
-            climberTriggerLeft.setPosition(0.0);
-        } else {
-            climberTriggerLeft.setPosition(0.5);
+            climberTriggerLeftPos = climberTriggerLeftPos + .01;
         }
+        climberTriggerLeftPos = Range.clip(climberTriggerLeftPos, 0.0, 1.0);
+        climberTriggerLeft.setPosition(climberTriggerLeftPos);
 
         if (gamepad2.right_bumper) {
-            climberTriggerRight.setPosition(0.0);
+            climberTriggerRightPos = climberTriggerRightPos + .01;
         } else if (gamepad2.right_trigger > 0.5) {
-            climberTriggerRight.setPosition(1.0);
-        } else {
-            climberTriggerRight.setPosition(0.5);
+            climberTriggerRightPos = climberTriggerRightPos - .01;
         }
+        climberTriggerRightPos = Range.clip(climberTriggerRightPos, 0.0, 1.0);
+        climberTriggerRight.setPosition(climberTriggerRightPos);
 
         if (gamepad2.a) {
-            servoClimberDumper.setPosition(0.1);
+            servoClimberDumper.setPosition(1.0);
         } else {
-           servoClimberDumper.setPosition(1.0);
+           servoClimberDumper.setPosition(0.0);
         }
 //        if (gamepad2.b) {
 //            climberDoor.setPosition(0.5);
