@@ -28,10 +28,10 @@ import com.qualcomm.robotcore.util.Range;
 public class BEAST_MODE_Autonomous extends OpMode {
     //movestate for our autonomous move
     enum MoveState {
-        STARTMOVE, MOVINGSTRAIGHT, STARTTURN, MOVINGTURN, DELAYSETTINGS, DELAY, INITIALIZEROBOT,
+        STARTMOVE, MOVINGSTRAIGHT, STARTTURN, MOVINGTURN, DELAYSETTINGS, DELAY, 
         DRIVEAWAYFROMWALL, TURNDIAG, MOVEDIAG, GOPASTREDTAPE, TURNPARALLELTOWALL,
         DRIVETOWHITELINE, DRIVEPASTWHITELINE, TURNTOBEACON, DRIVETOBEACON, WINDOUTARM, DUMPCLIMBERS,
-        WINDINARMPARTWAY, READBEACON,  TURNTOBUTTON, PUSHBUTTON, BACKUP,
+        WINDINARMPARTWAY, READBEACON,  GOTOBUTTON, BUTTONPUSHALIGN, PUSHBUTTON, BACKUP,
         TURNTOFLOORGOAL, DRIVEINFLOORGOAL, DONE
     }
     //movestate for our omniwheels in autonomous
@@ -57,6 +57,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
     Servo rightTrigger;
     Servo dumperDoor;
     Servo sweeper;
+    Servo buttonPusher
     // Sensors
     GyroSensor gyroSense;
     ColorSensor fColorSense;
@@ -243,6 +244,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
         rightTrigger = hardwareMap.servo.get("rT");
         sweeper = hardwareMap.servo.get("sweeper");
         dumperDoor = hardwareMap.servo.get("dumperDoor");
+        buttonPusher = hardwareMap.servo.get("bPusher");
         // Servo Settings
         armLock.setPosition(0.25);
         climberDumper.setPosition(0.15);
@@ -255,6 +257,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
         rightTrigger.setPosition(0.1);
         sweeper.setPosition(0.5);
         dumperDoor.setPosition(0.0);
+        buttonPusher.setPosition(1.0);
         // Sensors
         gyroSense = hardwareMap.gyroSensor.get("gyroSense");
         bColorSense = hardwareMap.colorSensor.get("bCS");
@@ -435,12 +438,6 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             // MOVES WE USE ONCE, IN A SEQUENCE
-            case INITIALIZEROBOT:
-                climberDumper.setPosition(0.15);
-                currentMove = MoveState.DRIVEAWAYFROMWALL;
-                telemetryMove = MoveState.INITIALIZEROBOT;
-                moveDelayTime = commonDelayTime;
-                break;
 
             case DRIVEAWAYFROMWALL:
                 moveStraight(firstMoveDist, fastSpeed);
@@ -523,6 +520,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case WINDOUTARM:
+                lookingWithUltraSense = false;
                 chinUp.setTargetPosition(-3360);
                 chinUp.setPower(0.5);
                 currentMove = MoveState.STARTMOVE;
@@ -532,7 +530,6 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case DUMPCLIMBERS:
-                lookingWithUltraSense = false;
                 climberDumper.setPosition(0.75);
                 currentMove = MoveState.DELAYSETTINGS;
                 nextMove = MoveState.READBEACON;
@@ -561,37 +558,66 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 chinUp.setTargetPosition(-75);
                 chinUp.setPower(0.5);
                 currentMove = MoveState.DELAYSETTINGS;
-                nextMove = MoveState.TURNTOBUTTON;
+                nextMove = MoveState.GOTOBUTTON;
                 telemetryMove = MoveState.WINDINARMPARTWAY;
                 currentOmni = OmniCtlr.REEXTEND;
                 moveDelayTime = commonDelayTime;
                 break;
 
-            case TURNTOBUTTON:
-                if (redL || blueL) {
-                    moveTurn(13, slowSpeed);
-                } else if (redR || blueR) {
-                    moveTurn(-13, slowSpeed);
-                }
-                currentMove = MoveState.STARTTURN;
-                nextMove = MoveState.PUSHBUTTON;
-                telemetryMove = MoveState.TURNTOBUTTON;
+            case GOTOBUTTON:
+                lookingWithUltraSense = true;
+                targetReading = 15.0;
+                moveStraight (30.0, slowSpeed);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.BUTTONPUSHALIGN;
+                telemetryMove = MoveState.GOTOBUTTON;
                 moveDelayTime = commonDelayTime;
                 break;
 
+            case BUTTONPUSHALIGN:
+                lookingWithUltraSense = false;
+                if (redL = true || blueL = true) {
+                    buttonPusher.setPosition (1.0);
+                } else if (redR = true || blueR = true) {
+                    buttonPusher.setPosition (0.0);
+                }
+                currentMove = MoveState.DELAYSETTINGS;
+                nextMove = MoveState.PUSHBUTTON;
+                telemetryMove = MoveState.BUTTONPUSHALIGN;
+                moveDelayTime = commonDelayTime;
+                break;
+                
             case PUSHBUTTON:
-                moveStraight(14.0, slowSpeed);
+                lookingWithUltraSense = true;
+                targetReading = 5.0;
+                moveStraight (30.0, slowSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.BACKUP;
-                telemetryMove = MoveState.PUSHBUTTON;
+                telemetryMove = PUSHBUTTON;
                 moveDelayTime = commonDelayTime;
                 break;
 
             case BACKUP:
-                moveStraight(-14.0, slowSpeed);
+                moveStraight(-24.0, mediumSpeed);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.TURNTOFLOORGOAL;
+                telemetryMove = MoveState.BACKUP;
+                moveDelayTime = commonDelayTime;
+                break;
+                
+            case TURNTOFLOORGOAL:
+                moveTurn (90.0, turnSpeed);
+                currentMove = MoveState.STARTTURN;
+                nextMove = MoveState.DRIVEINFLOORGOAL;
+                telemetryMove = TURNTOFLOORGOAL;
+                moveDelayTime = commonDelayTime;
+                break;
+                
+            case DRIVEINFLOORGOAL:
+                moveStraight (40.0, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
-                telemetryMove = MoveState.BACKUP;
+                telemetryMove = DRIVEINFLOORGOAL;
                 moveDelayTime = commonDelayTime;
                 break;
 
