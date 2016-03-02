@@ -638,7 +638,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
             case PUSHBUTTON:
                 lookingWithUltraSense = true;
-                moveStraight(20.0, slowSpeed);
+                moveStraight(18.0, slowSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.BACKUP;
                 telemetryMove = MoveState.PUSHBUTTON;
@@ -664,7 +664,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case DRIVEINFLOORGOAL:
-                moveStraight(65, fastSpeed);
+                moveStraight(60, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.DONE;
                 telemetryMove = MoveState.DRIVEINFLOORGOAL;
