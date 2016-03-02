@@ -31,7 +31,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
         STARTMOVE, MOVINGSTRAIGHT, STARTTURN, MOVINGTURN, DELAYSETTINGS, DELAY, INITIALIZEROBOT,
         DRIVEAWAYFROMWALL, TURNDIAG, MOVEDIAG, GOPASTREDTAPE, TURNPARALLELTOWALL,
         DRIVETOWHITELINE, DRIVEPASTWHITELINE, TURNTOBEACON, DRIVETOBEACON, WINDOUTARM, DUMPCLIMBERS,
-        WINDINARMPARTWAY, READBEACON,  TURNTOBUTTON, PUSHBUTTON, BACKUP,
+        JIGGLEF, JIGGLEB, WINDINARMPARTWAY, READBEACON,  TURNTOBUTTON, PUSHBUTTON, BACKUP,
         TURNTOFLOORGOAL, DRIVEINFLOORGOAL, DONE
     }
     //movestate for our omniwheels in autonomous
@@ -105,6 +105,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
     double turnSpeed;
     boolean lookingForWhiteLine;
     int beaconPushTurn;
+    boolean lookingForRedTape;
+    boolean lookingForBlueTape;
     // Elapsed Time
     ElapsedTime currentTime;
     // Method Variables
@@ -337,6 +339,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
         desiredHeading = 0;
         lookingForWhiteLine = false;
         lookingWithUltraSense = false;
+        lookingForRedTape = false;
+        lookingForBlueTape = false;
         beaconPushTurn = 0;
         // Elapsed Time
         currentTime = new ElapsedTime();
@@ -369,6 +373,22 @@ public class BEAST_MODE_Autonomous extends OpMode {
             case MOVINGSTRAIGHT:
                 if (lookingForWhiteLine) {
                     if (hsvValues[0] >= 68.0) {
+                        leftDrive.setPower(0.0);
+                        rightDrive.setPower(0.0);
+                        currentMove = MoveState.DELAYSETTINGS;
+                    }
+                }
+
+                if (lookingForRedTape) {
+                    if (fColorSense.red() >= 30.0 && fColorSense.red() <= 100.0) {
+                        leftDrive.setPower(0.0);
+                        rightDrive.setPower(0.0);
+                        currentMove = MoveState.DELAYSETTINGS;
+                    }
+                }
+
+                if (lookingForBlueTape) {
+                    if (fColorSense.blue() >= 45.0 && fColorSense.blue()<= 100.0) {
                         leftDrive.setPower(0.0);
                         rightDrive.setPower(0.0);
                         currentMove = MoveState.DELAYSETTINGS;
@@ -465,12 +485,30 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case MOVEDIAG:
-                moveStraight(moveDiagDist + 12, fastSpeed);
+                if (redAlliance) {
+                    lookingForRedTape = true;
+                } else if (blueAlliance) {
+                    lookingForBlueTape = true;
+                }
+                moveStraight(moveDiagDist + 20, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.TURNPARALLELTOWALL;
+                nextMove = MoveState.GOPASTREDTAPE;
                 telemetryMove = MoveState.MOVEDIAG;
                 moveDelayTime = commonDelayTime;
                 chosenOmni = OmniCtlr.EXTENDING;
+                break;
+
+            case GOPASTREDTAPE:
+                if (redAlliance) {
+                    lookingForRedTape = false;
+                } else if (blueAlliance){
+                    lookingForBlueTape = false;
+                }
+                moveStraight(5, mediumSpeed);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.TURNPARALLELTOWALL;
+                telemetryMove = MoveState.GOPASTREDTAPE;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case TURNPARALLELTOWALL:
@@ -511,7 +549,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
             case DRIVETOBEACON:
                 lookingWithUltraSense = true;
-                targetReading = 30.0;
+                targetReading = 35.0;
                 moveStraight(30.0, slowSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.WINDOUTARM;
@@ -532,9 +570,25 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 lookingWithUltraSense = false;
                 climberDumper.setPosition(0.75);
                 currentMove = MoveState.DELAYSETTINGS;
-                nextMove = MoveState.READBEACON;
+                nextMove = MoveState.JIGGLEB;
                 telemetryMove = MoveState.DUMPCLIMBERS;
                 moveDelayTime = commonDelayTime;
+                break;
+
+            case JIGGLEB:
+                moveStraight(-4, 1.0);
+                currentMove = MoveState.DELAYSETTINGS;
+                nextMove = MoveState.JIGGLEF;
+                telemetryMove = MoveState.JIGGLEB;
+                moveDelayTime = 500;
+                break;
+
+            case JIGGLEF:
+                moveStraight(2, 1.0);
+                currentMove = MoveState.DELAYSETTINGS;
+                nextMove = MoveState.READBEACON;
+                telemetryMove = MoveState.JIGGLEF;
+                moveDelayTime = 500;
                 break;
 
             case READBEACON:
@@ -555,7 +609,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case WINDINARMPARTWAY:
-                chinUp.setTargetPosition(-25);
+                chinUp.setTargetPosition(-150);
                 chinUp.setPower(0.5);
                 currentMove = MoveState.DELAYSETTINGS;
                 nextMove = MoveState.TURNTOBUTTON;
@@ -584,7 +638,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
             case PUSHBUTTON:
                 lookingWithUltraSense = true;
-                moveStraight(14.0, slowSpeed);
+                moveStraight(20.0, slowSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.BACKUP;
                 telemetryMove = MoveState.PUSHBUTTON;
@@ -605,6 +659,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.DRIVEINFLOORGOAL;
                 telemetryMove = MoveState.TURNTOFLOORGOAL;
+                currentOmni = OmniCtlr.RERETRACT;
                 moveDelayTime = commonDelayTime;
                 break;
 
