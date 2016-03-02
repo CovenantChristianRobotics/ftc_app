@@ -104,6 +104,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
     double slowSpeed;
     double turnSpeed;
     boolean lookingForWhiteLine;
+    int beaconPushTurn;
     // Elapsed Time
     ElapsedTime currentTime;
     // Method Variables
@@ -272,8 +273,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
         thirdTileSwitch = hardwareMap.digitalChannel.get("tileSw");
 //        delayPotentiometer = hardwareMap.analogInput.get("delPot");
         //statemachine settings
-        currentMove = MoveState.INITIALIZEROBOT;
-        telemetryMove = MoveState.INITIALIZEROBOT;
+        currentMove = MoveState.DRIVEAWAYFROMWALL;
+//        telemetryMove = MoveState.INITIALIZEROBOT;
         currentOmni = OmniCtlr.NOTMOVING;
         chosenOmni = OmniCtlr.NOTMOVING;
         counter = 0;
@@ -318,7 +319,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
         if (thirdTileSwitch.getState()) {       // WE ARE ON THE THIRD TILE FROM THE MOUNTAIN CORNER
             firstMoveDist = 6.35;
-            moveDiagDist = 217.0;
+            moveDiagDist = 165.0;
             thirdTile = true;
             fourthTile = false;
         } else {                                // WE ARE ON THE FOURTH TILE FROM THE MOUNTAIN CORNER
@@ -335,6 +336,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
         commonDelayTime = 300;
         desiredHeading = 0;
         lookingForWhiteLine = false;
+        lookingWithUltraSense = false;
+        beaconPushTurn = 0;
         // Elapsed Time
         currentTime = new ElapsedTime();
         // log switch positions
@@ -342,6 +345,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
         // Calibrate Gyro
         gyroSense.calibrate();
         while (gyroSense.isCalibrating()) {
+            telemetry.addData("gyro is calibrating", "");
         }
     }
 
@@ -443,6 +447,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case DRIVEAWAYFROMWALL:
+                currentTime.reset();
+                fColorSense.enableLed(true);
                 moveStraight(firstMoveDist, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNDIAG;
@@ -459,20 +465,12 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case MOVEDIAG:
-                moveStraight(moveDiagDist, fastSpeed);
+                moveStraight(moveDiagDist + 12, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.GOPASTREDTAPE;
+                nextMove = MoveState.TURNPARALLELTOWALL;
                 telemetryMove = MoveState.MOVEDIAG;
                 moveDelayTime = commonDelayTime;
                 chosenOmni = OmniCtlr.EXTENDING;
-                break;
-
-            case GOPASTREDTAPE:
-                moveStraight(12.0, slowSpeed);
-                currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.TURNPARALLELTOWALL;
-                telemetryMove = MoveState.GOPASTREDTAPE;
-                moveDelayTime = commonDelayTime;
                 break;
 
             case TURNPARALLELTOWALL:
@@ -484,7 +482,6 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case DRIVETOWHITELINE:
-                fColorSense.enableLed(true);
                 lookingForWhiteLine = true;
                 moveStraight(30.0, slowSpeed);
                 currentMove = MoveState.STARTMOVE;
@@ -558,21 +555,27 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case WINDINARMPARTWAY:
-                chinUp.setTargetPosition(-75);
+                chinUp.setTargetPosition(-25);
                 chinUp.setPower(0.5);
                 currentMove = MoveState.DELAYSETTINGS;
                 nextMove = MoveState.TURNTOBUTTON;
                 telemetryMove = MoveState.WINDINARMPARTWAY;
-                currentOmni = OmniCtlr.REEXTEND;
+//                currentOmni = OmniCtlr.REEXTEND;
                 moveDelayTime = commonDelayTime;
                 break;
 
             case TURNTOBUTTON:
                 if (redL || blueL) {
                     moveTurn(13, slowSpeed);
+                    beaconPushTurn = 13;
+                    targetReading = 23;
                 } else if (redR || blueR) {
                     moveTurn(-13, slowSpeed);
+                    beaconPushTurn = -13;
+                    targetReading = 19;
+
                 }
+                currentOmni = OmniCtlr.REEXTEND;
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.PUSHBUTTON;
                 telemetryMove = MoveState.TURNTOBUTTON;
@@ -580,6 +583,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case PUSHBUTTON:
+                lookingWithUltraSense = true;
                 moveStraight(14.0, slowSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.BACKUP;
@@ -588,11 +592,28 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case BACKUP:
+                lookingWithUltraSense = false;
                 moveStraight(-14.0, slowSpeed);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.DONE;
+                nextMove = MoveState.TURNTOFLOORGOAL;
                 telemetryMove = MoveState.BACKUP;
                 moveDelayTime = commonDelayTime;
+                break;
+
+            case TURNTOFLOORGOAL:
+                moveTurn(77 - beaconPushTurn, turnSpeed);
+                currentMove = MoveState.STARTTURN;
+                nextMove = MoveState.DRIVEINFLOORGOAL;
+                telemetryMove = MoveState.TURNTOFLOORGOAL;
+                moveDelayTime = commonDelayTime;
+                break;
+
+            case DRIVEINFLOORGOAL:
+                moveStraight(65, fastSpeed);
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.DONE;
+                telemetryMove = MoveState.DRIVEINFLOORGOAL;
+                moveDelayTime = 10;
                 break;
 
             case DONE:
@@ -640,7 +661,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 rightOmniPinion.setPosition(0.0);
                 currentOmni = OmniCtlr.DELAYSETTINGSOMNI;
                 nextOmni = chosenOmni;
-                moveDelaytimeOmni = 3500;
+                moveDelaytimeOmni = 4000;
                 break;
 
             case REEXTEND:
@@ -648,7 +669,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 rightOmniPinion.setPosition(1.0);
                 currentOmni = OmniCtlr.DELAYSETTINGSOMNI;
                 nextOmni = chosenOmni;
-                moveDelayTime = 3500;
+                moveDelayTime = 4000;
                 break;
 
             case RERETRACT:
