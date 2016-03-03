@@ -7,6 +7,7 @@
         <Servo name="lOmniPinion" port="6" />
     </ServoController>
     <LegacyModuleController name="Legacy Module 1" serialNumber="AL00XU3L">
+		<ColorSensor name="fCS" port="4" />
 		<UltrasonicSensor name="ultraSense" port="5" />
     </LegacyModuleController>
     <ServoController name="climberCtlr" serialNumber="AL00VUK4">
@@ -19,7 +20,6 @@
     </ServoController>
     <DeviceInterfaceModule name="Device Interface Module" serialNumber="AL00VFP2">
 		<ColorSensor name="bCS" port="3" />
-		<ColorSensor name="fCS" port="4" />
 		<Gyro name="gyroSense" port="5" />
 		<DigitalDevice name="tileSw" port="0" />
 		<DigitalDevice name="rBSw" port="1" />

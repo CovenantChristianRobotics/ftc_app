@@ -354,6 +354,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
         telemetry.addData("arm lock", armLock.getPosition());
         telemetry.addData("climber dumper", climberDumper.getPosition());
         telemetry.addData("doors", debrisDoors.getPosition());
+        telemetry.addData("ultrasonic value", ultraSense.getUltrasonicLevel());
 
     }
     @Override
