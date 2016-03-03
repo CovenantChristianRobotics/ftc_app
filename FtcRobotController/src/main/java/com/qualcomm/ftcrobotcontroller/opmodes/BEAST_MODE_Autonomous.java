@@ -332,9 +332,9 @@ public class BEAST_MODE_Autonomous extends OpMode {
         }
         // State Machine Settings
         fastSpeed = 1.0;
-        mediumSpeed = 0.5;
-        slowSpeed = 0.2;
-        turnSpeed = 0.4;
+        mediumSpeed = 0.7;
+        slowSpeed = 0.3;
+        turnSpeed = 0.5;
         commonDelayTime = 300;
         desiredHeading = 0;
         lookingForWhiteLine = false;
