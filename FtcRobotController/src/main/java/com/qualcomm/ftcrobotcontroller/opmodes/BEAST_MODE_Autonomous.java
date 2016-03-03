@@ -485,7 +485,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case MOVEDIAG:
-                leftPlow.setPosition(0.565);
+                leftPlow.setPosition(0.6);
                 if (redAlliance) {
                     lookingForRedTape = true;
                 } else if (blueAlliance) {
