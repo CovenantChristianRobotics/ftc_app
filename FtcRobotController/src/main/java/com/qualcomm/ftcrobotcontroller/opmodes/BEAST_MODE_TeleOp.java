@@ -58,20 +58,15 @@ public class BEAST_MODE_TeleOp extends OpMode {
     double plowsUp = 1.0;
     double plowsDown = 0.0;
 
-    // THE MARK OF THE BEAST
-
-    long the_mark_of_the_beast;
-
-
-    void setPlows(double position) {
-        if (position == plowsUp){
-            leftPlow.setPosition(1.0);
+    // void setPlows(double position) {
+        // if (position == plowsUp){
+            // leftPlow.setPosition(1.0);
 //            rightPlow.setPosition(0.45490196);
-        } else if (position == plowsDown){
-            leftPlow.setPosition(0.5);
+        // } else if (position == plowsDown){
+            // leftPlow.setPosition(0.5);
 //            rightPlow.setPosition(0.75);
-        }
-    }
+        // }
+    // }
 
     /**
      * Constructor
