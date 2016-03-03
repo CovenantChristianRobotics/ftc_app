@@ -88,8 +88,8 @@ public class CCHS4507TeleOp extends OpMode {
         motorLeft.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         trackLifter.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         armExtend.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
-        climberTriggerLeft.setPosition(0.5);
-        climberTriggerRight.setPosition(0.5);
+        climberTriggerLeft.setPosition(0.9);
+        climberTriggerRight.setPosition(0.1);
         armLock.setPosition(0.5);
         servoDist.setPosition(0.5);
         trackLock.setPosition(0.8);
