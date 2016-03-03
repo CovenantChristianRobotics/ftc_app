@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+
 //import java.util.Date;
 /**
  * Created by cchsrobochargers on 12/17/15.
@@ -253,8 +254,8 @@ public class CCHS4507Autonomous extends OpMode {
         trackLifter.setPower(0.2);
         trackLifter.setTargetPosition(30);
         servoClimberDumper.setPosition(0.1);
-        climberTriggerLeft.setPosition(0.5);
-        climberTriggerRight.setPosition(0.5);
+        climberTriggerLeft.setPosition(0.9);
+        climberTriggerRight.setPosition(0.1);
         cowCatcher.setPosition(0.2);
         armLock.setPosition(0.5);
         trackLock.setPosition(0.4);
