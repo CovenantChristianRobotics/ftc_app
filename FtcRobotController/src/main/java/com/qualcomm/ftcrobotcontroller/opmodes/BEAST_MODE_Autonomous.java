@@ -52,7 +52,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
     Servo leftOmniPinion;
     Servo rightOmniPinion;
     Servo leftPlow;
-    Servo rightPlow;
+//    Servo rightPlow;
     Servo leftTrigger;
     Servo rightTrigger;
     Servo dumperDoor;
@@ -241,7 +241,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
         leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
         rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
         leftPlow = hardwareMap.servo.get("lP");
-        rightPlow = hardwareMap.servo.get("rP");
+//        rightPlow = hardwareMap.servo.get("rP");
         leftTrigger = hardwareMap.servo.get("lT");
         rightTrigger = hardwareMap.servo.get("rT");
         sweeper = hardwareMap.servo.get("sweeper");
@@ -252,8 +252,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
-        leftPlow.setPosition(0.16392157);
-        rightPlow.setPosition(0.68627450);
+        leftPlow.setPosition(0.5);
+//        rightPlow.setPosition(0.68627450);
         leftTrigger.setPosition(0.8);
         rightTrigger.setPosition(0.1);
         sweeper.setPosition(0.5);

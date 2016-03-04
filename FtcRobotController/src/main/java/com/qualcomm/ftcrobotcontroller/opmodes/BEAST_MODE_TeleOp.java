@@ -34,7 +34,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
     Servo leftOmniPinion;
     Servo rightOmniPinion;
     Servo leftPlow;
-    Servo rightPlow;
+//    Servo rightPlow;
     Servo leftTrigger;
     Servo rightTrigger;
     Servo sweeper;
@@ -58,20 +58,15 @@ public class BEAST_MODE_TeleOp extends OpMode {
     double plowsUp = 1.0;
     double plowsDown = 0.0;
 
-    // THE MARK OF THE BEAST
-
-    long the_mark_of_the_beast;
-
-
-    void setPlows(double position) {
-        if (position == plowsUp){
-            leftPlow.setPosition(0.40392157);
-            rightPlow.setPosition(0.45490196);
-        } else if (position == plowsDown){
-            leftPlow.setPosition(0.16392157);
-            rightPlow.setPosition(0.75);
-        }
-    }
+    // void setPlows(double position) {
+        // if (position == plowsUp){
+            // leftPlow.setPosition(1.0);
+//            rightPlow.setPosition(0.45490196);
+        // } else if (position == plowsDown){
+            // leftPlow.setPosition(0.5);
+//            rightPlow.setPosition(0.75);
+        // }
+    // }
 
     /**
      * Constructor
@@ -101,7 +96,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
         leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
         rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
         leftPlow = hardwareMap.servo.get("lP");
-        rightPlow = hardwareMap.servo.get("rP");
+//        rightPlow = hardwareMap.servo.get("rP");
         leftTrigger = hardwareMap.servo.get("lT");
         rightTrigger = hardwareMap.servo.get("rT");
         sweeper = hardwareMap.servo.get("sweeper");
@@ -113,7 +108,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
         leftPlow.setPosition(0.16392157);
-        rightPlow.setPosition(0.68627450);
+//        rightPlow.setPosition(0.68627450);
         leftTrigger.setPosition(0.5);
         rightTrigger.setPosition(0.5);
         sweeper.setPosition(0.5);
@@ -269,14 +264,14 @@ public class BEAST_MODE_TeleOp extends OpMode {
         }
 
         if (gamepad2.dpad_up) {
-            setPlows(plowsUp);
+//            setPlows(plowsUp);
 //            leftPlow.setPosition(Range.clip(leftPlow.getPosition() + 0.01, 0, 1));
-//            leftPlow.setPosition(Range.clip(rightPlow.getPosition() - 0.01, 0.18392157, 0.40392157));
+            leftPlow.setPosition(Range.clip(leftPlow.getPosition() - 0.01, 0.5, 1.0));
 //            rightPlow.setPosition(Range.clip(rightPlow.getPosition() + 0.01, 0.45490196, 0.68627450));
         } else if (gamepad2.dpad_down) {
 //            leftPlow.setPosition(Range.clip(leftPlow.getPosition() - 0.01, 0, 1));
-            setPlows(plowsDown);
-//            leftPlow.setPosition(Range.clip(rightPlow.getPosition() + 0.01, 0.18392157, 0.40392157));
+//            setPlows(plowsDown);
+            leftPlow.setPosition(Range.clip(leftPlow.getPosition() + 0.01, 0.5, 1.0));
 //            rightPlow.setPosition(Range.clip(rightPlow.getPosition() - 0.01, 0, 1));
         }
 
@@ -348,7 +343,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
         telemetry.addData("LED", currentControl.toString());
         telemetry.addData("Elapsed Time", endGameTime.time());
         telemetry.addData("l plow", leftPlow.getPosition());
-        telemetry.addData("r plow", rightPlow.getPosition());
+//        telemetry.addData("r plow", rightPlow.getPosition());
         telemetry.addData("enc left", leftDrive.getCurrentPosition());
         telemetry.addData("enc right", rightDrive.getCurrentPosition());
         telemetry.addData("arm lock", armLock.getPosition());
