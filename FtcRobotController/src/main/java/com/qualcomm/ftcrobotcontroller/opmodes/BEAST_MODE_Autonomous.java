@@ -121,6 +121,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
     // moveTurn
     int gyroError;
     int desiredHeading;
+    
+    long THE_MARK_OF_THE_BEAST;
 
     // Methods that are called in the loop
 
@@ -348,6 +350,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
         currentTime = new ElapsedTime();
         // log switch positions
         Log.i("delay", Double.toString(delay));
+        THE_MARK_OF_THE_BEAST = 666;
+        Log.i("THE MARK OF THE BEAST", Long.toString(THE_MARK_OF_THE_BEAST));
         // Calibrate Gyro
         gyroSense.calibrate();
         while (gyroSense.isCalibrating()) {
@@ -658,8 +662,16 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case TURNTOFLOORGOAL:
+                 
+                Log.i("THE MARK OF THE BEAST", Long.toString(THE_MARK_OF_THE_BEAST));
+                 /**
+                 * The mark of the Beast
+                 * Line 666 is 3 lines above
+                 */
+                 
+                 
                 moveTurn(77 - beaconPushTurn, turnSpeed);
-                currentMove = MoveState.STARTTURN;
+                currentMove = MoveState.STARTTURN; 
                 nextMove = MoveState.DRIVEINFLOORGOAL;
                 telemetryMove = MoveState.TURNTOFLOORGOAL;
                 currentOmni = OmniCtlr.RERETRACT;
