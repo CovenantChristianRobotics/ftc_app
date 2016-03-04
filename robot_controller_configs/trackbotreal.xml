@@ -15,23 +15,24 @@
         <Motor name="armExtend" port="1" />
         <Motor name="armPivot" port="2" />
     </MotorController>
+    <ServoController name="Servo Controller 2" serialNumber="AI02RMPE">
+        <Servo name="armLock" port="1" />
+        <Servo name="trackLock" port="2" />
+    </ServoController>
     <MotorController name="Motor Drive" serialNumber="AL00VXQS">
         <Motor name="trkLftr" port="2" />
     </MotorController>
-    <LegacyModuleController name="Legacy Module 1" serialNumber="AL00XPHJ">
-        <UltrasonicSensor name="ultraSense" port="5" />
-    </LegacyModuleController>
     <ServoController name="Servo Controller 1" serialNumber="AL00VUL0">
+        <Servo name="trigRight" port="1" />
         <Servo name="servoDist" port="2" />
         <Servo name="climber_dumper" port="3" />
         <Servo name="trigLeft" port="4" />
-        <Servo name="trigRight" port="5" />
+        <Servo name="trigRight1" port="5" />
         <Servo name="cowCatcher" port="6" />
-	</ServoController>
-	<ServoController name="Servo Controller 2" serialNumber="AI02RMPE">
-		 <Servo name="armLock" port="1" />
-		 <Servo name="trackLock" port="2" />
-    </ServoController> 
+    </ServoController>
+    <LegacyModuleController name="Legacy Module 1" serialNumber="AL00XPHJ">
+        <UltrasonicSensor name="ultraSense" port="5" />
+    </LegacyModuleController>
     <MotorController name="MotorController 3" serialNumber="AL00VXR8">
         <Motor name="motorR" port="1" />
         <Motor name="motorL" port="2" />

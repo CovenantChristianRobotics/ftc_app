@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
  */
 public class CCHS4507Autonomous extends OpMode {
     enum MoveState {
-        DELAY, STARTMOVE, MOVING, STARTTURN, TURNING, MOVEDELAY, FIRSTMOVE, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
+        DELAY, STARTMOVE, MOVING, STARTTURN, TURNING, MOVEDELAY, FIRSTMOVE, ARMEXTENDERBRO, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
         FINDBEACON, MEASUREAMBIENT, MOVETOBUTTON, PRESSBUTTON,CENTERBUCKET, DUMPTRUCK, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, ALIGNRAMP,
         DOWNTRACK, UPRAMP, STRAIGHTTORAMP, STRAIGHTTORAMPTURN, DONE
     }
@@ -27,6 +27,7 @@ public class CCHS4507Autonomous extends OpMode {
     DcMotor motorRight;
     DcMotor motorLeft;
     DcMotor trackLifter;
+    DcMotor armExtend;
     //servos
     //Servo servoBeaconPusher;
     Servo servoClimberDumper;
@@ -177,6 +178,7 @@ public class CCHS4507Autonomous extends OpMode {
         motorRight = hardwareMap.dcMotor.get("motorR");
         motorLeft = hardwareMap.dcMotor.get("motorL");
         trackLifter = hardwareMap.dcMotor.get("trkLftr");
+        armExtend = hardwareMap.dcMotor.get("armExtend");
         //servos
         //servoBeaconPusher = hardwareMap.servo.get("beacon_pusher");
         servoClimberDumper = hardwareMap.servo.get("climber_dumper");
@@ -222,6 +224,8 @@ public class CCHS4507Autonomous extends OpMode {
         motorLeft.setDirection(DcMotor.Direction.FORWARD);
         motorRight.setDirection(DcMotor.Direction.REVERSE);
         trackLifter.setDirection(DcMotor.Direction.REVERSE);
+        armExtend.setDirection(DcMotor.Direction.REVERSE);
+        armExtend.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         motorRight.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         motorLeft.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         trackLifter.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
@@ -254,8 +258,8 @@ public class CCHS4507Autonomous extends OpMode {
         trackLifter.setPower(0.2);
         trackLifter.setTargetPosition(30);
         servoClimberDumper.setPosition(0.1);
-        climberTriggerLeft.setPosition(0.9);
-        climberTriggerRight.setPosition(0.1);
+        climberTriggerLeft.setPosition(0.8);
+        climberTriggerRight.setPosition(0.0);
         cowCatcher.setPosition(0.2);
         armLock.setPosition(0.5);
         trackLock.setPosition(0.4);
@@ -301,11 +305,12 @@ public class CCHS4507Autonomous extends OpMode {
                 }
                 motorRight.setPower(Range.clip(speed - (gyroError * 0.05), -1.0, 1.0));
                 motorLeft.setPower(Range.clip(speed + (gyroError * 0.05), -1.0, 1.0));
-                if (lookingForBlueFlag && colorSense.blue() > ambientBlue) {
+                if (!sawRedFlag && lookingForBlueFlag && colorSense.blue() > ambientBlue) {
                     sawBlueFlag = true;
                 }
-                if (lookingForRedFlag && colorSense.red() > ambientRed) {
+                if (!sawBlueFlag && lookingForRedFlag && colorSense.red() > ambientRed) {
                     sawRedFlag = true;
+
                 }
                 if (lookingForRedFlag && (colorSense.red() > ambientRed))  {
                     motorRight.setPower(0.0);
@@ -363,12 +368,21 @@ public class CCHS4507Autonomous extends OpMode {
                 moveStraight(60.0 + (fourthTileFlag ? 45.0 : 0.0), fastSpeed);
                 cowCatcher.setPosition(0.2);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.TURNDIAG;
+                nextMove = MoveState.ARMEXTENDERBRO;
                 telemetryMove = MoveState.FIRSTMOVE;
                 moveDelayTime = delayMillisec;
                 break;
 
+            case ARMEXTENDERBRO:
+                armExtend.setPower(0.8);
+                currentMove = MoveState.STARTTURN;
+                nextMove = MoveState.TURNDIAG;
+                telemetryMove = MoveState.ARMEXTENDERBRO;
+                moveDelayTime = delayMillisec;
+                break;
+
             case TURNDIAG:
+                armExtend.setPower(0.0);
                 if (redAlliance) {
                     moveTurn(-45.0, turnSpeed);
                 } else {
@@ -381,6 +395,7 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case MOVEDIAG:
+                armExtend.setPower(0.0);
                 moveStraight(209.0 - (fourthTileFlag ? 60.0 : 0.0), fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.FINDWALL;
@@ -410,26 +425,8 @@ public class CCHS4507Autonomous extends OpMode {
                     moveTurn(135.0, turnSpeed);
                 }
                 currentMove = MoveState.STARTTURN;
-                nextMove = MoveState.FINDBEACON;
-                telemetryMove = MoveState.TURNALONGWALL;
-                moveDelayTime = delayMillisec;
-                break;
-
-            case FINDBEACON:
-                if (redAlliance) {
-                    moveStraight(-90.0, fastSpeed);
-                    lookingForRedFlag = true;
-                    lookingForBlueFlag = true;
-                } else {
-                    moveStraight(90.0, fastSpeed);
-                    lookingForBlueFlag = true;
-                    lookingForRedFlag = true;
-                }
-                currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.CENTERBUCKET;
-                 //TODO: Verify MEASUREAMBIENT works correctly and enable it.
                 nextMove = MoveState.MEASUREAMBIENT;
-                telemetryMove = MoveState.FINDBEACON;
+                telemetryMove = MoveState.TURNALONGWALL;
                 moveDelayTime = delayMillisec;
                 break;
 
@@ -447,33 +444,52 @@ public class CCHS4507Autonomous extends OpMode {
                     Log.i("ambientRed", Integer.toString(ambientRed));
                     Log.i("ambientBlue", Integer.toString(ambientBlue));
                 } else {
-                    currentMove = MoveState.CENTERBUCKET;
+                    currentMove = MoveState.FINDBEACON;
                 }
                 telemetryMove = MoveState.MEASUREAMBIENT;
                 break;
 
+            case FINDBEACON:
+                if (redAlliance) {
+                    moveStraight(-90.0, fastSpeed);
+                    lookingForRedFlag = true;
+                    lookingForBlueFlag = true;
+                } else {
+                    moveStraight(90.0, fastSpeed);
+                    lookingForBlueFlag = true;
+                    lookingForRedFlag = true;
+                }
+                currentMove = MoveState.STARTMOVE;
+                 //TODO: Verify MEASUREAMBIENT works correctly and enable it.
+                nextMove = MoveState.MOVETOBUTTON;
+                telemetryMove = MoveState.FINDBEACON;
+                moveDelayTime = delayMillisec;
+                break;
+
             case MOVETOBUTTON:
+                lookingForRedFlag = false;
+                lookingForBlueFlag = false;
                 if (sawRedFlag) {
                     if (redAlliance){
-                        moveStraight (-30, mediumSpeed);
+                        moveStraight (-13, mediumSpeed);
                     } else {
-                        moveStraight (-5, mediumSpeed);
+                        moveStraight (5, mediumSpeed);
                     }
                 } else if (sawBlueFlag) {
                     if (redAlliance) {
-                        moveStraight(-5, mediumSpeed);
+                        moveStraight(-32, mediumSpeed);
                     } else {
-                        moveStraight(-30, mediumSpeed);
+                        moveStraight(-11, mediumSpeed);
                     }
                 }
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.PRESSBUTTON;
                 telemetryMove = MoveState.MOVETOBUTTON;
-                moveDelayTime = delayMillisec;
+                moveDelayTime = delayMillisec * 2;
                 break;
 
             case PRESSBUTTON:
-                climberTriggerLeft.setPosition(0.8);
+                climberTriggerLeft.setPosition(0.5);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.CENTERBUCKET;
                 telemetryMove = MoveState.PRESSBUTTON;
@@ -483,16 +499,24 @@ public class CCHS4507Autonomous extends OpMode {
             case CENTERBUCKET:
                 lookingForRedFlag = false;
                 lookingForBlueFlag = false;
-                climberTriggerLeft.setPosition(0.5);
+                climberTriggerLeft.setPosition(0.8);
                 // Checking to see whether or not we saw the beacon, and if we didn't don't try
                 // and dump the climbers.
                 if (!takeADump)  {
                     currentMove = MoveState.ROTATEFROMBEACON;
                 } else {
-                    if (redAlliance) {
-                        moveStraight(-10.0, fastSpeed);
-                    } else {
-                        moveStraight(10.0, fastSpeed);
+                    if (sawRedFlag) {
+                        if (redAlliance){
+                            moveStraight (10, mediumSpeed);
+                        } else {
+                            moveStraight (5, mediumSpeed);
+                        }
+                    } else if (sawBlueFlag) {
+                        if (redAlliance) {
+                            moveStraight(26, mediumSpeed);
+                        } else {
+                            moveStraight(18, mediumSpeed);
+                        }
                     }
                     currentMove = MoveState.STARTMOVE;
                     nextMove = MoveState.DUMPTRUCK;
@@ -511,12 +535,12 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case ROTATEFROMBEACON:
+                servoClimberDumper.setPosition(0.0);
                 if (redAlliance) {
                     moveTurn(-45.0, turnSpeed);
                 } else {
                     moveTurn(-135, turnSpeed);
                 }
-                servoClimberDumper.setPosition(1.0);
                 currentMove = MoveState.STARTTURN;
                 nextMove = MoveState.MOVETORAMP;
                 telemetryMove = MoveState.ROTATEFROMBEACON;
@@ -659,36 +683,6 @@ public class CCHS4507Autonomous extends OpMode {
     public void stop() {
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
