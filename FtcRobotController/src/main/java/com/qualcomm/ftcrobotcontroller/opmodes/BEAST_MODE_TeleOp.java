@@ -1,5 +1,6 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
+import android.graphics.Color;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -34,7 +35,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
     Servo leftOmniPinion;
     Servo rightOmniPinion;
     Servo leftPlow;
-//    Servo rightPlow;
+    Servo rightPlow;
     Servo leftTrigger;
     Servo rightTrigger;
     Servo sweeper;
@@ -57,6 +58,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
     // Method stuff
     double plowsUp = 1.0;
     double plowsDown = 0.0;
+    float hsvValues[] = {0F,0F,0F};
 
     // void setPlows(double position) {
         // if (position == plowsUp){
@@ -96,7 +98,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
         leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
         rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
         leftPlow = hardwareMap.servo.get("lP");
-//        rightPlow = hardwareMap.servo.get("rP");
+        rightPlow = hardwareMap.servo.get("rP");
         leftTrigger = hardwareMap.servo.get("lT");
         rightTrigger = hardwareMap.servo.get("rT");
         sweeper = hardwareMap.servo.get("sweeper");
@@ -107,7 +109,9 @@ public class BEAST_MODE_TeleOp extends OpMode {
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
-        leftPlow.setPosition(0.16392157);
+        leftPlow.setPosition(0.427);
+        rightPlow.setPosition(0.506);
+//        leftPlow.setPosition(0.16392157);
 //        rightPlow.setPosition(0.68627450);
         leftTrigger.setPosition(0.5);
         rightTrigger.setPosition(0.5);
@@ -266,13 +270,17 @@ public class BEAST_MODE_TeleOp extends OpMode {
         if (gamepad2.dpad_up) {
 //            setPlows(plowsUp);
 //            leftPlow.setPosition(Range.clip(leftPlow.getPosition() + 0.01, 0, 1));
-            leftPlow.setPosition(Range.clip(leftPlow.getPosition() - 0.01, 0.5, 1.0));
-//            rightPlow.setPosition(Range.clip(rightPlow.getPosition() + 0.01, 0.45490196, 0.68627450));
+//            leftPlow.setPosition(Range.clip(leftPlow.getPosition() + 0.01, 0.0, 1.0));
+//            rightPlow.setPosition(Range.clip(rightPlow.getPosition() + 0.01, 0, 1));
+            leftPlow.setPosition(0.83);
+            rightPlow.setPosition(0.088);
         } else if (gamepad2.dpad_down) {
 //            leftPlow.setPosition(Range.clip(leftPlow.getPosition() - 0.01, 0, 1));
 //            setPlows(plowsDown);
-            leftPlow.setPosition(Range.clip(leftPlow.getPosition() + 0.01, 0.5, 1.0));
+//            leftPlow.setPosition(Range.clip(leftPlow.getPosition() - 0.01, 0.0, 1.0));
 //            rightPlow.setPosition(Range.clip(rightPlow.getPosition() - 0.01, 0, 1));
+            leftPlow.setPosition(0.487);
+            rightPlow.setPosition(0.426);
         }
 
         if (gamepad2.y) {
@@ -338,18 +346,24 @@ public class BEAST_MODE_TeleOp extends OpMode {
 
 
 //        Log.i("THE MARK OF THE BEAST", Long.toString(the_mark_of_the_beast));
-
+        Color.RGBToHSV(fColorSense.red(), fColorSense.green(), fColorSense.blue(), hsvValues);
 //        telemetry.addData("THE MARK OF THE BEAST", the_mark_of_the_beast);
         telemetry.addData("LED", currentControl.toString());
         telemetry.addData("Elapsed Time", endGameTime.time());
         telemetry.addData("l plow", leftPlow.getPosition());
-//        telemetry.addData("r plow", rightPlow.getPosition());
+        telemetry.addData("r plow", rightPlow.getPosition());
         telemetry.addData("enc left", leftDrive.getCurrentPosition());
         telemetry.addData("enc right", rightDrive.getCurrentPosition());
         telemetry.addData("arm lock", armLock.getPosition());
         telemetry.addData("climber dumper", climberDumper.getPosition());
         telemetry.addData("doors", debrisDoors.getPosition());
         telemetry.addData("ultrasonic value", ultraSense.getUltrasonicLevel());
+        telemetry.addData("red", fColorSense.red());
+        telemetry.addData("blue", fColorSense.blue());
+        telemetry.addData("green", fColorSense.green());
+        telemetry.addData("alpha", fColorSense.alpha());
+//        telemetry.addData("?", otherOne.argb());
+        telemetry.addData("hue", hsvValues[0]);
 
     }
     @Override

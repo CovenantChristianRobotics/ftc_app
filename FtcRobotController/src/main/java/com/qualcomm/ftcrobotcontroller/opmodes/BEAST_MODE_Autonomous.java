@@ -52,7 +52,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
     Servo leftOmniPinion;
     Servo rightOmniPinion;
     Servo leftPlow;
-//    Servo rightPlow;
+    Servo rightPlow;
     Servo leftTrigger;
     Servo rightTrigger;
     Servo dumperDoor;
@@ -107,6 +107,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
     int beaconPushTurn;
     boolean lookingForRedTape;
     boolean lookingForBlueTape;
+    int floorHue;
     // Elapsed Time
     ElapsedTime currentTime;
     // Method Variables
@@ -241,7 +242,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
         leftOmniPinion = hardwareMap.servo.get("lOmniPinion");
         rightOmniPinion = hardwareMap.servo.get("rOmniPinion");
         leftPlow = hardwareMap.servo.get("lP");
-//        rightPlow = hardwareMap.servo.get("rP");
+        rightPlow = hardwareMap.servo.get("rP");
         leftTrigger = hardwareMap.servo.get("lT");
         rightTrigger = hardwareMap.servo.get("rT");
         sweeper = hardwareMap.servo.get("sweeper");
@@ -252,8 +253,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
         rightOmniPinion.setDirection(Servo.Direction.REVERSE);
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
-        leftPlow.setPosition(0.5);
-//        rightPlow.setPosition(0.68627450);
+        leftPlow.setPosition(0.487);
+        rightPlow.setPosition(0.426);
         leftTrigger.setPosition(0.8);
         rightTrigger.setPosition(0.1);
         sweeper.setPosition(0.5);
@@ -320,12 +321,12 @@ public class BEAST_MODE_Autonomous extends OpMode {
 //        delayRobot = false;
 
         if (thirdTileSwitch.getState()) {       // WE ARE ON THE THIRD TILE FROM THE MOUNTAIN CORNER
-            firstMoveDist = 6.35;
+            firstMoveDist = 4.35;
             moveDiagDist = 165.0;
             thirdTile = true;
             fourthTile = false;
         } else {                                // WE ARE ON THE FOURTH TILE FROM THE MOUNTAIN CORNER
-            firstMoveDist = 67.31;
+            firstMoveDist = 64.31;
             moveDiagDist = 122.0;
             thirdTile = false;
             fourthTile = true;
@@ -342,6 +343,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
         lookingForRedTape = false;
         lookingForBlueTape = false;
         beaconPushTurn = 0;
+        floorHue = 0;
         // Elapsed Time
         currentTime = new ElapsedTime();
         // log switch positions
@@ -372,7 +374,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
             case MOVINGSTRAIGHT:
                 if (lookingForWhiteLine) {
-                    if (hsvValues[0] >= 68.0) {
+                    if (hsvValues[0] >= 69.0) {
                         leftDrive.setPower(0.0);
                         rightDrive.setPower(0.0);
                         currentMove = MoveState.DELAYSETTINGS;
@@ -380,7 +382,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 }
 
                 if (lookingForRedTape) {
-                    if (fColorSense.red() >= 30.0 && fColorSense.red() <= 100.0) {
+                    if (fColorSense.red() >= 70.0 && fColorSense.red() <= 150.0) {
                         leftDrive.setPower(0.0);
                         rightDrive.setPower(0.0);
                         currentMove = MoveState.DELAYSETTINGS;
@@ -485,12 +487,13 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case MOVEDIAG:
+                fColorSense.enableLed(true);
                 if (redAlliance) {
                     lookingForRedTape = true;
                 } else if (blueAlliance) {
                     lookingForBlueTape = true;
                 }
-                moveStraight(moveDiagDist + 20, fastSpeed);
+                moveStraight(moveDiagDist + 40, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.GOPASTREDTAPE;
                 telemetryMove = MoveState.MOVEDIAG;
@@ -521,7 +524,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
             case DRIVETOWHITELINE:
                 lookingForWhiteLine = true;
-                moveStraight(30.0, slowSpeed);
+                moveStraight(45.0, slowSpeed);
                 currentMove = MoveState.STARTMOVE;
                 telemetryMove = MoveState.DRIVETOWHITELINE;
                 nextMove = MoveState.DRIVEPASTWHITELINE;
@@ -609,7 +612,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case WINDINARMPARTWAY:
-                chinUp.setTargetPosition(-150);
+                chinUp.setTargetPosition(-225);
                 chinUp.setPower(0.5);
                 currentMove = MoveState.DELAYSETTINGS;
                 nextMove = MoveState.TURNTOBUTTON;
@@ -638,7 +641,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
             case PUSHBUTTON:
                 lookingWithUltraSense = true;
-                moveStraight(16.0, slowSpeed);
+                moveStraight(17.0, slowSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.BACKUP;
                 telemetryMove = MoveState.PUSHBUTTON;
@@ -716,7 +719,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 rightOmniPinion.setPosition(0.0);
                 currentOmni = OmniCtlr.DELAYSETTINGSOMNI;
                 nextOmni = chosenOmni;
-                moveDelaytimeOmni = 4000;
+                moveDelaytimeOmni = 4250;
                 break;
 
             case REEXTEND:
@@ -724,7 +727,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 rightOmniPinion.setPosition(1.0);
                 currentOmni = OmniCtlr.DELAYSETTINGSOMNI;
                 nextOmni = chosenOmni;
-                moveDelayTime = 4000;
+                moveDelayTime = 4250;
                 break;
 
             case RERETRACT:
@@ -741,6 +744,12 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
         }
         Color.RGBToHSV(fColorSense.red(), fColorSense.green(), fColorSense.blue(), hsvValues);
+
+        if (currentTime.time() < 7.0) {
+            if (floorHue < hsvValues[0] + 10.0) {
+                floorHue = (int)hsvValues[0] + 10;
+            }
+        }
 
         telemetry.addData("left encoder", leftDrive.getCurrentPosition());
         telemetry.addData("right encoder", rightDrive.getCurrentPosition());

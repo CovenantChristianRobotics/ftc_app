@@ -3,7 +3,8 @@
     <ServoController name="omniPinionCtlr" serialNumber="AL00VTK3">
 		<Servo name="armLock" port="2" />
 		<Servo name="lP" port="3" />
-        <Servo name="rOmniPinion" port="5" />
+		<Servo name="lT" port="4" />
+		<Servo name="rT" port="5" />
         <Servo name="lOmniPinion" port="6" />
     </ServoController>
     <LegacyModuleController name="Legacy Module 1" serialNumber="AL00XU3L">
@@ -11,8 +12,8 @@
 		<UltrasonicSensor name="ultraSense" port="5" />
     </LegacyModuleController>
     <ServoController name="climberCtlr" serialNumber="AL00VUK4">
-		<Servo name="lT" port="1" />
-		<Servo name="rT" port="2" />
+		<Servo name="rP" port="1" />
+        <Servo name="rOmniPinion" port="2" />
 		<Servo name="climber_dumper" port="3" />
 		<Servo name="sweeper" port="5" />
 		<Servo name="dumperDoor" port="6" />
