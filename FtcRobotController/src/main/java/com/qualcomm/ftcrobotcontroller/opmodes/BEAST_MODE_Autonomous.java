@@ -266,8 +266,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
         bColorSense = hardwareMap.colorSensor.get("bCS");
         bColorSense.setI2cAddress(0x42);
         bColorSense.enableLed(false);
-        ambientRed = bColorSense.red();
-        ambientBlue = bColorSense.blue();
+        ambientRed = 0;
+        ambientBlue = 0;
         fColorSense = hardwareMap.colorSensor.get("fCS");
 //        fColorSense.setI2cAddress(0x40);
         fColorSense.enableLed(true);
@@ -284,7 +284,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
 //        telemetryMove = MoveState.INITIALIZEROBOT;
         currentOmni = OmniCtlr.NOTMOVING;
         chosenOmni = OmniCtlr.NOTMOVING;
-        counter = 1;
+        counter = 0;
         redL = false;
         redR = false;
         blueL = false;
