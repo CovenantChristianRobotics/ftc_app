@@ -28,7 +28,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
     DcMotor rightDrive;
     DcMotor chinUp;
 //    DcMotor endGameLights;
-    DcMotor debrisSwivel;
+//    DcMotor debrisSwivel;
     // Servos
     Servo armLock;
     Servo climberDumper;
@@ -38,8 +38,8 @@ public class BEAST_MODE_TeleOp extends OpMode {
     Servo rightPlow;
     Servo leftTrigger;
     Servo rightTrigger;
-    Servo sweeper;
-    Servo debrisDoors;
+//    Servo sweeper;
+//    Servo debrisDoors;
     // Sensors
     GyroSensor gyroSense;
     ColorSensor fColorSense;
@@ -83,7 +83,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
         rightDrive = hardwareMap.dcMotor.get("motorR");
         chinUp = hardwareMap.dcMotor.get("chinUp");
 //        endGameLights = hardwareMap.dcMotor.get("endGameLights");
-        debrisSwivel = hardwareMap.dcMotor.get("blockDumper");
+//        debrisSwivel = hardwareMap.dcMotor.get("blockDumper");
         // DC Motor Settings
         leftDrive.setDirection(DcMotor.Direction.REVERSE);
         leftDrive.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
@@ -91,7 +91,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
         chinUp.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
 //        endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
 //        endGameLights.setPower(0.9);
-        debrisSwivel.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+//        debrisSwivel.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
@@ -101,8 +101,8 @@ public class BEAST_MODE_TeleOp extends OpMode {
         rightPlow = hardwareMap.servo.get("rP");
         leftTrigger = hardwareMap.servo.get("lT");
         rightTrigger = hardwareMap.servo.get("rT");
-        sweeper = hardwareMap.servo.get("sweeper");
-        debrisDoors = hardwareMap.servo.get("dumperDoor");
+//        sweeper = hardwareMap.servo.get("sweeper");
+//        debrisDoors = hardwareMap.servo.get("dumperDoor");
         // Servo Settings
         armLock.setPosition(0.25);
         climberDumper.setPosition(0.45);
@@ -115,8 +115,8 @@ public class BEAST_MODE_TeleOp extends OpMode {
 //        rightPlow.setPosition(0.68627450);
         leftTrigger.setPosition(0.5);
         rightTrigger.setPosition(0.5);
-        sweeper.setPosition(0.5);
-        debrisDoors.setPosition(0.0);
+//        sweeper.setPosition(0.5);
+//        debrisDoors.setPosition(0.0);
         // Sensors
         gyroSense = hardwareMap.gyroSensor.get("gyroSense");
         fColorSense = hardwareMap.colorSensor.get("fCS");
@@ -206,33 +206,33 @@ public class BEAST_MODE_TeleOp extends OpMode {
 //            right = (float) medium(right);
 //        }
 
-        if (gamepad1.dpad_up){
-            debrisSwivel.setPower(0.0);
-        } else if (gamepad1.dpad_down){
-            debrisSwivel.setPowerFloat();
-        } else if (gamepad1.dpad_left){
-            debrisSwivel.setPower(-0.5);
-        } else if (gamepad1.dpad_right) {
-            debrisSwivel.setPower(0.5);
-        } else {
-            debrisSwivel.setPower(0.0);
-        }
+//        if (gamepad1.dpad_up){
+//            debrisSwivel.setPower(0.0);
+//        } else if (gamepad1.dpad_down){
+//            debrisSwivel.setPowerFloat();
+//        } else if (gamepad1.dpad_left){
+//            debrisSwivel.setPower(-0.5);
+//        } else if (gamepad1.dpad_right) {
+//            debrisSwivel.setPower(0.5);
+//        } else {
+//            debrisSwivel.setPower(0.0);
+//        }
 
-        if (gamepad1.right_bumper) {
-            sweeper.setPosition(1.0);
-        } else if (gamepad1.right_trigger > 0.5) {
-            sweeper.setPosition(0.5);
-        }
-
-        if (gamepad1.y) {
-            sweeper.setPosition(0.0);
-        }
-
-        if (gamepad1.left_bumper) {
-            debrisDoors.setPosition(0.36862746);
-        } else if (gamepad1.left_trigger > 0.5) {
-            debrisDoors.setPosition(0.0);
-        }
+//        if (gamepad1.right_bumper) {
+//            sweeper.setPosition(1.0);
+//        } else if (gamepad1.right_trigger > 0.5) {
+//            sweeper.setPosition(0.5);
+//        }
+//
+//        if (gamepad1.y) {
+//            sweeper.setPosition(0.0);
+//        }
+//
+//        if (gamepad1.left_bumper) {
+//            debrisDoors.setPosition(0.36862746);
+//        } else if (gamepad1.left_trigger > 0.5) {
+//            debrisDoors.setPosition(0.0);
+//        }
 
 
         chinUp.setPower(hang);
@@ -356,7 +356,7 @@ public class BEAST_MODE_TeleOp extends OpMode {
         telemetry.addData("enc right", rightDrive.getCurrentPosition());
         telemetry.addData("arm lock", armLock.getPosition());
         telemetry.addData("climber dumper", climberDumper.getPosition());
-        telemetry.addData("doors", debrisDoors.getPosition());
+//        telemetry.addData("doors", debrisDoors.getPosition());
         telemetry.addData("ultrasonic value", ultraSense.getUltrasonicLevel());
         telemetry.addData("red", fColorSense.red());
         telemetry.addData("blue", fColorSense.blue());
@@ -364,13 +364,14 @@ public class BEAST_MODE_TeleOp extends OpMode {
         telemetry.addData("alpha", fColorSense.alpha());
 //        telemetry.addData("?", otherOne.argb());
         telemetry.addData("hue", hsvValues[0]);
+        telemetry.addData("chinUp", chinUp.getCurrentPosition());
 
     }
     @Override
     public void stop () {
         leftOmniPinion.setPosition(0.5);
         rightOmniPinion.setPosition(0.5);
-        sweeper.setPosition(0.5);
+//        sweeper.setPosition(0.5);
     }
 
     double scaleInput(double dVal) {

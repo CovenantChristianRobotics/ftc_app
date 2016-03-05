@@ -11,7 +11,6 @@ import android.graphics.Color;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
@@ -20,7 +19,6 @@ import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 /**
  * Created by Robotics on 2/16/2016.
@@ -29,8 +27,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
     //movestate for our autonomous move
     enum MoveState {
         STARTMOVE, MOVINGSTRAIGHT, STARTTURN, MOVINGTURN, DELAYSETTINGS, DELAY, INITIALIZEROBOT,
-        DRIVEAWAYFROMWALL, TURNDIAG, MOVEDIAG, GOPASTREDTAPE, TURNPARALLELTOWALL,
-        DRIVETOWHITELINE, DRIVEPASTWHITELINE, TURNTOBEACON, DRIVETOBEACON, WINDOUTARM, DUMPCLIMBERS,
+        DRIVEAWAYFROMWALL, TURNDIAG, MOVEDIAG, GOPASTREDTAPE, TURNPARALLELTOWALL, DRIVETOWHITELINE,
+        LOOKFORWHITELINE, DRIVEPASTWHITELINE, TURNTOBEACON, DRIVETOBEACON, WINDOUTARM, DUMPCLIMBERS,
         JIGGLEF, JIGGLEB, WINDINARMPARTWAY, READBEACON,  TURNTOBUTTON, PUSHBUTTON, BACKUP,
         TURNTOFLOORGOAL, DRIVEINFLOORGOAL, DONE
     }
@@ -45,7 +43,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
     DcMotor rightDrive;
     DcMotor chinUp;
 //    DcMotor endGameLights;
-    DcMotor debrisSwivel;
+//    DcMotor debrisSwivel;
     // Servos
     Servo armLock;
     Servo climberDumper;
@@ -55,8 +53,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
     Servo rightPlow;
     Servo leftTrigger;
     Servo rightTrigger;
-    Servo dumperDoor;
-    Servo sweeper;
+//    Servo dumperDoor;
+//    Servo sweeper;
     // Sensors
     GyroSensor gyroSense;
     ColorSensor fColorSense;
@@ -84,6 +82,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
     boolean redR;
     boolean blueL;
     boolean blueR;
+    int ambientRed;
+    int ambientBlue;
     // State Machine Settings
     MoveState currentMove;
     MoveState nextMove;
@@ -229,7 +229,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
         rightDrive = hardwareMap.dcMotor.get("motorR");
         chinUp = hardwareMap.dcMotor.get("chinUp");
 //        endGameLights = hardwareMap.dcMotor.get("endGameLights");
-        debrisSwivel = hardwareMap.dcMotor.get("blockDumper");
+//        debrisSwivel = hardwareMap.dcMotor.get("blockDumper");
         // DC Motor Settings
         leftDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
         rightDrive.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
@@ -237,7 +237,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
         chinUp.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
 //        endGameLights.setMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
 //        endGameLights.setPower(0.9);
-        debrisSwivel.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+//        debrisSwivel.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         // Servos
         armLock = hardwareMap.servo.get("armLock");
         climberDumper = hardwareMap.servo.get("climber_dumper");
@@ -247,8 +247,8 @@ public class BEAST_MODE_Autonomous extends OpMode {
         rightPlow = hardwareMap.servo.get("rP");
         leftTrigger = hardwareMap.servo.get("lT");
         rightTrigger = hardwareMap.servo.get("rT");
-        sweeper = hardwareMap.servo.get("sweeper");
-        dumperDoor = hardwareMap.servo.get("dumperDoor");
+//        sweeper = hardwareMap.servo.get("sweeper");
+//        dumperDoor = hardwareMap.servo.get("dumperDoor");
         // Servo Settings
         armLock.setPosition(0.25);
         climberDumper.setPosition(0.15);
@@ -259,13 +259,15 @@ public class BEAST_MODE_Autonomous extends OpMode {
         rightPlow.setPosition(0.426);
         leftTrigger.setPosition(0.8);
         rightTrigger.setPosition(0.1);
-        sweeper.setPosition(0.5);
-        dumperDoor.setPosition(0.0);
+//        sweeper.setPosition(0.5);
+//        dumperDoor.setPosition(0.0);
         // Sensors
         gyroSense = hardwareMap.gyroSensor.get("gyroSense");
         bColorSense = hardwareMap.colorSensor.get("bCS");
         bColorSense.setI2cAddress(0x42);
         bColorSense.enableLed(false);
+        ambientRed = bColorSense.red();
+        ambientBlue = bColorSense.blue();
         fColorSense = hardwareMap.colorSensor.get("fCS");
 //        fColorSense.setI2cAddress(0x40);
         fColorSense.enableLed(true);
@@ -335,10 +337,10 @@ public class BEAST_MODE_Autonomous extends OpMode {
         }
         // State Machine Settings
         fastSpeed = 1.0;
-        mediumSpeed = 0.5;
-        slowSpeed = 0.2;
-        turnSpeed = 0.4;
-        commonDelayTime = 300;
+        mediumSpeed = 0.65;
+        slowSpeed = 0.35;
+        turnSpeed = 0.55;
+        commonDelayTime = 200;
         desiredHeading = 0;
         lookingForWhiteLine = false;
         lookingWithUltraSense = false;
@@ -497,7 +499,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 } else if (blueAlliance) {
                     lookingForBlueTape = true;
                 }
-                moveStraight(moveDiagDist + 40, fastSpeed);
+                moveStraight(moveDiagDist + 50, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.GOPASTREDTAPE;
                 telemetryMove = MoveState.MOVEDIAG;
@@ -511,7 +513,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 } else if (blueAlliance){
                     lookingForBlueTape = false;
                 }
-                moveStraight(5, mediumSpeed);
+                moveStraight(17, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNPARALLELTOWALL;
                 telemetryMove = MoveState.GOPASTREDTAPE;
@@ -527,10 +529,18 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case DRIVETOWHITELINE:
+                moveStraight(10.0, mediumSpeed);
+                currentMove = MoveState.STARTMOVE;
+                telemetryMove = MoveState.DRIVETOWHITELINE;
+                nextMove = MoveState.LOOKFORWHITELINE;
+                moveDelayTime = commonDelayTime;
+                break;
+
+            case LOOKFORWHITELINE:
                 lookingForWhiteLine = true;
                 moveStraight(45.0, slowSpeed);
                 currentMove = MoveState.STARTMOVE;
-                telemetryMove = MoveState.DRIVETOWHITELINE;
+                telemetryMove = MoveState.LOOKFORWHITELINE;
                 nextMove = MoveState.DRIVEPASTWHITELINE;
                 moveDelayTime = commonDelayTime;
                 break;
@@ -538,7 +548,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
             case DRIVEPASTWHITELINE:
                 fColorSense.enableLed(false);
                 lookingForWhiteLine = false;
-                moveStraight(3.5, slowSpeed);
+                moveStraight(3.5, mediumSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.TURNTOBEACON;
                 telemetryMove = MoveState.DRIVEPASTWHITELINE;
@@ -551,7 +561,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 nextMove = MoveState.DRIVETOBEACON;
                 telemetryMove = MoveState.TURNTOBEACON;
                 currentOmni = OmniCtlr.RETRACT;
-                moveDelayTime = 1500;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case DRIVETOBEACON:
@@ -561,13 +571,13 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.WINDOUTARM;
                 telemetryMove = MoveState.DRIVETOBEACON;
-                moveDelayTime = 1500;
+                moveDelayTime = commonDelayTime;
                 break;
 
             case WINDOUTARM:
-                chinUp.setTargetPosition(-3360);
+                chinUp.setTargetPosition(-3500);
                 chinUp.setPower(0.5);
-                currentMove = MoveState.STARTMOVE;
+                currentMove = MoveState.DELAYSETTINGS;
                 nextMove = MoveState.DUMPCLIMBERS;
                 telemetryMove = MoveState.WINDOUTARM;
                 moveDelayTime = 1500;
@@ -600,13 +610,13 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
             case READBEACON:
                 if (redAlliance){
-                    if (bColorSense.red() >= 1.0) {
+                    if (bColorSense.red() > ambientRed) {
                         redL = true;
                     } else {
                         redR = true;
                     }
                 } else if (blueAlliance) {
-                    if (bColorSense.blue() >= 1.0) {
+                    if (bColorSense.blue() > ambientBlue) {
                         blueL = true;
                     } else {
                         blueR = true;
@@ -616,7 +626,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 break;
 
             case WINDINARMPARTWAY:
-                chinUp.setTargetPosition(-225);
+                chinUp.setTargetPosition(-375);
                 chinUp.setPower(0.5);
                 currentMove = MoveState.DELAYSETTINGS;
                 nextMove = MoveState.TURNTOBUTTON;
@@ -645,7 +655,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
 
             case PUSHBUTTON:
                 lookingWithUltraSense = true;
-                moveStraight(17.0, slowSpeed);
+                moveStraight(18.0, slowSpeed);
                 currentMove = MoveState.STARTMOVE;
                 nextMove = MoveState.BACKUP;
                 telemetryMove = MoveState.PUSHBUTTON;
@@ -773,6 +783,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
         telemetry.addData("green", Integer.toString(bColorSense.green()));
         telemetry.addData("ultraSense", ultraSense.getUltrasonicLevel());
         telemetry.addData("redAlliance", redAlliance);
+        telemetry.addData("chinUp", chinUp.getCurrentPosition());
 
 
     }

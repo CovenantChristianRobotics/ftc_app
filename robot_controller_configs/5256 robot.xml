@@ -1,22 +1,17 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <Robot>
-    <ServoController name="omniPinionCtlr" serialNumber="AL00VTK3">
-		<Servo name="armLock" port="2" />
-		<Servo name="lP" port="3" />
-		<Servo name="lT" port="4" />
-		<Servo name="rT" port="5" />
-        <Servo name="lOmniPinion" port="6" />
+    <ServoController name="plowCtlr" serialNumber="AL00VTK3">
+		<Servo name="rP" port="5" />
+		<Servo name="lP" port="6" />
     </ServoController>
     <LegacyModuleController name="Legacy Module 1" serialNumber="AL00XU3L">
 		<ColorSensor name="fCS" port="3" />
 		<UltrasonicSensor name="ultraSense" port="5" />
     </LegacyModuleController>
     <ServoController name="climberCtlr" serialNumber="AL00VUK4">
-		<Servo name="rP" port="1" />
-        <Servo name="rOmniPinion" port="2" />
-		<Servo name="climber_dumper" port="3" />
-		<Servo name="sweeper" port="5" />
-		<Servo name="dumperDoor" port="6" />
+		<Servo name="climber_dumper" port="4" />
+		<Servo name="lT" port="5" />
+		<Servo name="rT" port="6" />
     </ServoController>
     <DeviceInterfaceModule name="Device Interface Module" serialNumber="AL00VFP2">
 		<ColorSensor name="bCS" port="3" />
@@ -28,9 +23,11 @@
         <Motor name="motorR" port="1" />
         <Motor name="motorL" port="2" />
     </MotorController>
-    <MotorController name="Motor Controller 5" serialNumber="AL00VXF8">
-	    <Motor name="blockDumper" port="1" />
-    </MotorController>
+    <ServoController name="extraServoController" serialNumber="AL00XLPH">
+	<Servo name="armLock" port="4" />
+	<Servo name="rOmniPinion" port="5" />
+	<Servo name="lOmniPinion" port="6" />
+	</ServoController>
     <MotorController name="endGameCtlr" serialNumber="AL00VTFB">
         <Motor name="endGameLights" port="1" />
         <Motor name="chinUp" port="2" />
