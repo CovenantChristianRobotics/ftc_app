@@ -29,7 +29,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
         STARTMOVE, MOVINGSTRAIGHT, STARTTURN, MOVINGTURN, DELAYSETTINGS, DELAY, INITIALIZEROBOT,
         DRIVEAWAYFROMWALL, TURNDIAG, MOVEDIAG, GOPASTREDTAPE, TURNPARALLELTOWALL, DRIVETOWHITELINE,
         LOOKFORWHITELINE, DRIVEPASTWHITELINE, TURNTOBEACON, DRIVETOBEACON, WINDOUTARM, DUMPCLIMBERS,
-        JIGGLEF, JIGGLEB, WINDINARMPARTWAY, READBEACON,  TURNTOBUTTON, PUSHBUTTON, BACKUP,
+        JIGGLEF, JIGGLEB, WINDINARMPARTWAY, CALCULATEAMBIENT, READBEACON, TURNTOBUTTON, PUSHBUTTON, BACKUP,
         TURNTOFLOORGOAL, DRIVEINFLOORGOAL, DONE
     }
     //movestate for our omniwheels in autonomous
@@ -284,7 +284,7 @@ public class BEAST_MODE_Autonomous extends OpMode {
 //        telemetryMove = MoveState.INITIALIZEROBOT;
         currentOmni = OmniCtlr.NOTMOVING;
         chosenOmni = OmniCtlr.NOTMOVING;
-        counter = 0;
+        counter = 1;
         redL = false;
         redR = false;
         blueL = false;
@@ -501,10 +501,28 @@ public class BEAST_MODE_Autonomous extends OpMode {
                 }
                 moveStraight(moveDiagDist + 50, fastSpeed);
                 currentMove = MoveState.STARTMOVE;
-                nextMove = MoveState.GOPASTREDTAPE;
+                nextMove = MoveState.CALCULATEAMBIENT;
                 telemetryMove = MoveState.MOVEDIAG;
                 moveDelayTime = commonDelayTime;
                 chosenOmni = OmniCtlr.EXTENDING;
+                break;
+
+            case CALCULATEAMBIENT:
+                if (counter < 8) {
+                    ambientBlue = ambientBlue + bColorSense.blue();
+                    ambientRed = ambientRed + bColorSense.red();
+                    counter++;
+                    Log.i("ambientRed", Integer.toString(ambientRed));
+                    Log.i("ambientBlue", Integer.toString(ambientBlue));
+                } else if (counter == 8) {
+                    ambientBlue = (int)(((double)ambientBlue / 8.0) + 0.5);
+                    ambientRed = (int)(((double)ambientRed / 8.0) + 0.5);
+                    counter++;
+                    Log.i("ambientRed", Integer.toString(ambientRed));
+                    Log.i("ambientBlue", Integer.toString(ambientBlue));
+                } else {
+                    currentMove = MoveState.GOPASTREDTAPE;
+                }
                 break;
 
             case GOPASTREDTAPE:
