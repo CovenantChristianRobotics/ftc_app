@@ -465,13 +465,13 @@ public class CCHS4507Autonomous extends OpMode {
                     if (redAlliance){
                         moveStraight (-13, mediumSpeed);
                     } else {
-                        moveStraight (5, mediumSpeed);
+                        moveStraight (3, mediumSpeed);
                     }
                 } else { // Saw blue (or neither :-O)
                     if (redAlliance) {
-                        moveStraight(-32, mediumSpeed);
+                        moveStraight(-27, mediumSpeed);
                     } else {
-                        moveStraight(-11, mediumSpeed);
+                        moveStraight(-13, mediumSpeed);
                     }
                 }
                 currentMove = MoveState.STARTMOVE;
@@ -482,7 +482,7 @@ public class CCHS4507Autonomous extends OpMode {
 
             case PRESSBUTTON:
                 climberTriggerLeft.setPosition(0.5);
-                currentMove = MoveState.STARTMOVE;
+                currentMove = MoveState.MOVEDELAY;
                 nextMove = MoveState.CENTERBUCKET;
                 telemetryMove = MoveState.PRESSBUTTON;
                 moveDelayTime = delayMillisec;
@@ -499,13 +499,13 @@ public class CCHS4507Autonomous extends OpMode {
                 } else {
                     if (sawRedFlag) {
                         if (redAlliance){
-                            moveStraight (10, mediumSpeed);
+                            moveStraight (6, mediumSpeed);
                         } else {
-                            moveStraight (5, mediumSpeed);
+                            moveStraight (3, mediumSpeed);
                         }
                     } else { // Saw blue (or neither :-O)
                         if (redAlliance) {
-                            moveStraight(26, mediumSpeed);
+                            moveStraight(16, mediumSpeed);
                         } else {
                             moveStraight(18, mediumSpeed);
                         }
