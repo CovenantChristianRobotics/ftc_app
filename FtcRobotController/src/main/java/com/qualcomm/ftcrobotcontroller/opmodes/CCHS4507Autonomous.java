@@ -215,10 +215,7 @@ public class CCHS4507Autonomous extends OpMode {
             servoDist.setPosition(0.25);
         }
 
-        if (liftCheck.isPressed()) {
-            trackLifterUp = trackLifter.getCurrentPosition();
-            trackLifter.setTargetPosition(trackLifterUp);
-        }
+        trackLifterUp = trackLifter.getCurrentPosition();
         distanceToWall = 0.0;
         colorSense.enableLed(false);
         motorLeft.setDirection(DcMotor.Direction.FORWARD);
@@ -264,10 +261,6 @@ public class CCHS4507Autonomous extends OpMode {
         armLock.setPosition(0.5);
         trackLock.setPosition(0.4);
         //servoBeaconPusher.setPosition(0.0);
-        if (liftCheck.isPressed()) {
-            trackLifterUp = trackLifter.getCurrentPosition();
-            trackLifter.setTargetPosition(trackLifterUp);
-        }
         gyroSense.calibrate();
         while (gyroSense.isCalibrating()) {
         }
@@ -305,20 +298,19 @@ public class CCHS4507Autonomous extends OpMode {
                 }
                 motorRight.setPower(Range.clip(speed - (gyroError * 0.05), -1.0, 1.0));
                 motorLeft.setPower(Range.clip(speed + (gyroError * 0.05), -1.0, 1.0));
-                if (!sawRedFlag && lookingForBlueFlag && colorSense.blue() > ambientBlue) {
-                    sawBlueFlag = true;
-                }
-                if (!sawBlueFlag && lookingForRedFlag && colorSense.red() > ambientRed) {
-                    sawRedFlag = true;
-
-                }
                 if (lookingForRedFlag && (colorSense.red() > ambientRed))  {
+                    if (!sawBlueFlag) {
+                        sawRedFlag = true;
+                    }
                     motorRight.setPower(0.0);
                     motorLeft.setPower(0.0);
                     takeADump = true;
                     currentMove = MoveState.MOVEDELAY;
                 }
                 if (lookingForBlueFlag && (colorSense.blue() > ambientBlue))  {
+                    if (!sawRedFlag) {
+                        sawBlueFlag = true;
+                    }
                     motorRight.setPower(0.0);
                     motorLeft.setPower(0.0);
                     takeADump = true;
@@ -375,7 +367,7 @@ public class CCHS4507Autonomous extends OpMode {
 
             case ARMEXTENDERBRO:
                 armExtend.setPower(0.8);
-                currentMove = MoveState.STARTTURN;
+                currentMove = MoveState.MOVEDELAY;
                 nextMove = MoveState.TURNDIAG;
                 telemetryMove = MoveState.ARMEXTENDERBRO;
                 moveDelayTime = delayMillisec;
@@ -475,7 +467,7 @@ public class CCHS4507Autonomous extends OpMode {
                     } else {
                         moveStraight (5, mediumSpeed);
                     }
-                } else if (sawBlueFlag) {
+                } else { // Saw blue (or neither :-O)
                     if (redAlliance) {
                         moveStraight(-32, mediumSpeed);
                     } else {
@@ -511,7 +503,7 @@ public class CCHS4507Autonomous extends OpMode {
                         } else {
                             moveStraight (5, mediumSpeed);
                         }
-                    } else if (sawBlueFlag) {
+                    } else { // Saw blue (or neither :-O)
                         if (redAlliance) {
                             moveStraight(26, mediumSpeed);
                         } else {
