@@ -207,7 +207,20 @@ public class TractorBotDrive extends OpMode {
           
         case WRITE:
           switch (currentWrite) {
-            }
+            case PRE1:
+              preLeft = leftDrive.getCurrentPosition();
+              preRight = rightDrive.getCurrentPosition();
+              currentWrite = WriteState. WAITFORSTART1;
+              break;
+              
+            case WAITFORSTART1:
+              if(gamepad1.dpad_up || gamepad1.dpad_down || gamepad1.dpad_left || gamepad1.dpad_right){
+                currentWrite = WriteState.WAITFOREND1;
+              }
+              break;
+              
+            case WAITFOREND1:
+              if((gamepad1.dpad_up
           break;
           
         case READ:
