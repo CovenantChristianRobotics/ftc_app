@@ -223,7 +223,11 @@ public class TractorBotDrive extends OpMode {
               break;
               
             case WAITFOREND1:
-              if((gamepad1.dpad_up
+              if((!gamepad1.dpad_up && !gamepad1.dpad_down && !gamepad.dpad_left && !gamepad.dpad_right) && (!leftDrive.isBusy && !rightDrive.isBusy)){
+                currentWrite = WriteState.POST1;
+              break;
+              
+            case POST1:
           break;
           
         case READ:
