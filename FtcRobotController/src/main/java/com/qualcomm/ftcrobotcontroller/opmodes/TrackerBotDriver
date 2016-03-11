@@ -228,6 +228,18 @@ public class TractorBotDrive extends OpMode {
               break;
               
             case POST1:
+              postLeft = leftDrive.getCurrentPosition();
+              postRight = rightDrive.getCurrentPosition();
+              currentWrite = WriteState.CALCULATEDIFF1;
+              break;
+              
+            case CALCULATEDIFF1:
+              move1LDist = postLeft - PreLeft;
+              move1RDist = postRight - PreRight;
+              currentWrite = WriteState.WRITE1
+              break;
+            case WRITE1:
+              
           break;
           
         case READ:
