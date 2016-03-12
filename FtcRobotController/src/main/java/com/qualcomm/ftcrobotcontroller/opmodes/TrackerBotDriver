@@ -1,5 +1,3 @@
-
-
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
 public class TractorBotDrive extends OpMode {
@@ -188,13 +186,801 @@ public class TractorBotDrive extends OpMode {
     PRE177, WAITFORSTART177, WAITFOREND177, POST177, CALCULATEDIFF177, WRITE177, DELAYSETTINGS177, DELAY177,
     PRE178, WAITFORSTART178, WAITFOREND178, POST178, CALCULATEDIFF178, WRITE178, DELAYSETTINGS178, DELAY178,
     PRE179, WAITFORSTART179, WAITFOREND179, POST179, CALCULATEDIFF179, WRITE179, DELAYSETTINGS179, DELAY179,
+    PRE180, WAITFORSTART180, WAITFOREND180, POST180, CALCULATEDIFF180, WRITE180, DELAYSETTINGS180, DELAY180,
+    PRE181, WAITFORSTART181, WAITFOREND181, POST181, CALCULATEDIFF181, WRITE181, DELAYSETTINGS181, DELAY181,
+    PRE182, WAITFORSTART182, WAITFOREND182, POST182, CALCULATEDIFF182, WRITE182, DELAYSETTINGS182, DELAY182,
+    PRE183, WAITFORSTART183, WAITFOREND183, POST183, CALCULATEDIFF183, WRITE183, DELAYSETTINGS183, DELAY183,
+    PRE184, WAITFORSTART184, WAITFOREND184, POST184, CALCULATEDIFF184, WRITE184, DELAYSETTINGS184, DELAY184,
+    PRE185, WAITFORSTART185, WAITFOREND185, POST185, CALCULATEDIFF185, WRITE185, DELAYSETTINGS185, DELAY185,
+    PRE186, WAITFORSTART186, WAITFOREND186, POST186, CALCULATEDIFF186, WRITE186, DELAYSETTINGS186, DELAY186,
+    PRE187, WAITFORSTART187, WAITFOREND187, POST187, CALCULATEDIFF187, WRITE187, DELAYSETTINGS187, DELAY187,
+    PRE188, WAITFORSTART188, WAITFOREND188, POST188, CALCULATEDIFF188, WRITE188, DELAYSETTINGS188, DELAY188,
+    PRE189, WAITFORSTART189, WAITFOREND189, POST189, CALCULATEDIFF189, WRITE189, DELAYSETTINGS189, DELAY189,
+    PRE190, WAITFORSTART190, WAITFOREND190, POST190, CALCULATEDIFF190, WRITE190, DELAYSETTINGS190, DELAY190,
+    PRE191, WAITFORSTART191, WAITFOREND191, POST191, CALCULATEDIFF191, WRITE191, DELAYSETTINGS191, DELAY191,
+    PRE192, WAITFORSTART192, WAITFOREND192, POST192, CALCULATEDIFF192, WRITE192, DELAYSETTINGS192, DELAY192,
+    PRE193, WAITFORSTART193, WAITFOREND193, POST193, CALCULATEDIFF193, WRITE193, DELAYSETTINGS193, DELAY193,
+    PRE194, WAITFORSTART194, WAITFOREND194, POST194, CALCULATEDIFF194, WRITE194, DELAYSETTINGS194, DELAY194,
+    PRE195, WAITFORSTART195, WAITFOREND195, POST195, CALCULATEDIFF195, WRITE195, DELAYSETTINGS195, DELAY195,
+    PRE196, WAITFORSTART196, WAITFOREND196, POST196, CALCULATEDIFF196, WRITE196, DELAYSETTINGS196, DELAY196,
+    PRE197, WAITFORSTART197, WAITFOREND197, POST197, CALCULATEDIFF197, WRITE197, DELAYSETTINGS197, DELAY197,
+    PRE198, WAITFORSTART198, WAITFOREND198, POST198, CALCULATEDIFF198, WRITE198, DELAYSETTINGS198, DELAY198,
+    PRE199, WAITFORSTART199, WAITFOREND199, POST199, CALCULATEDIFF199, WRITE199, DELAYSETTINGS199, DELAY199,
+    PRE200, WAITFORSTART200, WAITFOREND200, POST200, CALCULATEDIFF200, WRITE200, DELAYSETTINGS200, DELAY200,
+    PRE201, WAITFORSTART201, WAITFOREND201, POST201, CALCULATEDIFF201, WRITE201, DELAYSETTINGS201, DELAY201,
+    PRE202, WAITFORSTART202, WAITFOREND202, POST202, CALCULATEDIFF202, WRITE202, DELAYSETTINGS202, DELAY202,
+    PRE203, WAITFORSTART203, WAITFOREND203, POST203, CALCULATEDIFF203, WRITE203, DELAYSETTINGS203, DELAY203,
+    PRE204, WAITFORSTART204, WAITFOREND204, POST204, CALCULATEDIFF204, WRITE204, DELAYSETTINGS204, DELAY204,
+    PRE205, WAITFORSTART205, WAITFOREND205, POST205, CALCULATEDIFF205, WRITE205, DELAYSETTINGS205, DELAY205,
+    PRE206, WAITFORSTART206, WAITFOREND206, POST206, CALCULATEDIFF206, WRITE206, DELAYSETTINGS206, DELAY206,
+    PRE207, WAITFORSTART207, WAITFOREND207, POST207, CALCULATEDIFF207, WRITE207, DELAYSETTINGS207, DELAY207,
+    PRE208, WAITFORSTART208, WAITFOREND208, POST208, CALCULATEDIFF208, WRITE208, DELAYSETTINGS208, DELAY208,
+    PRE209, WAITFORSTART209, WAITFOREND209, POST209, CALCULATEDIFF209, WRITE209, DELAYSETTINGS209, DELAY209,
+    PRE210, WAITFORSTART210, WAITFOREND210, POST210, CALCULATEDIFF210, WRITE210, DELAYSETTINGS210, DELAY210,
+    PRE211, WAITFORSTART211, WAITFOREND211, POST211, CALCULATEDIFF211, WRITE211, DELAYSETTINGS211, DELAY211,
+    PRE212, WAITFORSTART212, WAITFOREND212, POST212, CALCULATEDIFF212, WRITE212, DELAYSETTINGS212, DELAY212,
+    PRE213, WAITFORSTART213, WAITFOREND213, POST213, CALCULATEDIFF213, WRITE213, DELAYSETTINGS213, DELAY213,
+    PRE214, WAITFORSTART214, WAITFOREND214, POST214, CALCULATEDIFF214, WRITE214, DELAYSETTINGS214, DELAY214,
+    PRE215, WAITFORSTART215, WAITFOREND215, POST215, CALCULATEDIFF215, WRITE215, DELAYSETTINGS215, DELAY215,
+    PRE216, WAITFORSTART216, WAITFOREND216, POST216, CALCULATEDIFF216, WRITE216, DELAYSETTINGS216, DELAY216,
+    PRE217, WAITFORSTART217, WAITFOREND217, POST217, CALCULATEDIFF217, WRITE217, DELAYSETTINGS217, DELAY217,
+    PRE218, WAITFORSTART218, WAITFOREND218, POST218, CALCULATEDIFF218, WRITE218, DELAYSETTINGS218, DELAY218,
+    PRE219, WAITFORSTART219, WAITFOREND219, POST219, CALCULATEDIFF219, WRITE219, DELAYSETTINGS219, DELAY219,
+    PRE220, WAITFORSTART220, WAITFOREND220, POST220, CALCULATEDIFF220, WRITE220, DELAYSETTINGS220, DELAY220,
+    PRE221, WAITFORSTART221, WAITFOREND221, POST221, CALCULATEDIFF221, WRITE221, DELAYSETTINGS221, DELAY221,
+    PRE222, WAITFORSTART222, WAITFOREND222, POST222, CALCULATEDIFF222, WRITE222, DELAYSETTINGS222, DELAY222,
+    PRE223, WAITFORSTART223, WAITFOREND223, POST223, CALCULATEDIFF223, WRITE223, DELAYSETTINGS223, DELAY223,
+    PRE224, WAITFORSTART224, WAITFOREND224, POST224, CALCULATEDIFF224, WRITE224, DELAYSETTINGS224, DELAY224,
+    PRE225, WAITFORSTART225, WAITFOREND225, POST225, CALCULATEDIFF225, WRITE225, DELAYSETTINGS225, DELAY225,
+    PRE226, WAITFORSTART226, WAITFOREND226, POST226, CALCULATEDIFF226, WRITE226, DELAYSETTINGS226, DELAY226,
+    PRE227, WAITFORSTART227, WAITFOREND227, POST227, CALCULATEDIFF227, WRITE227, DELAYSETTINGS227, DELAY227,
+    PRE228, WAITFORSTART228, WAITFOREND228, POST228, CALCULATEDIFF228, WRITE228, DELAYSETTINGS228, DELAY228,
+    PRE229, WAITFORSTART229, WAITFOREND229, POST229, CALCULATEDIFF229, WRITE229, DELAYSETTINGS229, DELAY229,
+    PRE230, WAITFORSTART230, WAITFOREND230, POST230, CALCULATEDIFF230, WRITE230, DELAYSETTINGS230, DELAY230,
+    PRE231, WAITFORSTART231, WAITFOREND231, POST231, CALCULATEDIFF231, WRITE231, DELAYSETTINGS231, DELAY231,
+    PRE232, WAITFORSTART232, WAITFOREND232, POST232, CALCULATEDIFF232, WRITE232, DELAYSETTINGS232, DELAY232,
+    PRE233, WAITFORSTART233, WAITFOREND233, POST233, CALCULATEDIFF233, WRITE233, DELAYSETTINGS233, DELAY233,
+    PRE234, WAITFORSTART234, WAITFOREND234, POST234, CALCULATEDIFF234, WRITE234, DELAYSETTINGS234, DELAY234,
+    PRE235, WAITFORSTART235, WAITFOREND235, POST235, CALCULATEDIFF235, WRITE235, DELAYSETTINGS235, DELAY235,
+    PRE236, WAITFORSTART236, WAITFOREND236, POST236, CALCULATEDIFF236, WRITE236, DELAYSETTINGS236, DELAY236,
+    PRE237, WAITFORSTART237, WAITFOREND237, POST237, CALCULATEDIFF237, WRITE237, DELAYSETTINGS237, DELAY237,
+    PRE238, WAITFORSTART238, WAITFOREND238, POST238, CALCULATEDIFF238, WRITE238, DELAYSETTINGS238, DELAY238,
+    PRE239, WAITFORSTART239, WAITFOREND239, POST239, CALCULATEDIFF239, WRITE239, DELAYSETTINGS239, DELAY239,
+    PRE240, WAITFORSTART240, WAITFOREND240, POST240, CALCULATEDIFF240, WRITE240, DELAYSETTINGS240, DELAY240,
+    PRE241, WAITFORSTART241, WAITFOREND241, POST241, CALCULATEDIFF241, WRITE241, DELAYSETTINGS241, DELAY241,
+    PRE242, WAITFORSTART242, WAITFOREND242, POST242, CALCULATEDIFF242, WRITE242, DELAYSETTINGS242, DELAY242,
+    PRE243, WAITFORSTART243, WAITFOREND243, POST243, CALCULATEDIFF243, WRITE243, DELAYSETTINGS243, DELAY243,
+    PRE244, WAITFORSTART244, WAITFOREND244, POST244, CALCULATEDIFF244, WRITE244, DELAYSETTINGS244, DELAY244,
+    PRE245, WAITFORSTART245, WAITFOREND245, POST245, CALCULATEDIFF245, WRITE245, DELAYSETTINGS245, DELAY245,
+    PRE246, WAITFORSTART246, WAITFOREND246, POST246, CALCULATEDIFF246, WRITE246, DELAYSETTINGS246, DELAY246,
+    PRE247, WAITFORSTART247, WAITFOREND247, POST247, CALCULATEDIFF247, WRITE247, DELAYSETTINGS247, DELAY247,
+    PRE248, WAITFORSTART248, WAITFOREND248, POST248, CALCULATEDIFF248, WRITE248, DELAYSETTINGS248, DELAY248,
+    PRE249, WAITFORSTART249, WAITFOREND249, POST249, CALCULATEDIFF249, WRITE249, DELAYSETTINGS249, DELAY249,
+    PRE250, WAITFORSTART250, WAITFOREND250, POST250, CALCULATEDIFF250, WRITE250, DELAYSETTINGS250, DELAY250,
+    PRE251, WAITFORSTART251, WAITFOREND251, POST251, CALCULATEDIFF251, WRITE251, DELAYSETTINGS251, DELAY251,
+    PRE252, WAITFORSTART252, WAITFOREND252, POST252, CALCULATEDIFF252, WRITE252, DELAYSETTINGS252, DELAY252,
+    PRE253, WAITFORSTART253, WAITFOREND253, POST253, CALCULATEDIFF253, WRITE253, DELAYSETTINGS253, DELAY253,
+    PRE254, WAITFORSTART254, WAITFOREND254, POST254, CALCULATEDIFF254, WRITE254, DELAYSETTINGS254, DELAY254,
+    PRE255, WAITFORSTART255, WAITFOREND255, POST255, CALCULATEDIFF255, WRITE255, DELAYSETTINGS255, DELAY255,
+    PRE256, WAITFORSTART256, WAITFOREND256, POST256, CALCULATEDIFF256, WRITE256, DELAYSETTINGS256, DELAY256,
     }
     
     int move1LDist;
     int move1RDist;
     int pre1Time;
     int post1Time;
-    
+    int move2LDist;
+    int move2RDist;
+    int pre2Time;
+    int post2Time;
+    int move3LDist;
+    int move3RDist;
+    int pre3Time;
+    int post3Time;
+    int move4LDist;
+    int move4RDist;
+    int pre4Time;
+    int post4Time;
+    int move5LDist;
+    int move5RDist;
+    int pre5Time;
+    int post5Time;
+    int move6LDist;
+    int move6RDist;
+    int pre6Time;
+    int post6Time;
+    int move7LDist;
+    int move7RDist;
+    int pre7Time;
+    int post7Time;
+    int move8LDist;
+    int move8RDist;
+    int pre8Time;
+    int post8Time;
+    int move9LDist;
+    int move9RDist;
+    int pre9Time;
+    int post9Time;
+    int move10LDist;
+    int move10RDist;
+    int pre10Time;
+    int post10Time;
+    int move11LDist;
+    int move11RDist;
+    int pre11Time;
+    int post11Time;
+    int move12LDist;
+    int move12RDist;
+    int pre12Time;
+    int post12Time;
+    int move13LDist;
+    int move13RDist;
+    int pre13Time;
+    int post13Time;
+    int move14LDist;
+    int move14RDist;
+    int pre14Time;
+    int post14Time;
+    int move15LDist;
+    int move15RDist;
+    int pre15Time;
+    int post15Time;
+    int move16LDist;
+    int move16RDist;
+    int pre16Time;
+    int post16Time;
+    int move17LDist;
+    int move17RDist;
+    int pre17Time;
+    int post17Time;
+    int move18LDist;
+    int move18RDist;
+    int pre18Time;
+    int post18Time;
+    int move19LDist;
+    int move19RDist;
+    int pre19Time;
+    int post19Time;
+    int move20LDist;
+    int move20RDist;
+    int pre20Time;
+    int post20Time;
+    int move21LDist;
+    int move21RDist;
+    int pre21Time;
+    int post21Time;
+    int move22LDist;
+    int move22RDist;
+    int pre22Time;
+    int post22Time;
+    int move23LDist;
+    int move23RDist;
+    int pre23Time;
+    int post23Time;
+    int move24LDist;
+    int move24RDist;
+    int pre24Time;
+    int post24Time;
+    int move25LDist;
+    int move25RDist;
+    int pre25Time;
+    int post25Time;
+    int move26LDist;
+    int move26RDist;
+    int pre26Time;
+    int post26Time;
+    int move27LDist;
+    int move27RDist;
+    int pre27Time;
+    int post27Time;
+    int move28LDist;
+    int move28RDist;
+    int pre28Time;
+    int post28Time;
+    int move29LDist;
+    int move29RDist;
+    int pre29Time;
+    int post29Time;
+    int move30LDist;
+    int move30RDist;
+    int pre30Time;
+    int post30Time;
+    int move31LDist;
+    int move31RDist;
+    int pre31Time;
+    int post31Time;
+    int move32LDist;
+    int move32RDist;
+    int pre32Time;
+    int post32Time;
+    int move33LDist;
+    int move33RDist;
+    int pre33Time;
+    int post33Time;
+    int move34LDist;
+    int move34RDist;
+    int pre34Time;
+    int post34Time;
+    int move35LDist;
+    int move35RDist;
+    int pre35Time;
+    int post35Time;
+    int move36LDist;
+    int move36RDist;
+    int pre36Time;
+    int post36Time;
+    int move37LDist;
+    int move37RDist;
+    int pre37Time;
+    int post37Time;
+    int move38LDist;
+    int move38RDist;
+    int pre38Time;
+    int post38Time;
+    int move39LDist;
+    int move39RDist;
+    int pre39Time;
+    int post39Time;
+    int move40LDist;
+    int move40RDist;
+    int pre40Time;
+    int post40Time;
+    int move41LDist;
+    int move41RDist;
+    int pre41Time;
+    int post41Time;
+    int move42LDist;
+    int move42RDist;
+    int pre42Time;
+    int post42Time;
+    int move43LDist;
+    int move43RDist;
+    int pre43Time;
+    int post43Time;
+    int move44LDist;
+    int move44RDist;
+    int pre44Time;
+    int post44Time;
+    int move45LDist;
+    int move45RDist;
+    int pre45Time;
+    int post45Time;
+    int move46LDist;
+    int move46RDist;
+    int pre46Time;
+    int post46Time;
+    int move47LDist;
+    int move47RDist;
+    int pre47Time;
+    int post47Time;
+    int move48LDist;
+    int move48RDist;
+    int pre48Time;
+    int post48Time;
+    int move49LDist;
+    int move49RDist;
+    int pre49Time;
+    int post49Time;
+    int move50LDist;
+    int move50RDist;
+    int pre50Time;
+    int post50Time;
+    int move51LDist;
+    int move51RDist;
+    int pre51Time;
+    int post51Time;
+    int move52LDist;
+    int move52RDist;
+    int pre52Time;
+    int post52Time;
+    int move53LDist;
+    int move53RDist;
+    int pre53Time;
+    int post53Time;
+    int move54LDist;
+    int move54RDist;
+    int pre54Time;
+    int post54Time;
+    int move55LDist;
+    int move55RDist;
+    int pre55Time;
+    int post55Time;
+    int move56LDist;
+    int move56RDist;
+    int pre56Time;
+    int post56Time;
+    int move57LDist;
+    int move57RDist;
+    int pre57Time;
+    int post57Time;
+    int move58LDist;
+    int move58RDist;
+    int pre58Time;
+    int post58Time;
+    int move59LDist;
+    int move59RDist;
+    int pre59Time;
+    int post59Time;
+    int move60LDist;
+    int move60RDist;
+    int pre60Time;
+    int post60Time;
+    int move61LDist;
+    int move61RDist;
+    int pre61Time;
+    int post61Time;
+    int move62LDist;
+    int move62RDist;
+    int pre62Time;
+    int post62Time;
+    int move63LDist;
+    int move63RDist;
+    int pre63Time;
+    int post63Time;
+    int move64LDist;
+    int move64RDist;
+    int pre64Time;
+    int post64Time;
+    int move65LDist;
+    int move65RDist;
+    int pre65Time;
+    int post65Time;
+    int move66LDist;
+    int move66RDist;
+    int pre66Time;
+    int post66Time;
+    int move67LDist;
+    int move67RDist;
+    int pre67Time;
+    int post67Time;
+    int move68LDist;
+    int move68RDist;
+    int pre68Time;
+    int post68Time;
+    int move69LDist;
+    int move69RDist;
+    int pre69Time;
+    int post69Time;
+    int move70LDist;
+    int move70RDist;
+    int pre70Time;
+    int post70Time;
+    int move71LDist;
+    int move71RDist;
+    int pre71Time;
+    int post71Time;
+    int move72LDist;
+    int move72RDist;
+    int pre72Time;
+    int post72Time;
+    int move73LDist;
+    int move73RDist;
+    int pre73Time;
+    int post73Time;
+    int move74LDist;
+    int move74RDist;
+    int pre74Time;
+    int post74Time;
+    int move75LDist;
+    int move75RDist;
+    int pre75Time;
+    int post75Time;
+    int move76LDist;
+    int move76RDist;
+    int pre76Time;
+    int post76Time;
+    int move77LDist;
+    int move77RDist;
+    int pre77Time;
+    int post77Time;
+    int move78LDist;
+    int move78RDist;
+    int pre78Time;
+    int post78Time;
+    int move79LDist;
+    int move79RDist;
+    int pre79Time;
+    int post79Time;
+    int move80LDist;
+    int move80RDist;
+    int pre80Time;
+    int post80Time;
+    int move81LDist;
+    int move81RDist;
+    int pre81Time;
+    int post81Time;
+    int move82LDist;
+    int move82RDist;
+    int pre82Time;
+    int post82Time;
+    int move83LDist;
+    int move83RDist;
+    int pre83Time;
+    int post83Time;
+    int move84LDist;
+    int move84RDist;
+    int pre84Time;
+    int post84Time;
+    int move85LDist;
+    int move85RDist;
+    int pre85Time;
+    int post85Time;
+    int move86LDist;
+    int move86RDist;
+    int pre86Time;
+    int post86Time;
+    int move87LDist;
+    int move87RDist;
+    int pre87Time;
+    int post87Time;
+    int move88LDist;
+    int move88RDist;
+    int pre88Time;
+    int post88Time;
+    int move89LDist;
+    int move89RDist;
+    int pre89Time;
+    int post89Time;
+    int move90LDist;
+    int move90RDist;
+    int pre90Time;
+    int post90Time;
+    int move91LDist;
+    int move91RDist;
+    int pre91Time;
+    int post91Time;
+    int move92LDist;
+    int move92RDist;
+    int pre92Time;
+    int post92Time;
+    int move93LDist;
+    int move93RDist;
+    int pre93Time;
+    int post93Time;
+    int move94LDist;
+    int move94RDist;
+    int pre94Time;
+    int post94Time;
+    int move95LDist;
+    int move95RDist;
+    int pre95Time;
+    int post95Time;
+    int move96LDist;
+    int move96RDist;
+    int pre96Time;
+    int post96Time;
+    int move97LDist;
+    int move97RDist;
+    int pre97Time;
+    int post97Time;
+    int move98LDist;
+    int move98RDist;
+    int pre98Time;
+    int post98Time;
+    int move99LDist;
+    int move99RDist;
+    int pre99Time;
+    int post99Time;
+    int move100LDist;
+    int move100RDist;
+    int pre100Time;
+    int post100Time;
+    int move101LDist;
+    int move101RDist;
+    int pre101Time;
+    int post101Time;
+    int move102LDist;
+    int move102RDist;
+    int pre102Time;
+    int post102Time;
+    int move103LDist;
+    int move103RDist;
+    int pre103Time;
+    int post103Time;
+    int move104LDist;
+    int move104RDist;
+    int pre104Time;
+    int post104Time;
+    int move105LDist;
+    int move105RDist;
+    int pre105Time;
+    int post105Time;
+    int move106LDist;
+    int move106RDist;
+    int pre106Time;
+    int post106Time;
+    int move107LDist;
+    int move107RDist;
+    int pre107Time;
+    int post107Time;
+    int move108LDist;
+    int move108RDist;
+    int pre108Time;
+    int post108Time;
+    int move109LDist;
+    int move109RDist;
+    int pre109Time;
+    int post109Time;
+    int move110LDist;
+    int move110RDist;
+    int pre110Time;
+    int post110Time;
+    int move111LDist;
+    int move111RDist;
+    int pre111Time;
+    int post111Time;
+    int move112LDist;
+    int move112RDist;
+    int pre112Time;
+    int post112Time;
+    int move113LDist;
+    int move113RDist;
+    int pre113Time;
+    int post113Time;
+    int move114LDist;
+    int move114RDist;
+    int pre114Time;
+    int post114Time;
+    int move115LDist;
+    int move115RDist;
+    int pre115Time;
+    int post115Time;
+    int move116LDist;
+    int move116RDist;
+    int pre116Time;
+    int post116Time;
+    int move117LDist;
+    int move117RDist;
+    int pre117Time;
+    int post117Time;
+    int move118LDist;
+    int move118RDist;
+    int pre118Time;
+    int post118Time;
+    int move119LDist;
+    int move119RDist;
+    int pre119Time;
+    int post119Time;
+    int move120LDist;
+    int move120RDist;
+    int pre120Time;
+    int post120Time;
+    int move121LDist;
+    int move121RDist;
+    int pre121Time;
+    int post121Time;
+    int move122LDist;
+    int move122RDist;
+    int pre122Time;
+    int post122Time;
+    int move123LDist;
+    int move123RDist;
+    int pre123Time;
+    int post123Time;
+    int move124LDist;
+    int move124RDist;
+    int pre124Time;
+    int post124Time;
+    int move125LDist;
+    int move125RDist;
+    int pre125Time;
+    int post125Time;
+    int move126LDist;
+    int move126RDist;
+    int pre126Time;
+    int post126Time;
+    int move127LDist;
+    int move127RDist;
+    int pre127Time;
+    int post127Time;
+    int move128LDist;
+    int move128RDist;
+    int pre128Time;
+    int post128Time;
+    int move129LDist;
+    int move129RDist;
+    int pre129Time;
+    int post129Time;
+    int move130LDist;
+    int move130RDist;
+    int pre130Time;
+    int post130Time;
+    int move131LDist;
+    int move131RDist;
+    int pre131Time;
+    int post131Time;
+    int move132LDist;
+    int move132RDist;
+    int pre132Time;
+    int post132Time;
+    int move133LDist;
+    int move133RDist;
+    int pre133Time;
+    int post133Time;
+    int move134LDist;
+    int move134RDist;
+    int pre134Time;
+    int post134Time;
+    int move135LDist;
+    int move135RDist;
+    int pre135Time;
+    int post135Time;
+    int move136LDist;
+    int move136RDist;
+    int pre136Time;
+    int post136Time;
+    int move137LDist;
+    int move137RDist;
+    int pre137Time;
+    int post137Time;
+    int move138LDist;
+    int move138RDist;
+    int pre138Time;
+    int post138Time;
+    int move139LDist;
+    int move193RDist;
+    int pre139Time;
+    int post139Time;
+    int move140LDist;
+    int move140RDist;
+    int pre140Time;
+    int post140Time;
+    int move141LDist;
+    int move141RDist;
+    int pre141Time;
+    int post141Time;
+    int move142LDist;
+    int move142RDist;
+    int pre142Time;
+    int post142Time;
+    int move143LDist;
+    int move143RDist;
+    int pre143Time;
+    int post143Time;
+    int move144LDist;
+    int move144RDist;
+    int pre144Time;
+    int post144Time;
+    int move145LDist;
+    int move145RDist;
+    int pre145Time;
+    int post145Time;
+    int move146LDist;
+    int move146RDist;
+    int pre146Time;
+    int post146Time;
+    int move147LDist;
+    int move147RDist;
+    int pre147Time;
+    int post147Time;
+    int move148LDist;
+    int move148RDist;
+    int pre148Time;
+    int post148Time;
+    int move149LDist;
+    int move149RDist;
+    int pre149Time;
+    int post149Time;
+    int move150LDist;
+    int move150RDist;
+    int pre150Time;
+    int post150Time;
+    int move151LDist;
+    int move151RDist;
+    int pre151Time;
+    int post151Time;
+    int move152LDist;
+    int move152RDist;
+    int pre152Time;
+    int post152Time;
+    int move153LDist;
+    int move153RDist;
+    int pre153Time;
+    int post153Time;
+    int move154LDist;
+    int move154RDist;
+    int pre154Time;
+    int post154Time;
+    int move155LDist;
+    int move155RDist;
+    int pre155Time;
+    int post155Time;
+    int move156LDist;
+    int move156RDist;
+    int pre156Time;
+    int post156Time;
+    int move157LDist;
+    int move157RDist;
+    int pre157Time;
+    int post157Time;
+    int move158LDist;
+    int move158RDist;
+    int pre158Time;
+    int post158Time;
+    int move159LDist;
+    int move159RDist;
+    int pre159Time;
+    int post159Time;
+    int move160LDist;
+    int move160RDist;
+    int pre160Time;
+    int post160Time;
+    int move161LDist;
+    int move161RDist;
+    int pre161Time;
+    int post161Time;
+    int move162LDist;
+    int move162RDist;
+    int pre162Time;
+    int post162Time;
+    int move163LDist;
+    int move163RDist;
+    int pre163Time;
+    int post163Time;
+    int move164LDist;
+    int move164RDist;
+    int pre164Time;
+    int post164Time;
+    int move165LDist;
+    int move165RDist;
+    int pre165Time;
+    int post165Time;
+    int move166LDist;
+    int move166RDist;
+    int pre166Time;
+    int post166Time;
+    int move167LDist;
+    int move167RDist;
+    int pre167Time;
+    int post167Time;
+    int move168LDist;
+    int move168RDist;
+    int pre168Time;
+    int post168Time;
+    int move169LDist;
+    int move169RDist;
+    int pre169Time;
+    int post169Time;
+    int move170LDist;
+    int move170RDist;
+    int pre170Time;
+    int post170Time;
+    int move171LDist;
+    int move171RDist;
+    int pre171Time;
+    int post171Time;
+    int move172LDist;
+    int move172RDist;
+    int pre172Time;
+    int post172Time;
+    int move173LDist;
+    int move173RDist;
+    int pre173Time;
+    int post173Time;
+    int move174LDist;
+    int move174RDist;
+    int pre174Time;
+    int post174Time;
+    int move175LDist;
+    int move175RDist;
+    int pre175Time;
+    int post175Time;
+    int move176LDist;
+    int move176RDist;
+    int pre176Time;
+    int post176Time;
+    int move177LDist;
+    int move177RDist;
+    int pre177Time;
+    int post177Time;
+    int move178LDist;
+    int move178RDist;
+    int pre178Time;
+    int post178Time;
+    int move179LDist;
+    int move179RDist;
+    int pre179Time;
+    int post179Time;
     DriveMode currentMode;
     WriteMode currentWrite;
     
@@ -250,4 +1036,3 @@ public class TractorBotDrive extends OpMode {
     }
     
 }    
-
