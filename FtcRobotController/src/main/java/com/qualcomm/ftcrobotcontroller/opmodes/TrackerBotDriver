@@ -1,5 +1,10 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 public class TractorBotDrive extends OpMode {
 
   enum DriveMode {
@@ -263,8 +268,16 @@ public class TractorBotDrive extends OpMode {
     PRE254, WAITFORSTART254, WAITFOREND254, POST254, CALCULATEDIFF254, WRITE254, DELAYSETTINGS254, DELAY254,
     PRE255, WAITFORSTART255, WAITFOREND255, POST255, CALCULATEDIFF255, WRITE255, DELAYSETTINGS255, DELAY255,
     PRE256, WAITFORSTART256, WAITFOREND256, POST256, CALCULATEDIFF256, WRITE256, DELAYSETTINGS256, DELAY256,
-    }
+  }
     
+  enum ReadMode { 
+  
+  }
+    
+    DcMotor leftDrive;
+    DcMotor rightDrive;
+    DigitalChannel teleOpSw;
+    DigitalChannel readWriteSw;
     int move1LDist;
     int move1RDist;
     int pre1Time;
@@ -1141,12 +1154,172 @@ public class TractorBotDrive extends OpMode {
     int move219RDist;
     int pre219Time;
     int post219Time;
+    int move220LDist;
+    int move220RDist;
+    int pre220Time;
+    int post220Time;
+    int move221LDist;
+    int move221RDist;
+    int pre221Time;
+    int post221Time;
+    int move222LDist;
+    int move222RDist;
+    int pre222Time;
+    int post222Time;
+    int move223LDist;
+    int move223RDist;
+    int pre223Time;
+    int post223Time;
+    int move224LDist;
+    int move224RDist;
+    int pre224Time;
+    int post224Time;
+    int move225LDist;
+    int move225RDist;
+    int pre225Time;
+    int post225Time;
+    int move226LDist;
+    int move226RDist;
+    int pre226Time;
+    int post226Time;
+    int move227LDist;
+    int move227RDist;
+    int pre227Time;
+    int post227Time;
+    int move228LDist;
+    int move228RDist;
+    int pre228Time;
+    int post228Time;
+    int move229LDist;
+    int move229RDist;
+    int pre229Time;
+    int post229Time;
+    int move230LDist;
+    int move230RDist;
+    int pre230Time;
+    int post230Time;
+    int move231LDist;
+    int move231RDist;
+    int pre231Time;
+    int post231Time;
+    int move232LDist;
+    int move232RDist;
+    int pre232Time;
+    int post232Time;
+    int move233LDist;
+    int move233RDist;
+    int pre233Time;
+    int post233Time;
+    int move234LDist;
+    int move234RDist;
+    int pre234Time;
+    int post234Time;
+    int move235LDist;
+    int move235RDist;
+    int pre235Time;
+    int post235Time;
+    int move236LDist;
+    int move236RDist;
+    int pre236Time;
+    int post236Time;
+    int move237LDist;
+    int move237RDist;
+    int pre237Time;
+    int post237Time;
+    int move238LDist;
+    int move238RDist;
+    int pre238Time;
+    int post238Time;
+    int move239LDist;
+    int move239RDist;
+    int pre239Time;
+    int post239Time;
+    int move240LDist;
+    int move240RDist;
+    int pre240Time;
+    int post240Time;
+    int move241LDist;
+    int move241RDist;
+    int pre241Time;
+    int post241Time;
+    int move242LDist;
+    int move242RDist;
+    int pre242Time;
+    int post242Time;
+    int move243LDist;
+    int move243RDist;
+    int pre243Time;
+    int post243Time;
+    int move244LDist;
+    int move244RDist;
+    int pre244Time;
+    int post244Time;
+    int move245LDist;
+    int move245RDist;
+    int pre245Time;
+    int post245Time;
+    int move246LDist;
+    int move246RDist;
+    int pre246Time;
+    int post246Time;
+    int move247LDist;
+    int move247RDist;
+    int pre247Time;
+    int post247Time;
+    int move248LDist;
+    int move248RDist;
+    int pre248Time;
+    int post248Time;
+    int move249LDist;
+    int move249RDist;
+    int pre249Time;
+    int post249Time;
+    int move250LDist;
+    int move250RDist;
+    int pre250Time;
+    int post250Time;
+    int move251LDist;
+    int move251RDist;
+    int pre251Time;
+    int post251Time;
+    int move252LDist;
+    int move252RDist;
+    int pre252Time;
+    int post252Time;
+    int move253LDist;
+    int move253RDist;
+    int pre253Time;
+    int post253Time;
+    int move254LDist;
+    int move254RDist;
+    int pre254Time;
+    int post254Time;
+    int move255LDist;
+    int move255RDist;
+    int pre255Time;
+    int post255Time;
+    int move256LDist;
+    int move256RDist;
+    int pre256Time;
+    int post256Time;
+    int counter;
+    int preLeft;
+    int preRight;
+    int postLeft;
+    int postRight;
+    boolean alreadyWritten;
+    ElapsedTime currentTime;
     DriveMode currentMode;
     WriteMode currentWrite;
+    ReadMode currentRead;
     
     
     @Override
     public void init() {
+    leftDrive = hardwareMap.dcMotor.get("motorL");
+    rightDrive = hardwareMap.dcMotor.get("motorR");
+    teleOpSw = hardwareMap.digitalChannel.get("tOSw");
+    readWriteSw = hardwareMap.digitalChannel.get("rWSw");
     }
     
     public void loop() {
