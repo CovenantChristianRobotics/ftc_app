@@ -1580,6 +1580,25 @@ public class TractorBotDrive extends OpMode {
     public void loop() {
       switch (currentMode) {
         case TELEOP:
+          double left = -gamepad1.left_stick_y;
+          double right = -gamepad1.right_stick_y;
+          left = Range.clip(left, -1, 1);
+          right = Range.clip(right, -1, 1);
+          if (gamepad1.dpad_up) {
+            left = 1.0;
+            right = 1.0;
+          } else if (gamepad1.dpad_down) {
+            left = -1.0;
+            right = -1.0;
+          } else if (gamepad1.dpad_right) {
+            left = 1.0;
+            right = -1.0;
+          } else if (gamepad1.dpad_left) {
+            left = -1.0;
+            right = 1.0;
+          }
+          leftDrive.setPower(left);
+          rightDrive.setPower(right);
           break;
           
         case WRITE:
@@ -1617,8 +1636,788 @@ public class TractorBotDrive extends OpMode {
           break;
           
         case READ:
-          break;
+          switch(currentRead) {
+          case READ1:
+            currentRead = ReadState.SET1;
+            break;
+            
+          case SET1:
+            leftDrive.setTargetPosition(move1LDist);
+            rightDrive.setTargetPosition(move1RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START1;
+            break;
+            
+          case START1:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT1;
+            }
+            break;
+            
+          case WAIT1:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS1;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS1:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY1;
+            break;
+          
+          case DELAY1:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ2;
+            }
+            break;
+            
+            case READ2:
+            currentRead = ReadState.SET2;
+            break;
+            
+          case SET2:
+            leftDrive.setTargetPosition(move2LDist);
+            rightDrive.setTargetPosition(move2RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START2;
+            break;
+            
+          case START2:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT2;
+            }
+            break;
+          
+          case WAIT2:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS2;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS2:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY2;
+            break;
+          
+          case DELAY2:
+            if (System.currentTimeMillis() >= delayUntil) {
+                    currentMove = ReadState.READ3;
+                }
+            break;
+            
+            case READ3:
+            currentRead = ReadState.SET3;
+            break;
+            
+          case SET3:
+            leftDrive.setTargetPosition(move3LDist);
+            rightDrive.setTargetPosition(move3RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START3;
+            break;
+            
+          case START3:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT3;
+            }
+            break;
+            
+          case WAIT3:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS3;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS3:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY3;
+            break;
+          
+          case DELAY3:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ4;
+            }
+            break;
+            
+            case READ4:
+            currentRead = ReadState.SET4;
+            break;
+            
+          case SET4:
+            leftDrive.setTargetPosition(move4LDist);
+            rightDrive.setTargetPosition(move4RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START4;
+            break;
+            
+          case START4:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT4;
+            }
+            break;
+            
+          case WAIT4:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS4;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS4:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY4;
+            break;
+          
+          case DELAY4:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ5;
+            }
+            break;
+            
+          case READ5:
+            currentRead = ReadState.SET5;
+            break;
+            
+          case SET5:
+            leftDrive.setTargetPosition(move5LDist);
+            rightDrive.setTargetPosition(move5RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START5;
+            break;
+            
+          case START5:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT5;
+            }
+            break;
+            
+          case WAIT5:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS5;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS5:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY5;
+            break;
+          
+          case DELAY5:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ6;
+            }
+            break;
+            
+          case READ6:
+            currentRead = ReadState.SET6;
+            break;
+            
+          case SET6:
+            leftDrive.setTargetPosition(move6LDist);
+            rightDrive.setTargetPosition(move6RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START6;
+            break;
+            
+          case START6:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT6;
+            }
+            break;
+            
+          case WAIT6:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS6;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS6:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY6;
+            break;
+          
+          case DELAY6:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ7;
+            }
+            break;
+            
+          case READ7:
+            currentRead = ReadState.SET7;
+            break;
+            
+          case SET7:
+            leftDrive.setTargetPosition(move7LDist);
+            rightDrive.setTargetPosition(move7RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START7;
+            break;
+            
+          case START7:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT7;
+            }
+            break;
+            
+          case WAIT7:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS7;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS7:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY7;
+            break;
+          
+          case DELAY7:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ8;
+            }
+            break;
+            
+          case READ8:
+            currentRead = ReadState.SET8;
+            break;
+            
+          case SET8:
+            leftDrive.setTargetPosition(move1LDist);
+            rightDrive.setTargetPosition(move1RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START8;
+            break;
+            
+          case START8:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT8;
+            }
+            break;
+            
+          case WAIT8:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS8;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS8:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY8;
+            break;
+          
+          case DELAY8:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ9;
+            }
+            break;
+            
+            case READ9:
+            currentRead = ReadState.SET9;
+            break;
+            
+          case SET9:
+            leftDrive.setTargetPosition(move9LDist);
+            rightDrive.setTargetPosition(move9RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START9;
+            break;
+            
+          case START9:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT9;
+            }
+            break;
+            
+          case WAIT9:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS9;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS9:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY9;
+            break;
+          
+          case DELAY9:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ10;
+            }
+            break;
+            
+          case READ10:
+            currentRead = ReadState.SET10;
+            break;
+            
+          case SET10:
+            leftDrive.setTargetPosition(move10LDist);
+            rightDrive.setTargetPosition(move10RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START10;
+            break;
+            
+          case START10:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT10;
+            }
+            break;
+            
+          case WAIT10:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS10;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS10:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY10;
+            break;
+          
+          case DELAY10:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ11;
+            }
+            break;
+            
+          case READ11:
+            currentRead = ReadState.SET11;
+            break;
+            
+          case SET11:
+            leftDrive.setTargetPosition(move11LDist);
+            rightDrive.setTargetPosition(move11RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START11;
+            break;
+            
+          case START11:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT11;
+            }
+            break;
+            
+          case WAIT11:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS11;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS11:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY11;
+            break;
+          
+          case DELAY11:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ12;
+            }
+            break;
+            
+          case READ12:
+            currentRead = ReadState.SET12;
+            break;
+            
+          case SET12:
+            leftDrive.setTargetPosition(move12LDist);
+            rightDrive.setTargetPosition(move12RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START12;
+            break;
+            
+          case START12:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT12;
+            }
+            break;
+            
+          case WAIT12:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS12;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS12:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY12;
+            break;
+          
+          case DELAY12:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ13;
+            }
+            break;
+            
+          case READ13:
+            currentRead = ReadState.SET13;
+            break;
+            
+          case SET13:
+            leftDrive.setTargetPosition(move13LDist);
+            rightDrive.setTargetPosition(move13RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START13;
+            break;
+            
+          case START13:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT13;
+            }
+            break;
+            
+          case WAIT13:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS13;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS13:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY13;
+            break;
+          
+          case DELAY13:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ14;
+            }
+            break;
+            
+          case READ14:
+            currentRead = ReadState.SET1;
+            break;
+            
+          case SET14:
+            leftDrive.setTargetPosition(move14LDist);
+            rightDrive.setTargetPosition(move14RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START14;
+            break;
+            
+          case START14:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT14;
+            }
+            break;
+            
+          case WAIT14:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS14;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS14:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY14;
+            break;
+          
+          case DELAY14:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ15;
+            }
+            break;
+            
+          case READ15:
+            currentRead = ReadState.SET1;
+            break;
+            
+          case SET15:
+            leftDrive.setTargetPosition(move15LDist);
+            rightDrive.setTargetPosition(move15RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START15;
+            break;
+            
+          case START15:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT15;
+            }
+            break;
+            
+          case WAIT15:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS15;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS15:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY15;
+            break;
+          
+          case DELAY15:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ16;
+            }
+            break;
+            
+          case READ16:
+            currentRead = ReadState.SET16;
+            break;
+            
+          case SET16:
+            leftDrive.setTargetPosition(move16LDist);
+            rightDrive.setTargetPosition(move16RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START16;
+            break;
+            
+          case START16:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT16;
+            }
+            break;
+            
+          case WAIT16:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS16;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS16:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY16;
+            break;
+          
+          case DELAY1:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ17;
+            }
+            break;
+            
+          case READ17:
+            currentRead = ReadState.SET17;
+            break;
+            
+          case SET17:
+            leftDrive.setTargetPosition(move17LDist);
+            rightDrive.setTargetPosition(move17RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START17;
+            break;
+            
+          case START17:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT17;
+            }
+            break;
+            
+          case WAIT17:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS17;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS17:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY17;
+            break;
+          
+          case DELAY17:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ18;
+            }
+            break;
+            
+          case READ18:
+            currentRead = ReadState.SET18;
+            break;
+            
+          case SET18:
+            leftDrive.setTargetPosition(move18LDist);
+            rightDrive.setTargetPosition(move18RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START18;
+            break;
+            
+          case START18:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT18;
+            }
+            break;
+            
+          case WAIT18:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS18;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS18:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY18;
+            break;
+          
+          case DELAY18:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ19;
+            }
+            break;
+            
+          case READ19:
+            currentRead = ReadState.SET19;
+            break;
+            
+          case SET19:
+            leftDrive.setTargetPosition(move19LDist);
+            rightDrive.setTargetPosition(move19RDist);
+            leftDrive.setPower(1.0);
+            rightDrive.setPower(1.0);
+            currentRead = ReadState.START19;
+            break;
+            
+          case START19:
+            if (leftDrive.isBusy() && rightDrive.isBusy()) {
+              currentRead = ReadState.WAIT19;
+            }
+            break;
+            
+          case WAIT19:
+            if (!leftDrive.isBusy() && !rightDrive.isBusy()) {
+              currentRead = ReadState.RDELAYSETTINGS19;
+            }
+            readDelayTime = 100;
+            break;
+            
+          case RDELAYSETTINGS19:
+            now = System.currentTimeMillis();
+                delayUntil = now + moveDelayTime;
+                Log.i("MOVEDELAY: time", Long.toString(System.currentTimeMillis()));
+                Log.i("MOVEDELAY: now", Long.toString(now));
+                Log.i("MOVEDELAY: delayTime", Long.toString(moveDelayTime));
+                Log.i("MOVEDELAY: delayUntil", Long.toString(delayUntil));
+            currentRead = DELAY19;
+            break;
+          
+          case DELAY19:
+            if (System.currentTimeMillis() >= delayUntil) {
+              currentRead = ReadState.READ20;
+            }
+            break;
     }
+    
+    telemetry.addData("Mode", currentMode.toString);
     
     public void stop() {
     }
