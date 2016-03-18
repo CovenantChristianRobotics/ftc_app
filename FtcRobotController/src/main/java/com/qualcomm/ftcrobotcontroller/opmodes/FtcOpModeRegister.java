@@ -79,7 +79,7 @@ public class FtcOpModeRegister implements OpModeRegister {
 //    manager.register("CCHS5256TeleOpOLD", CCHS5256TeleOpOLD.class);
 //    manager.register("EncValueTeleOp", EncValueTeleOp.class);
 //    manager.register("CCHS5256AutonomousOLD", CCHS5256AutonomousOLD.class);
-//    manager.register("PracticeTeleOp", PracticeTeleOp.class);
+    manager.register("FastTeleOp", FastTeleOp.class);
 //    manager.register("TurnTeleOp", TurnTeleOp.class);
 //    manager.register("TestAutonomous", TestAutonomous.class);
 //    manager.register("SpareParts5256Autonomous", SpareParts5256Autonomous.class);
@@ -92,6 +92,7 @@ public class FtcOpModeRegister implements OpModeRegister {
     manager.register("Fix TeleOp", FixTeleOp.class);
     manager.register("sweeper TeleOp", sweeperTeleop.class);
     manager.register("color test", colortest.class);
+    manager.register("Demo Board", demoboard.class);
 
 
 
