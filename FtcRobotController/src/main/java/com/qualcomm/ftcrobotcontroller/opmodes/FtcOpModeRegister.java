@@ -95,7 +95,6 @@ public class FtcOpModeRegister implements OpModeRegister {
     manager.register("Demo Board", demoboard.class);
 
 
-
     //manager.register("NxtTeleOp", NxtTeleOp.class);
 
     //manager.register("LinearK9TeleOp", LinearK9TeleOp.class);

@@ -141,17 +141,17 @@ public class CCHS4507TeleOp extends OpMode {
 
         armExtend.setPower(-gamepad2.left_stick_y);
 
-        if (gamepad2.left_bumper) {
+        if (gamepad2.left_trigger > 0.5) {
             climberTriggerLeftPos = climberTriggerLeftPos - .01;
-        } else if (gamepad2.left_trigger > 0.5) {
+        } else if (gamepad2.left_bumper) {
             climberTriggerLeftPos = climberTriggerLeftPos + .01;
         }
-        climberTriggerLeftPos = Range.clip(climberTriggerLeftPos, 0.0, 1.0);
+
         climberTriggerLeft.setPosition(climberTriggerLeftPos);
 
-        if (gamepad2.right_bumper) {
+        if (gamepad2.right_trigger > 0.5) {
             climberTriggerRightPos = climberTriggerRightPos + .01;
-        } else if (gamepad2.right_trigger > 0.5) {
+        } else if (gamepad2.right_bumper) {
             climberTriggerRightPos = climberTriggerRightPos - .01;
         }
         climberTriggerRightPos = Range.clip(climberTriggerRightPos, 0.0, 1.0);
@@ -171,7 +171,7 @@ public class CCHS4507TeleOp extends OpMode {
             //zipTieSweeper.setPosition(.75);
         }
         if (gamepad2.start) {
-            armLock.setPosition(0.3);
+            armLock.setPosition(0.27);
         }
         if (gamepad2.x) {
             armLock.setPosition(0.5);
