@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
  */
 public class CCHS4507Autonomous extends OpMode {
     enum MoveState {
-        DELAY, STARTMOVE, MOVING, STARTTURN, TURNING, MOVEDELAY, FIRSTMOVE, ARMEXTENDERBRO, TURNDIAG, MOVEDIAG, FINDWALL, TURNALONGWALL,
+        DELAY, STARTMOVE, MOVING, STARTTURN, TURNING, MOVEDELAY, FIRSTMOVE, ARMEXTENDERBRO, TURNDIAG, MOVEDIAG, FINDWALL, MOVETOWALL, TURNALONGWALL,
         FINDBEACON, MEASUREAMBIENT, MOVETOBUTTON, PRESSBUTTON,CENTERBUCKET, DUMPTRUCK, ROTATEFROMBEACON, MOVETORAMP, TURNTORAMP, STOPATRAMP, ALIGNRAMP,
         DOWNTRACK, UPRAMP, STRAIGHTTORAMP, STRAIGHTTORAMPTURN, DONE
     }
@@ -50,6 +50,7 @@ public class CCHS4507Autonomous extends OpMode {
     int ambientRed;
     int ambientBlue;
     int lightAverageCounter;
+    int ultraDistCounter;
     boolean sawBlueFlag;
     boolean sawRedFlag;
     boolean fourthTileFlag;
@@ -73,6 +74,7 @@ public class CCHS4507Autonomous extends OpMode {
     long delayMillisec;
     long now;
     double distanceToWall;
+    double ultraDistance;
     GyroSensor gyroSense;
     int gyroError;
     int desiredHeading;
@@ -217,6 +219,7 @@ public class CCHS4507Autonomous extends OpMode {
 
         trackLifterUp = trackLifter.getCurrentPosition();
         distanceToWall = 0.0;
+        ultraDistance = 0.0;
         colorSense.enableLed(false);
         motorLeft.setDirection(DcMotor.Direction.FORWARD);
         motorRight.setDirection(DcMotor.Direction.REVERSE);
@@ -238,6 +241,7 @@ public class CCHS4507Autonomous extends OpMode {
         ambientRed = colorSense.red();
         ambientBlue = colorSense.blue();
         lightAverageCounter = 1;
+        ultraDistCounter = 0;
         desiredHeading = 0;
         speed = 0;
         movingForward = true;
@@ -396,18 +400,27 @@ public class CCHS4507Autonomous extends OpMode {
                 break;
 
             case FINDWALL:
-                distanceToWall = ultraSense.getUltrasonicLevel();
-                if ((distanceToWall > 20.0) && (distanceToWall <= 120.0)) {
-                    if (redAlliance) {
-                        moveStraight((distanceToWall - 26.0) * 1.414, slowSpeed);
-                    } else {
-                        moveStraight((distanceToWall - 30.0) * 1.414, slowSpeed);
+                ultraDistance = ultraSense.getUltrasonicLevel();
+                if ((ultraDistance > 20.0) && (ultraDistance <= 120.0)) {
+                    distanceToWall = distanceToWall + ultraDistance;
+                    ultraDistCounter++;
+                    if (ultraDistCounter >= 8) {
+                        distanceToWall = distanceToWall / 8.0;
+                        currentMove = MoveState.MOVETOWALL;
                     }
-                    currentMove = MoveState.STARTMOVE;
-                    nextMove = MoveState.TURNALONGWALL;
-                    telemetryMove = MoveState.FINDWALL;
-                    moveDelayTime = delayMillisec;
                 }
+                break;
+
+            case MOVETOWALL:
+                if (redAlliance) {
+                    moveStraight((distanceToWall - 26.0) * 1.414, slowSpeed);
+                } else {
+                    moveStraight((distanceToWall - 30.0) * 1.414, slowSpeed);
+                }
+                currentMove = MoveState.STARTMOVE;
+                nextMove = MoveState.TURNALONGWALL;
+                telemetryMove = MoveState.FINDWALL;
+                moveDelayTime = delayMillisec;
                 break;
 
             case TURNALONGWALL:
